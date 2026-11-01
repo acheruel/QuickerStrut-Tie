@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — strut-and-tie verification to CSA S6 (bridges) and
  * CSA A23.3 (buildings).
  *
@@ -25,7 +26,7 @@
       node: function (type, fc) { var a = alpha1(fc); return { CCC: a, CCT: 0.88 * a, CTT: 0.76 * a }[type]; },
       nodeText: { CCC: 'α1', CCT: '0,88 α1', CTT: '0,76 α1' },
       rhoMin: 0.003, sMax: 300, maxFaceArea: 1500,
-      clause: { phi: '8.4.6', strut: '8.10.3', fcu: '8.10.3.3', tie: '8.10.4.1', node: '8.10.5.1', crack: '8.10.5' }
+      clause: { phi: '8.4.6', strut: '8.10.3', fcu: '8.10.3.3', tie: '8.10.4.1', node: '8.10.5.1', crack: '8.10.5', anchor: '8.10.4.2 · A23.3 12.2.3 / 12.5' }
     },
     A23: {
       name: 'CSA A23.3',
@@ -34,7 +35,7 @@
       node: function (type) { return { CCC: 0.85, CCT: 0.75, CTT: 0.65 }[type]; },
       nodeText: { CCC: '0,85', CCT: '0,75', CTT: '0,65' },
       rhoMin: 0.002, sMax: 300, maxFaceArea: null,
-      clause: { phi: '8.4.2 / 8.4.3', strut: '11.4.2', fcu: '11.4.2.3', tie: '11.4.3.1', node: '11.4.4.1', crack: '11.4.5' }
+      clause: { phi: '8.4.2 / 8.4.3', strut: '11.4.2', fcu: '11.4.2.3', tie: '11.4.3.1', node: '11.4.4.1', crack: '11.4.5', anchor: '11.4.3.2 · 12.2.3 / 12.5' }
     }
   };
 
@@ -196,6 +197,7 @@
       out.nodes.push({
         id: n.id, kind: 'node', type: type, factor: factor, limit: limit, faces: faces,
         util: maxFace ? maxFace.util : 0, governingFace: maxFace, ties: ties.length,
+        zone: hydrostaticZone(n, atNode[n.id], byId, R, b, limit, model.outline),
         clause: code.clause.node
       });
     });
@@ -211,12 +213,150 @@
       clause: code.clause.crack
     };
 
+    // --- Anchorage of ties -----------------------------------------------------
+    out.anchors = anchorageChecks(model, byId, atNode, out.nodes, { fc: fc, fy: fy, b: b, code: code, mat: mat, reactions: reactionById });
+
     // --- Governing element ----------------------------------------------------
-    var all = out.members.concat(out.nodes);
+    var all = out.members.concat(out.nodes).concat(out.anchors.filter(function (a) { return !a.na; }));
     all.forEach(function (e) { if (!out.governing || e.util > out.governing.util) out.governing = e; });
     out.maxUtil = out.governing ? out.governing.util : 0;
     out.phiC = F.phiC; out.phiS = F.phiS; out.code = model.code; out.strutCap = cap;
     out.ok = true;
+    return out;
+  }
+
+
+  // ---------------------------------------------------------------------------
+  // Hydrostatic nodal zone. Every force on the node is represented as a push on
+  // one face: struts on their own side, ties as a push on the back face (net
+  // force of collinear ties), loads and reactions on their plate. The closed
+  // force polygon rotated by 90° and scaled by 1 / (σ·b) is the node outline:
+  // each face is perpendicular to its force and all faces carry the same
+  // stress σ. σ is the largest stress on a face with a given width (so every
+  // hydrostatic width ≤ the width entered), or the node limit if no width is
+  // given (smallest admissible node).
+  function hydrostaticZone(n, members, byId, R, b, limit, outline) {
+    var faces = [], tieGroups = [];
+    members.forEach(function (m) {
+      var f = byId[m.id];
+      if (!f || f.kind === 'zero') return;
+      var sgn = m.i === n.id ? 1 : -1, ux = sgn * f.c, uy = sgn * f.s;
+      if (f.kind === 'strut') faces.push({ kind: 'strut', ref: m.id, force: -f.N, ux: ux, uy: uy, wGiven: Number(m.w) || 0 });
+      else {
+        var g = tieGroups.filter(function (t) { return Math.abs(t.dx * uy - t.dy * ux) < Math.sin(5 * Math.PI / 180); })[0];
+        if (!g) { g = { dx: ux, dy: uy, px: 0, py: 0, refs: [], w: 0 }; tieGroups.push(g); }
+        g.px += f.N * ux; g.py += f.N * uy; g.refs.push(m.id); g.w = Math.max(g.w, Number(m.w) || 0);
+      }
+    });
+    tieGroups.forEach(function (g) {
+      var T = Math.hypot(g.px, g.py);
+      if (T > 0.05) faces.push({ kind: 'tie', ref: g.refs.join('+'), force: T, ux: -g.px / T, uy: -g.py / T, wGiven: g.w });
+    });
+    var lb = Number(n.bearing) || 0;
+    var P = Math.hypot(Number(n.fx) || 0, Number(n.fy) || 0);
+    if (P > 0.05) faces.push({ kind: 'load', ref: n.id, force: P, ux: -(Number(n.fx) || 0) / P, uy: -(Number(n.fy) || 0) / P, wGiven: lb });
+    if (R) {
+      var Rm = Math.hypot(R.rx, R.ry);
+      if (Rm > 0.05) faces.push({ kind: 'support', ref: n.id, force: Rm, ux: -R.rx / Rm, uy: -R.ry / Rm, wGiven: lb });
+    }
+    if (faces.length < 3) return null;
+    var sigma = 0;
+    faces.forEach(function (fa) { if (fa.wGiven > 0) sigma = Math.max(sigma, fa.force * 1000 / (fa.wGiven * b)); });
+    var scaled = sigma > 0 ? 'face' : 'limit';
+    if (!(sigma > 0)) sigma = limit;
+    faces.forEach(function (fa) { fa.angle = Math.atan2(fa.uy, fa.ux); fa.wHydro = fa.force * 1000 / (sigma * b); });
+    faces.sort(function (a, c) { return a.angle - c.angle; });
+    var pts = [[0, 0]];
+    faces.forEach(function (fa) {
+      var L = fa.wHydro / 1000, last = pts[pts.length - 1];
+      pts.push([last[0] - fa.uy * L, last[1] + fa.ux * L]);
+    });
+    var end = pts.pop(), closure = Math.hypot(end[0], end[1]);
+    // Area and centroid (shoelace), then centre the polygon on the node.
+    var A = 0, cx = 0, cy = 0;
+    for (var i = 0; i < pts.length; i++) {
+      var p = pts[i], q = pts[(i + 1) % pts.length], cr = p[0] * q[1] - q[0] * p[1];
+      A += cr; cx += (p[0] + q[0]) * cr; cy += (p[1] + q[1]) * cr;
+    }
+    A /= 2;
+    if (Math.abs(A) < 1e-8) return null;
+    cx /= 6 * A; cy /= 6 * A;
+    var poly = pts.map(function (p) { return [n.x + p[0] - cx, n.y + p[1] - cy]; });
+    // Faces as segments (for drawing): face k joins vertex k and k+1.
+    faces.forEach(function (fa, k) { fa.a = poly[k]; fa.b = poly[(k + 1) % poly.length]; });
+    var outside = outline && outline.length >= 3 ? poly.some(function (p) { return !insideOrOn(p[0], p[1], outline, 0.005); }) : false;
+    return { sigma: sigma, scaled: scaled, util: sigma / limit, faces: faces, poly: poly, area: Math.abs(A), closure: closure, outside: outside };
+  }
+
+  // Distance (m) from (x, y) along the unit direction (dx, dy) to the outline.
+  function rayToOutline(x, y, dx, dy, poly) {
+    var best = Infinity;
+    for (var i = 0; i < poly.length; i++) {
+      var a = poly[i], c = poly[(i + 1) % poly.length], ex = c[0] - a[0], ey = c[1] - a[1];
+      var den = dx * ey - dy * ex;
+      if (Math.abs(den) < 1e-12) continue;
+      var t = ((a[0] - x) * ey - (a[1] - y) * ex) / den, u = ((a[0] - x) * dy - (a[1] - y) * dx) / den;
+      if (t > 1e-9 && u >= -1e-9 && u <= 1 + 1e-9) best = Math.min(best, t);
+    }
+    return best;
+  }
+
+  // Development length of a straight bar (A23.3 12.2.3, simplified) and of a
+  // standard hook (A23.3 12.5.2, basic length × fy / 400).
+  function developmentLength(type, db, fy, fc, opts) {
+    var sq = Math.min(Math.sqrt(fc), 8);
+    if (type === 'hook') return Math.max(100 * db / sq * fy / 400, 8 * db, 150);
+    var k = opts.k || 0.45, k1 = opts.top ? 1.3 : 1.0, k4 = db <= 20 ? 0.8 : 1.0;
+    return Math.max(k * k1 * k4 * fy / sq * db, 300);
+  }
+
+  // Tie anchorage: at each node where a tie ends, the bars must develop fy at
+  // the edge of the extended nodal zone. Available length la = critical-section
+  // offset (strut edge or hydrostatic zone crossing the tie axis) + extension of
+  // the bars beyond the node to the concrete face, less the cover.
+  function anchorageChecks(model, byId, atNode, nodeChecks, o) {
+    var out = [], poly = model.outline || [], zoneOf = {};
+    nodeChecks.forEach(function (c) { zoneOf[c.id] = c.zone; });
+    var cover = Number(o.mat.cover) >= 0 ? Number(o.mat.cover) : 50;
+    model.members.forEach(function (m) {
+      var f = byId[m.id];
+      if (!f || f.kind !== 'tie') return;
+      [m.i, m.j].forEach(function (nid) {
+        var sgn = m.i === nid ? 1 : -1, dx = sgn * f.c, dy = sgn * f.s;
+        var continues = atNode[nid].some(function (o2) {
+          if (o2.id === m.id) return false;
+          var g = byId[o2.id];
+          return g && g.kind === 'tie' && Math.abs(g.c * f.s - g.s * f.c) < Math.sin(5 * Math.PI / 180);
+        });
+        if (continues) return;
+        var n = model.nodes.filter(function (x) { return x.id === nid; })[0];
+        // A support reaction in line with the tie stands for its continuation
+        // (symmetry plane, continuous member): no anchorage there.
+        var Rn = o.reactions[nid];
+        if (Rn && Math.abs(Rn.rx * dx + Rn.ry * dy) >= 0.9 * f.N) return;
+        var dc = 0;
+        atNode[nid].forEach(function (o2) {
+          var g = byId[o2.id];
+          if (!g || g.kind !== 'strut') return;
+          var th = acuteAngle(f, g);
+          if (th > 5 * Math.PI / 180) dc = Math.max(dc, (Number(o2.w) || 0) / 2 / Math.sin(th));
+        });
+        var z = zoneOf[nid];
+        if (z) z.poly.forEach(function (p) { dc = Math.max(dc, ((p[0] - n.x) * dx + (p[1] - n.y) * dy) * 1000); });
+        var ray = poly.length >= 3 ? rayToOutline(n.x, n.y, -dx, -dy, poly) : 0;
+        var e = isFinite(ray) ? Math.max(0, ray * 1000 - cover) : 0;
+        var la = dc + e, type = m.anchor || 'straight';
+        var db = m.bars && BARS[m.bars.size] ? BARS[m.bars.size].d : (Number(m.db) > 0 ? Number(m.db) : null);
+        // Top bars: more than 300 mm of concrete below them (k1 = 1.3).
+        var below = poly.length >= 3 ? rayToOutline(n.x, n.y, 0, -1, poly) : 0;
+        var top = isFinite(below) && below > 0.3;
+        var rec = { id: m.id + '@' + nid, kind: 'anchor', member: m.id, node: nid, type: type, la: la, e: e, dc: dc, db: db, top: top, clause: o.code.clause.anchor, end: [n.x - dx * e / 1000, n.y - dy * e / 1000], dir: [-dx, -dy] };
+        if (type === 'plate' || type === 'stirrup') { rec.req = 0; rec.util = 0; rec.mechanical = true; }
+        else if (!db) { rec.na = true; rec.util = 0; }
+        else { rec.req = developmentLength(type, db, o.fy, o.fc, { k: Number(o.mat.ldFactor) || 0.45, top: top }); rec.util = la > 0 ? rec.req / la : Infinity; }
+        out.push(rec);
+      });
+    });
     return out;
   }
 
@@ -236,9 +376,9 @@
     return Math.hypot(x - a[0] - t * dx, y - a[1] - t * dy);
   }
 
-  function insideOrOn(x, y, poly) {
+  function insideOrOn(x, y, poly, tol) {
     if (pointInPolygon(x, y, poly)) return true;
-    for (var i = 0; i < poly.length; i++) if (distToSegment(x, y, poly[i], poly[(i + 1) % poly.length]) < 1e-6) return true;
+    for (var i = 0; i < poly.length; i++) if (distToSegment(x, y, poly[i], poly[(i + 1) % poly.length]) < (tol || 1e-6)) return true;
     return false;
   }
 
@@ -264,7 +404,8 @@
   var api = {
     CODES: CODES, BARS: BARS, alpha1: alpha1, check: check, strutFcu: strutFcu, factors: factors,
     memberArea: memberArea, normalize: normalize, geometryWarnings: geometryWarnings,
-    pointInPolygon: pointInPolygon, acuteAngle: acuteAngle
+    pointInPolygon: pointInPolygon, acuteAngle: acuteAngle, hydrostaticZone: hydrostaticZone,
+    developmentLength: developmentLength, rayToOutline: rayToOutline
   };
   root.QST = root.QST || {};
   root.QST.csa = api;

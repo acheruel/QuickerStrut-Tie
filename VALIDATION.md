@@ -1,6 +1,6 @@
 # Validation
 
-*QuickerStrut&Tie v0.1.1 · 2026-11-01*
+*QuickerStrut&Tie v0.2 · 2026-11-01*
 
 The engine (`app/js/solver.js`, `app/js/csa.js`) is checked against hand calculations by
 the automated tests in `tests/engine.test.js` (`node --test`). The cases below are
@@ -135,4 +135,14 @@ Hanger 6-20M: Tr = 0.90 × 400 × 1800 = 648 kN (0.93); nib tie 5-20M: 540 kN (0
   the FHWA example, kept with the manual's initial geometry).
 - S6 α1 limits and the 1500 mm²/m crack control cap; a tie collinear with a strut does
   not reduce its strength.
+- Hydrostatic zones: force polygon closure < 10⁻⁹, every face perpendicular to its force,
+  uniform stress, symmetric CCC node widths (300 / √2 mm for 45° struts and a 300 mm plate),
+  tie as a back-face push at CCT nodes.
+- Development lengths (straight, top bar, hook, 300 mm minimum, √f′c ≤ 8 MPa) and the
+  available anchorage length (cover, strut edge `w/2 / sin θ`); no check at a symmetry
+  plane or where a tie continues.
+- Templates (nine parameter sets): stable, equilibrium < 10⁻⁶ kN, inside the outline,
+  sized to utilization ≤ 1; bent cap indeterminacy `r = ncol − 2`; dapped end hanger = R and
+  nib tie = R cot α; pile head loads P/2, P/3, P/4 and the 4-pile tie
+  `(P/2)(s/2)/z`; 3D tie factors 0.5 and 1/√3.
 - Every interface string exists in French and English.

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — interactive SVG model editor and static drawings. */
 (function () {
   'use strict';
@@ -182,6 +183,47 @@
       out.push('<line x1="' + n2(g.a[0]) + '" y1="' + n2(g.a[1]) + '" x2="' + n2(g.b[0]) + '" y2="' + n2(g.b[1]) + '" stroke="' + c + '" stroke-width="' + sw + '"' + dash + ' stroke-linecap="round"/>');
     });
 
+    // Hydrostatic nodal zones and tie anchorages
+    if (o.zones !== false && checks && checks.ok) {
+      var zs = [];
+      checks.nodes.forEach(function (nc) {
+        var z = nc.zone; if (!z) return;
+        var pts = z.poly.map(function (q) { var sp = toScreen(v, q[0], q[1]); return n2(sp[0]) + ',' + n2(sp[1]); }).join(' ');
+        var fillZ = mode === 'util' ? App.utilColor(z.util) : (o.palette === 'light' ? '#dfe9ef' : '#e8fff8');
+        zs.push('<polygon points="' + pts + '" fill="' + fillZ + '" fill-opacity="' + (mode === 'util' ? 0.45 : (o.palette === 'light' ? 0.7 : 0.16)) + '" stroke="' + (z.outside ? pal.warn : (o.palette === 'light' ? '#5d7684' : '#cfe6ef')) + '" stroke-width="1.2" stroke-linejoin="round"' + (z.outside ? ' stroke-dasharray="3 2"' : '') + '/>');
+        z.faces.forEach(function (fa) {
+          var A = toScreen(v, fa.a[0], fa.a[1]), Bp = toScreen(v, fa.b[0], fa.b[1]);
+          var col = fa.kind === 'strut' ? pal.strut : fa.kind === 'tie' ? pal.tie : fa.kind === 'load' ? pal.load : pal.react;
+          zs.push('<line x1="' + n2(A[0]) + '" y1="' + n2(A[1]) + '" x2="' + n2(Bp[0]) + '" y2="' + n2(Bp[1]) + '" stroke="' + col + '" stroke-width="2.4" stroke-linecap="round"/>');
+        });
+      });
+      var opl = model.outline || [], cen = [0, 0];
+      opl.forEach(function (q) { cen[0] += q[0] / opl.length; cen[1] += q[1] / opl.length; });
+      (checks.anchors || []).forEach(function (an) {
+        var nn = nm[an.node]; if (!nn) return;
+        var s0 = toScreen(v, nn.x, nn.y), s1 = toScreen(v, an.end[0], an.end[1]);
+        var col = mode === 'util' && !an.na && !an.mechanical ? App.utilColor(an.util) : pal.tie;
+        zs.push('<line x1="' + n2(s0[0]) + '" y1="' + n2(s0[1]) + '" x2="' + n2(s1[0]) + '" y2="' + n2(s1[1]) + '" stroke="' + col + '" stroke-width="2" stroke-dasharray="1 0" opacity=".9"/>');
+        var ux = an.dir[0], uy = -an.dir[1];
+        if (an.type === 'hook') {
+          // 90° hook turned towards the inside of the concrete (away from the nearest face)
+          var px = -an.dir[1], py = an.dir[0];
+          if (px * (cen[0] - nn.x) + py * (cen[1] - nn.y) < 0) { px = -px; py = -py; }
+          var hx = px, hy = -py;
+          var hl = Math.min(18, Math.max(8, 0.012 * v.k * 10));
+          zs.push('<path d="M' + n2(s1[0]) + ' ' + n2(s1[1]) + 'q' + n2(ux * 5) + ' ' + n2(uy * 5) + ' ' + n2(ux * 5 + hx * 6) + ' ' + n2(uy * 5 + hy * 6) + 'l' + n2(hx * hl) + ' ' + n2(hy * hl) + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linecap="round"/>');
+        } else if (an.type === 'plate') {
+          zs.push('<line x1="' + n2(s1[0] - uy * 9) + '" y1="' + n2(s1[1] + ux * 9) + '" x2="' + n2(s1[0] + uy * 9) + '" y2="' + n2(s1[1] - ux * 9) + '" stroke="' + col + '" stroke-width="4" stroke-linecap="round"/>');
+        } else if (an.type === 'straight') {
+          zs.push('<circle cx="' + n2(s1[0]) + '" cy="' + n2(s1[1]) + '" r="2.4" fill="' + col + '"/>');
+        }
+        // Critical section (edge of the extended nodal zone)
+        var cx0 = nn.x - an.dir[0] * an.dc / 1000, cy0 = nn.y - an.dir[1] * an.dc / 1000, cs = toScreen(v, cx0, cy0);
+        zs.push('<line x1="' + n2(cs[0] - uy * 7) + '" y1="' + n2(cs[1] + ux * 7) + '" x2="' + n2(cs[0] + uy * 7) + '" y2="' + n2(cs[1] - ux * 7) + '" stroke="' + col + '" stroke-width="1.4" opacity=".8"/>');
+      });
+      out.push('<g class="zones">' + zs.join('') + '</g>');
+    }
+
     // Supports
     model.nodes.forEach(function (n) {
       if (!n.support) return;
@@ -321,7 +363,7 @@
       svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
       svg.setAttribute('class', 'tool-' + App.tool + (drag && drag.kind === 'pan' ? ' panning' : '') + (drag && drag.moved && drag.kind !== 'pan' ? ' dragging' : ''));
       svg.innerHTML = draw(App.model, App.result, App.checks, {
-        view: view, w: W, h: H, palette: 'dark', mode: App.display.mode, bands: App.display.bands, ids: App.display.ids,
+        view: view, w: W, h: H, palette: 'dark', mode: App.display.mode, bands: App.display.bands, ids: App.display.ids, zones: App.display.zones,
         interactive: true, sel: App.sel, hover: App.hover, warnings: App.warnings
       });
       hud();
@@ -588,15 +630,16 @@
   // Light drawing for reports and SVG export.
   App.staticSVG = function (opts) {
     opts = opts || {};
+    var model = opts.model || App.model, result = opts.result || App.result, checks = opts.checks || App.checks;
     var w = opts.width || 1000;
-    var b = bbox(App.model), bw = Math.max(b.x1 - b.x0, 0.2), bh = Math.max(b.y1 - b.y0, 0.2);
-    var h = Math.round(Math.max(340, Math.min(720, (w - 140) * bh / bw + 150)));
-    var v = fitView(App.model, w, h, { l: 70, r: 70, t: 80, b: 70 });
-    var body = draw(App.model, App.result, App.checks, { view: v, w: w, h: h, palette: 'light', mode: opts.mode || 'forces', bands: true, ids: true, grid: opts.grid !== false, interactive: false });
+    var b = bbox(model), bw = Math.max(b.x1 - b.x0, 0.2), bh = Math.max(b.y1 - b.y0, 0.2);
+    var h = opts.height || Math.round(Math.max(340, Math.min(720, (w - 140) * bh / bw + 150)));
+    var pad = opts.pad || { l: 70, r: 70, t: 80, b: 70 };
+    var v = fitView(model, w, h, pad);
+    var body = draw(model, result, checks, { view: v, w: w, h: h, palette: opts.palette || 'light', mode: opts.mode || 'forces', bands: true, ids: opts.ids !== false, zones: opts.zones !== false, grid: opts.grid !== false, interactive: false });
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" font-family="Segoe UI, Inter, Roboto, Arial, sans-serif">' + body + '</svg>';
   };
 
-  App.coarse = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
   App.initCanvas = function () {
     svg = document.getElementById('canvas');
     wrap = document.getElementById('canvas-wrap');

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — 2D pin-jointed truss solver (direct stiffness method).
  *
  * Units: coordinates in m, forces in kN, widths/thickness in mm, areas in mm²,

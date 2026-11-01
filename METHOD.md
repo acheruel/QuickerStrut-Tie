@@ -1,6 +1,6 @@
 # Method and assumptions · Méthode et hypothèses
 
-*QuickerStrut&Tie v0.1.1 · 2026-11-01*
+*QuickerStrut&Tie v0.2 · 2026-11-01*
 
 ## Units and sign convention
 
@@ -91,18 +91,74 @@ Face stresses compared with `f_lim`:
 - load plate: `|F| / (lb · b)`;
 - optionally, the anchorage face of a tie that ends at the node: `T / (w · b)`.
 
+### Hydrostatic nodal zones (graphical construction)
+
+Every force on the node is represented as a push on one face: a strut on its own side, the
+net force of the ties on one line as a push on the back face, a load or reaction on its
+plate. Because the node is in equilibrium the force polygon closes; rotated by 90° and
+scaled by `1 / (σh · b)` it becomes the node outline, each face perpendicular to its force
+with width `wh,i = Fi / (σh · b)`, so that all faces carry the same stress `σh`
+(hydrostatic node). `σh` is the highest stress `Fi / (wi · b)` among the faces with an
+entered width, which makes every hydrostatic width `wh,i ≤ wi`; without any entered width
+the zone is sized at the node limit (smallest admissible node). The polygon is centred on
+the node; a zone that leaves the concrete outline is flagged.
+
+### Tie anchorage
+
+At every node where a tie ends (not where it continues on the same line, and not where a
+support reaction in line with the tie represents its continuation, e.g. a symmetry
+plane), the bars must develop `fy` where the tie leaves the extended nodal zone:
+
+```
+la = dc + e
+dc = max( w_strut / 2 / sin θ  ,  extent of the hydrostatic zone along the tie )
+e  = distance from the node to the concrete face beyond it − cover
+```
+
+Required length (A23.3, simplified, also used with S6 pending a check against S6 8.15):
+
+```
+straight: ld  = k · k1 · k4 · fy / √f′c · db ≥ 300 mm   (k = 0.45 or 0.6, k1 = 1.3 if more than
+                                                         300 mm of concrete below, k4 = 0.8 up to 20M,
+                                                         √f′c ≤ 8 MPa)          A23.3 12.2.3
+hook:     ldh = 100 · db / √f′c · fy / 400 ≥ max(8 db, 150 mm)                 A23.3 12.5
+```
+
+Anchor plates, welded transverse bars and closed stirrups are taken as mechanical
+anchorages (the tie back-face stress is then checked in the nodal zone).
+
 ### Crack control reinforcement
 
 Orthogonal grid near each face, ratio `ρ ≥ ρmin` in each direction, spacing ≤ 300 mm.
 For S6 the required grid is limited to 1500 mm²/m on each face, i.e.
 `ρ ≥ min(0.003, 3000 / (b · 1000))`. The ratios entered apply to the whole model.
 
-## Limits of version 0.1.1
+## Parametric templates
+
+- **Dapped end:** orthogonal half-joint model, half span with a symmetry plane (horizontal
+  rollers at mid-span), reaction `R` spread over the top nodes.
+- **Multi-column bent cap:** top and bottom chords, a vertical at every girder and column,
+  one compression diagonal per panel falling towards the nearest column; first column
+  pinned, others on rollers; indeterminate for 3 and 4 columns (`r = ncol − 2`).
+- **Pile cap:** 2D section. Four piles (square): each pile line stands for two piles, the
+  2D tie is shared by two parallel ties (factor 0.5). Three piles (equilateral triangle):
+  section through one pile and the line of the other two, side ties `T2D / √3`. Bearing
+  plates are equivalent to the real pile and column areas over the width `b`.
+- **Automatic sizing:** tie bars, strut widths (`wReq / 0.85`), plates and anchorage type
+  (straight → hook → plate), three to four passes because strut strength depends on the
+  tie strains.
+
+## QuickerPile export
+
+`quickerpile-head-loads` JSON (version 1): project, code, limit state, units (kN, kN·m,
+m), and per pile `id`, `node`, `x`, `N` (> 0 compression), `H` (along x), `M` (0, pinned
+head). For the pile cap templates the 2D reactions are expanded to the real piles.
+
+## Limits of version 0.2
 
 - 2D model with a constant thickness `b`; one factored load case.
 - No automatic self-weight, no automatic model generation, no stress fields.
-- No anchorage, development length or bearing-on-plate (back face) detailing checks.
-- Node geometry (hydrostatic or extended nodal zones) is not constructed; the checks
-  use the widths entered.
+- Development lengths use the simplified A23.3 expressions for both codes.
+- 3- and 4-pile caps are handled as 2D sections.
 - The model geometry, the choice of widths and the load path remain the engineer's
   judgement.

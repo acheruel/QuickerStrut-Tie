@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — application state, model operations, history, storage. */
 (function () {
   'use strict';
@@ -9,7 +10,7 @@
   var App = {
     model: null, result: null, checks: null, warnings: [],
     sel: null, hover: null, tool: 'select',
-    display: { mode: 'forces', bands: true, ids: true, snap: true },
+    display: { mode: 'forces', bands: true, ids: true, snap: true, zones: true },
     panel: 'params', view: 'checks',
     history: [], future: [], dirty: false,
     listeners: []
@@ -87,8 +88,8 @@
     var dup = App.model.members.some(function (m) { return (m.i === i && m.j === j) || (m.i === j && m.j === i); });
     if (dup) return null;
     var id = App.nextId('M', App.model.members);
-    var m = { id: id, i: i, j: j, role: 'auto', w: 200, bars: { n: 4, size: '20M' }, As: 0 };
-    if (proto) { m.role = proto.role; m.w = proto.w; m.bars = proto.bars ? { n: proto.bars.n, size: proto.bars.size } : null; m.As = proto.As; }
+    var m = { id: id, i: i, j: j, role: 'auto', w: 200, bars: { n: 4, size: '20M' }, As: 0, anchor: 'hook', db: 0 };
+    if (proto) { m.role = proto.role; m.w = proto.w; m.bars = proto.bars ? { n: proto.bars.n, size: proto.bars.size } : null; m.As = proto.As; m.anchor = proto.anchor || 'hook'; }
     App.model.members.push(m);
     return id;
   };
@@ -206,9 +207,11 @@
       var id = String(b.id || App.nextId('M', out.members));
       mids[id] = 1;
       var bars = b.bars && b.bars.n > 0 && QST.csa.BARS[b.bars.size] ? { n: Math.round(+b.bars.n), size: b.bars.size } : null;
-      out.members.push({ id: id, i: b.i, j: b.j, role: ['auto', 'strut', 'tie'].indexOf(b.role) >= 0 ? b.role : 'auto', w: Math.max(0, +b.w || 0), bars: bars, As: Math.max(0, +b.As || 0) });
+      out.members.push({ id: id, i: b.i, j: b.j, role: ['auto', 'strut', 'tie'].indexOf(b.role) >= 0 ? b.role : 'auto', w: Math.max(0, +b.w || 0), bars: bars, As: Math.max(0, +b.As || 0),
+        anchor: ['straight', 'hook', 'plate', 'stirrup'].indexOf(b.anchor) >= 0 ? b.anchor : 'hook', db: Math.max(0, +b.db || 0) });
     });
     if (out.outline.length < 3) out.outline = base.outline;
+    if (m.meta && typeof m.meta === 'object') { try { out.meta = JSON.parse(JSON.stringify(m.meta)); } catch (e) {} }
     return out;
   };
 

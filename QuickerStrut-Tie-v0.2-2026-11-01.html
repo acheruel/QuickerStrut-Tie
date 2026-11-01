@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- QuickerStrut&Tie · © 2026 Anthony Chéruel · SPDX-License-Identifier: GPL-3.0-or-later -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -8,6 +9,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23102d41'/%3E%3Crect x='8' y='16' width='48' height='36' rx='3' fill='%239fc3d2' fill-opacity='.16'/%3E%3Cpath d='M32 22L15.5 45.5M32 22L48.5 45.5' stroke='%237cb4ff' stroke-width='5.5' stroke-linecap='round'/%3E%3Cpath d='M15.5 45.5H48.5' stroke='%23ffc978' stroke-width='6' stroke-linecap='round'/%3E%3Cg fill='%23e8fff8' stroke='%230b2436' stroke-width='2.2'%3E%3Ccircle cx='32' cy='22' r='5.5'/%3E%3Ccircle cx='15.5' cy='45.5' r='5.5'/%3E%3Ccircle cx='48.5' cy='45.5' r='5.5'/%3E%3C/g%3E%3Cpath d='M44 8.5h9.5V18M53 9l-7.5 7.5' fill='none' stroke='%2356e0bb' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <style>
 @charset "UTF-8";
+/* SPDX-License-Identifier: GPL-3.0-or-later */
 /* QuickerStrut&Tie — design tokens and layout. */
 :root{
   --navy:#102d41;--navy-2:#0b2436;--navy-3:#061520;--ink:#17374b;--muted:#566e7c;--axis:#5d7684;
@@ -270,17 +272,20 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:10px 16px;border-radius:9px;font-size:.84rem;box-shadow:0 10px 26px #0006;opacity:0;transition:all .25s;z-index:200;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ---------- Splash ---------- */
-#splash{position:fixed;inset:0;z-index:1000;background:#061520;display:flex;align-items:center;justify-content:center;transition:opacity .55s ease}
-#splash.out{opacity:0;pointer-events:none}
-#splash svg{width:100%;height:100%}
-#splash .sp-word{font:650 46px "Segoe UI",Inter,Arial,sans-serif;letter-spacing:-1.5px}
-#splash .sp-tag{font:500 15px "Segoe UI",Inter,Arial,sans-serif;fill:#9fc3d2;letter-spacing:2px}
-#splash .sp-small{font:600 12px "Segoe UI",Inter,Arial,sans-serif}
-#splash-skip{position:absolute;right:22px;bottom:22px;background:transparent;border:1px solid #2f5a70;color:#9fc3d2;border-radius:999px;width:38px;height:38px;font-size:1.2rem;padding:0}
-.reveal .inputs,.reveal .stage,.reveal .metrics,.reveal .chart-toolbar,.reveal .result-view{animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
-.reveal .stage{animation-delay:.08s}.reveal .metrics{animation-delay:.16s}.reveal .chart-toolbar,.reveal .result-view{animation-delay:.22s}
-@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+/* ---------- Templates dialog ---------- */
+.tpl-dialog{width:1040px}
+.tpl-body{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;padding:14px 18px;max-height:72vh;overflow:auto}
+.tpl-kinds{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.tpl-kind{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;padding:9px 11px;border-radius:9px}
+.tpl-kind small{font-weight:400;color:var(--muted)}
+.tpl-kind.active{border-color:var(--teal);background:#eefaf6;box-shadow:0 0 0 2px #56e0bb44}
+.tpl-form .field{margin-bottom:8px}
+.tpl-preview{display:flex;flex-direction:column;gap:10px;min-width:0}
+.tpl-svg{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.tpl-svg svg{width:100%;height:auto;display:block}
+.tpl-info{font-size:.8rem;color:var(--muted);line-height:1.55}
+.tpl-info b{color:var(--ink)}
+.tpl-info .bad{color:var(--bad)}
 
 /* ---------- Responsive ---------- */
 @media (max-width:1380px){.top-warning{display:none}}
@@ -291,6 +296,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
   .inspector{width:290px}
 }
 @media (max-width:760px){
+  .tpl-body{grid-template-columns:1fr}
   .topbar{padding:0 12px;height:56px}.brand{font-size:1.15rem}.release-info,.method-open .lbl{display:none}
   .header-right{gap:10px}
   .canvas-wrap{height:68vh}
@@ -359,6 +365,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
   .view-tabs button{padding:8px 1px;font-size:.8rem}
   .result-view{padding:8px 10px 10px}
   dialog{max-height:calc(100svh - 12px)}
+  .tpl-body{grid-template-columns:250px minmax(0,1fr);max-height:calc(100svh - 130px);padding:10px}
   .dlg-body{max-height:calc(100svh - 120px)}
 }
 @media (pointer:coarse){
@@ -400,79 +407,6 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 </style>
 </head>
 <body>
-<div id="splash" aria-hidden="true">
-  <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
-    <defs>
-      <radialGradient id="sp-bg" cx="50%" cy="42%" r="75%"><stop offset="0" stop-color="#123a52"/><stop offset=".55" stop-color="#0b2436"/><stop offset="1" stop-color="#061520"/></radialGradient>
-      <pattern id="sp-grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#2c5b72" stroke-width=".5"/></pattern>
-      <pattern id="sp-grid2" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M100 0H0V100" fill="none" stroke="#3a7390" stroke-width=".8"/></pattern>
-      <filter id="sp-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      <marker id="sp-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#ff9b85"/></marker>
-    </defs>
-    <rect width="1000" height="600" fill="url(#sp-bg)"/>
-    <g id="sp-gridl" opacity="0"><rect width="1000" height="600" fill="url(#sp-grid)"/><rect width="1000" height="600" fill="url(#sp-grid2)"/></g>
-    <rect id="sp-concrete" x="290" y="200" width="420" height="230" rx="2" fill="#9fc3d2" fill-opacity=".09" stroke="#7fa8bb" stroke-width="1.4" opacity="0"/>
-    <path id="sp-band-l" d="M0 0" fill="#7cb4ff" fill-opacity=".17"/>
-    <path id="sp-band-r" d="M0 0" fill="#7cb4ff" fill-opacity=".17"/>
-    <rect id="sp-band-t" x="330" y="395" width="0" height="20" fill="#ffc978" fill-opacity=".2"/>
-    <line id="sp-strut-l" x1="500" y1="225" x2="500" y2="225" stroke="#7cb4ff" stroke-width="3" stroke-dasharray="10 6" filter="url(#sp-glow)"/>
-    <line id="sp-strut-r" x1="500" y1="225" x2="500" y2="225" stroke="#7cb4ff" stroke-width="3" stroke-dasharray="10 6" filter="url(#sp-glow)"/>
-    <line id="sp-tie" x1="335" y1="405" x2="335" y2="405" stroke="#ffc978" stroke-width="4" filter="url(#sp-glow)"/>
-    <g id="sp-nodes" opacity="0">
-      <circle cx="500" cy="225" r="7" fill="#e8fff8" stroke="#0b2436" stroke-width="2"/>
-      <circle cx="335" cy="405" r="7" fill="#e8fff8" stroke="#0b2436" stroke-width="2"/>
-      <circle cx="665" cy="405" r="7" fill="#e8fff8" stroke="#0b2436" stroke-width="2"/>
-      <path d="M335 413l-13 21h26Z M665 413l-13 21h26Z" fill="#cfe6ef" opacity=".9"/>
-      <path d="M315 439h40 M645 439h40" stroke="#6f98ab" stroke-width="1.5"/>
-    </g>
-    <line id="sp-load" x1="500" y1="120" x2="500" y2="120" stroke="#ff9b85" stroke-width="3" marker-end="url(#sp-arrow)"/>
-    <text id="sp-c" x="388" y="300" fill="#cfe2ff" class="sp-small" text-anchor="middle" opacity="0"></text>
-    <text id="sp-t" x="500" y="460" fill="#ffe2ae" class="sp-small" text-anchor="middle" opacity="0"></text>
-    <g id="sp-brand" opacity="0">
-      <g transform="translate(284 48) scale(.9)"><g><defs><linearGradient id="qst-tile-sp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#174560"/><stop offset="1" stop-color="#0b2436"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#qst-tile-sp)"/><rect x=".5" y=".5" width="63" height="63" rx="13.5" fill="none" stroke="#fff" stroke-opacity=".14"/><rect x="8" y="16" width="48" height="36" rx="3" fill="#9fc3d2" fill-opacity=".14"/><path d="M32 22L15.5 45.5M32 22L48.5 45.5" stroke="#7cb4ff" stroke-width="5" stroke-dasharray="6.4 3.4" stroke-linecap="round"/><path d="M15.5 45.5H48.5" stroke="#ffc978" stroke-width="5.6" stroke-linecap="round"/><g fill="#e8fff8" stroke="#0b2436" stroke-width="2.2"><circle cx="32" cy="22" r="5"/><circle cx="15.5" cy="45.5" r="5"/><circle cx="48.5" cy="45.5" r="5"/></g><path d="M44 8.5h9.5V18M53 9l-7.5 7.5" fill="none" stroke="#56e0bb" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></g></g><text x="532" y="92" text-anchor="middle" class="sp-word"><tspan fill="#fff">Quicker</tspan><tspan fill="#56e0bb">Strut&amp;Tie</tspan></text>
-      <text id="sp-tagline" x="500" y="528" text-anchor="middle" class="sp-tag"></text>
-    </g>
-  </svg>
-  <button id="splash-skip" type="button" aria-label="Skip">›</button>
-</div>
-<script>
-/* Intro: a deep beam strut-and-tie model is drawn and its forces appear (2.4 s). */
-(function(){
-  'use strict';
-  var root=document.getElementById('splash');if(!root)return;
-  var lang='fr';try{var s=localStorage.getItem('qst-lang');if(s==='en'||s==='fr')lang=s;else if(!/^fr/i.test(navigator.language||'fr'))lang='en';}catch(e){}
-  var $=function(i){return document.getElementById(i);};
-  $('sp-tagline').textContent=lang==='fr'?'BIELLES ET TIRANTS · CSA S6 / A23.3':'STRUT-AND-TIE · CSA S6 / A23.3';
-  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var D=2400,t0=performance.now(),done=false;
-  var ease=function(u){u=Math.max(0,Math.min(1,u));return u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;};
-  var fmt=function(v){return Math.round(v).toLocaleString(lang==='fr'?'fr-CA':'en-CA');};
-  function band(id,x1,y1,x2,y2,w,p){var dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),nx=-dy/L*w/2,ny=dx/L*w/2,ex=x1+dx*p,ey=y1+dy*p;
-    $(id).setAttribute('d','M'+(x1+nx)+' '+(y1+ny)+'L'+(ex+nx)+' '+(ey+ny)+'L'+(ex-nx)+' '+(ey-ny)+'L'+(x1-nx)+' '+(y1-ny)+'Z');}
-  function frame(now){
-    var t=reduce?D:now-t0;
-    $('sp-gridl').setAttribute('opacity',(.5*ease(t/500)).toFixed(3));
-    $('sp-concrete').setAttribute('opacity',ease((t-150)/400).toFixed(3));
-    $('sp-nodes').setAttribute('opacity',ease((t-400)/300).toFixed(3));
-    var l=ease((t-500)/450);$('sp-load').setAttribute('y2',(120+88*l).toFixed(1));
-    var s=ease((t-800)/600);
-    $('sp-strut-l').setAttribute('x2',(500-165*s).toFixed(1));$('sp-strut-l').setAttribute('y2',(225+180*s).toFixed(1));
-    $('sp-strut-r').setAttribute('x2',(500+165*s).toFixed(1));$('sp-strut-r').setAttribute('y2',(225+180*s).toFixed(1));
-    band('sp-band-l',500,225,335,405,34,s);band('sp-band-r',500,225,665,405,34,s);
-    var ti=ease((t-1150)/550);$('sp-tie').setAttribute('x2',(335+330*ti).toFixed(1));$('sp-band-t').setAttribute('width',(330*ti).toFixed(1));
-    var f=ease((t-1350)/700);$('sp-c').setAttribute('opacity',f.toFixed(2));$('sp-t').setAttribute('opacity',f.toFixed(2));
-    $('sp-c').textContent='C '+fmt(1414*f)+' kN';$('sp-t').textContent='T '+fmt(1000*f)+' kN';
-    var b=ease((t-1500)/600);$('sp-brand').setAttribute('opacity',b.toFixed(3));$('sp-brand').setAttribute('transform','translate(0 '+(8*(1-b)).toFixed(2)+')');
-    if(t>=D){finish();return;}
-    requestAnimationFrame(frame);
-  }
-  function finish(){if(done)return;done=true;document.body.classList.add('reveal');setTimeout(function(){document.body.classList.remove('reveal');},1500);root.classList.add('out');setTimeout(function(){root.remove();},600);}
-  $('splash-skip').addEventListener('click',finish);
-  document.addEventListener('keydown',function k(e){if(e.key==='Escape'){finish();document.removeEventListener('keydown',k);}});
-  requestAnimationFrame(frame);
-})();
-</script>
-
 <header class="topbar">
   <div class="brand"><svg class="brand-logo" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><defs><linearGradient id="qst-tile-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#174560"/><stop offset="1" stop-color="#0b2436"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#qst-tile-top)"/><rect x=".5" y=".5" width="63" height="63" rx="13.5" fill="none" stroke="#fff" stroke-opacity=".14"/><rect x="8" y="16" width="48" height="36" rx="3" fill="#9fc3d2" fill-opacity=".14"/><path d="M32 22L15.5 45.5M32 22L48.5 45.5" stroke="#7cb4ff" stroke-width="5" stroke-dasharray="6.4 3.4" stroke-linecap="round"/><path d="M15.5 45.5H48.5" stroke="#ffc978" stroke-width="5.6" stroke-linecap="round"/><g fill="#e8fff8" stroke="#0b2436" stroke-width="2.2"><circle cx="32" cy="22" r="5"/><circle cx="15.5" cy="45.5" r="5"/><circle cx="48.5" cy="45.5" r="5"/></g><path d="M44 8.5h9.5V18M53 9l-7.5 7.5" fill="none" stroke="#56e0bb" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg><div>Quicker<span>Strut&amp;Tie</span></div></div>
   <p class="top-warning" role="note"><span class="warning-symbol" aria-hidden="true">!</span><span data-i18n="warning"></span></p>
@@ -498,10 +432,12 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
             <div class="menu-sep" role="separator"></div>
             <button type="button" id="print-report" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 7.5V3h9v4.5 M5.5 14H3.5V8h13v6h-2 M5.5 11.5h9V17h-9z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="report"></b><small data-i18n="reportSub"></small></span><kbd>Ctrl P</kbd></button>
             <button type="button" id="export-svg" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 15l4.5-9 4 6 2-3 3.5 6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="exportSvg"></b><small data-i18n="exportSvgSub"></small></span></button>
+            <button type="button" id="export-pile-menu" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h12v4H4z M6.5 8v9 M13.5 8v9 M5 17h3 M12 17h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="exportPile"></b><small data-i18n="exportPileSub"></small></span></button>
             <button type="button" id="export-csv" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><rect x="3.5" y="3.5" width="13" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 8h13 M3.5 12.3h13 M8 3.5v13" stroke="currentColor" stroke-width="1.3"/></svg><span class="mi-text"><b data-i18n="exportCsv"></b><small data-i18n="exportCsvSub"></small></span></button>
           </div></div>
         <div class="qst-menu"><button type="button" class="menu-button" data-menu-toggle aria-haspopup="menu" aria-expanded="false"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 16h15 M4 16V9h12v7 M4 9l6-5 6 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span data-i18n="examplesMenu"></span><span class="caret" aria-hidden="true">▾</span></button>
           <div class="menu-pop" role="menu" id="examples-list"></div></div>
+        <button type="button" class="menu-button" id="open-templates"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 16.5h14 M4.5 16.5v-9h11v9 M4.5 7.5l5.5-4 5.5 4 M8 16.5v-4.5h4v4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span data-i18n="templatesMenu"></span></button>
         <input id="project-file" type="file" accept=".json,application/json" hidden>
       </div>
     </div>
@@ -517,6 +453,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
         <div class="stage-right">
           <div class="dark-seg" id="display-mode" role="group"></div>
           <button type="button" class="chip" id="toggle-bands" aria-pressed="true"></button>
+          <button type="button" class="chip" id="toggle-zones" aria-pressed="true"></button>
           <button type="button" class="chip" id="toggle-ids" aria-pressed="true"></button>
           <button type="button" class="chip" id="toggle-snap" aria-pressed="true"></button>
           <button type="button" class="icon-chip" id="undo" data-i18n-title="undo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 5L3.5 9l4 4 M3.8 9H12a4.5 4.5 0 010 9h-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -542,14 +479,19 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 </main>
 
 <dialog id="method-dialog"><div class="dlg-head"><span class="ins-badge">i</span><div><b data-i18n="methodOpen"></b><small data-i18n="methodSub"></small></div><button type="button" class="ins-close" data-close aria-label="Close">×</button></div><div class="dlg-body" id="method-body"></div></dialog>
+<dialog id="tpl-dialog" class="tpl-dialog"><div class="dlg-head"><span class="ins-badge">⌂</span><div><b data-i18n="templatesMenu"></b><small data-i18n="templatesSub"></small></div><button type="button" class="ins-close" data-close aria-label="Close">×</button></div>
+  <div class="tpl-body"><div class="tpl-side"><div class="tpl-kinds" id="tpl-kinds"></div><div id="tpl-form" class="tpl-form"></div></div><div class="tpl-preview"><div id="tpl-svg" class="tpl-svg"></div><div id="tpl-info" class="tpl-info"></div></div></div>
+  <div class="dlg-actions"><button type="button" data-close data-i18n="cancel"></button><button type="button" class="primary" id="tpl-create" data-i18n="tplCreate"></button></div></dialog>
 <dialog id="confirm-dialog" style="width:460px"><form method="dialog"><div class="dlg-head"><div><b id="confirm-title"></b></div></div><div class="dlg-body"><p id="confirm-body"></p></div><div class="dlg-actions"><button value="cancel" data-i18n="cancel"></button><button value="ok" class="primary" id="confirm-ok"></button></div></form></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <div id="report"></div>
 <script>/* js/version.js */
-window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chéruel', schema: 1 };
+// SPDX-License-Identifier: GPL-3.0-or-later
+window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chéruel', schema: 1 };
 
 </script>
 <script>/* js/solver.js */
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — 2D pin-jointed truss solver (direct stiffness method).
  *
  * Units: coordinates in m, forces in kN, widths/thickness in mm, areas in mm²,
@@ -740,6 +682,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
 
 </script>
 <script>/* js/csa.js */
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — strut-and-tie verification to CSA S6 (bridges) and
  * CSA A23.3 (buildings).
  *
@@ -767,7 +710,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
       node: function (type, fc) { var a = alpha1(fc); return { CCC: a, CCT: 0.88 * a, CTT: 0.76 * a }[type]; },
       nodeText: { CCC: 'α1', CCT: '0,88 α1', CTT: '0,76 α1' },
       rhoMin: 0.003, sMax: 300, maxFaceArea: 1500,
-      clause: { phi: '8.4.6', strut: '8.10.3', fcu: '8.10.3.3', tie: '8.10.4.1', node: '8.10.5.1', crack: '8.10.5' }
+      clause: { phi: '8.4.6', strut: '8.10.3', fcu: '8.10.3.3', tie: '8.10.4.1', node: '8.10.5.1', crack: '8.10.5', anchor: '8.10.4.2 · A23.3 12.2.3 / 12.5' }
     },
     A23: {
       name: 'CSA A23.3',
@@ -776,7 +719,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
       node: function (type) { return { CCC: 0.85, CCT: 0.75, CTT: 0.65 }[type]; },
       nodeText: { CCC: '0,85', CCT: '0,75', CTT: '0,65' },
       rhoMin: 0.002, sMax: 300, maxFaceArea: null,
-      clause: { phi: '8.4.2 / 8.4.3', strut: '11.4.2', fcu: '11.4.2.3', tie: '11.4.3.1', node: '11.4.4.1', crack: '11.4.5' }
+      clause: { phi: '8.4.2 / 8.4.3', strut: '11.4.2', fcu: '11.4.2.3', tie: '11.4.3.1', node: '11.4.4.1', crack: '11.4.5', anchor: '11.4.3.2 · 12.2.3 / 12.5' }
     }
   };
 
@@ -938,6 +881,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
       out.nodes.push({
         id: n.id, kind: 'node', type: type, factor: factor, limit: limit, faces: faces,
         util: maxFace ? maxFace.util : 0, governingFace: maxFace, ties: ties.length,
+        zone: hydrostaticZone(n, atNode[n.id], byId, R, b, limit, model.outline),
         clause: code.clause.node
       });
     });
@@ -953,12 +897,150 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
       clause: code.clause.crack
     };
 
+    // --- Anchorage of ties -----------------------------------------------------
+    out.anchors = anchorageChecks(model, byId, atNode, out.nodes, { fc: fc, fy: fy, b: b, code: code, mat: mat, reactions: reactionById });
+
     // --- Governing element ----------------------------------------------------
-    var all = out.members.concat(out.nodes);
+    var all = out.members.concat(out.nodes).concat(out.anchors.filter(function (a) { return !a.na; }));
     all.forEach(function (e) { if (!out.governing || e.util > out.governing.util) out.governing = e; });
     out.maxUtil = out.governing ? out.governing.util : 0;
     out.phiC = F.phiC; out.phiS = F.phiS; out.code = model.code; out.strutCap = cap;
     out.ok = true;
+    return out;
+  }
+
+
+  // ---------------------------------------------------------------------------
+  // Hydrostatic nodal zone. Every force on the node is represented as a push on
+  // one face: struts on their own side, ties as a push on the back face (net
+  // force of collinear ties), loads and reactions on their plate. The closed
+  // force polygon rotated by 90° and scaled by 1 / (σ·b) is the node outline:
+  // each face is perpendicular to its force and all faces carry the same
+  // stress σ. σ is the largest stress on a face with a given width (so every
+  // hydrostatic width ≤ the width entered), or the node limit if no width is
+  // given (smallest admissible node).
+  function hydrostaticZone(n, members, byId, R, b, limit, outline) {
+    var faces = [], tieGroups = [];
+    members.forEach(function (m) {
+      var f = byId[m.id];
+      if (!f || f.kind === 'zero') return;
+      var sgn = m.i === n.id ? 1 : -1, ux = sgn * f.c, uy = sgn * f.s;
+      if (f.kind === 'strut') faces.push({ kind: 'strut', ref: m.id, force: -f.N, ux: ux, uy: uy, wGiven: Number(m.w) || 0 });
+      else {
+        var g = tieGroups.filter(function (t) { return Math.abs(t.dx * uy - t.dy * ux) < Math.sin(5 * Math.PI / 180); })[0];
+        if (!g) { g = { dx: ux, dy: uy, px: 0, py: 0, refs: [], w: 0 }; tieGroups.push(g); }
+        g.px += f.N * ux; g.py += f.N * uy; g.refs.push(m.id); g.w = Math.max(g.w, Number(m.w) || 0);
+      }
+    });
+    tieGroups.forEach(function (g) {
+      var T = Math.hypot(g.px, g.py);
+      if (T > 0.05) faces.push({ kind: 'tie', ref: g.refs.join('+'), force: T, ux: -g.px / T, uy: -g.py / T, wGiven: g.w });
+    });
+    var lb = Number(n.bearing) || 0;
+    var P = Math.hypot(Number(n.fx) || 0, Number(n.fy) || 0);
+    if (P > 0.05) faces.push({ kind: 'load', ref: n.id, force: P, ux: -(Number(n.fx) || 0) / P, uy: -(Number(n.fy) || 0) / P, wGiven: lb });
+    if (R) {
+      var Rm = Math.hypot(R.rx, R.ry);
+      if (Rm > 0.05) faces.push({ kind: 'support', ref: n.id, force: Rm, ux: -R.rx / Rm, uy: -R.ry / Rm, wGiven: lb });
+    }
+    if (faces.length < 3) return null;
+    var sigma = 0;
+    faces.forEach(function (fa) { if (fa.wGiven > 0) sigma = Math.max(sigma, fa.force * 1000 / (fa.wGiven * b)); });
+    var scaled = sigma > 0 ? 'face' : 'limit';
+    if (!(sigma > 0)) sigma = limit;
+    faces.forEach(function (fa) { fa.angle = Math.atan2(fa.uy, fa.ux); fa.wHydro = fa.force * 1000 / (sigma * b); });
+    faces.sort(function (a, c) { return a.angle - c.angle; });
+    var pts = [[0, 0]];
+    faces.forEach(function (fa) {
+      var L = fa.wHydro / 1000, last = pts[pts.length - 1];
+      pts.push([last[0] - fa.uy * L, last[1] + fa.ux * L]);
+    });
+    var end = pts.pop(), closure = Math.hypot(end[0], end[1]);
+    // Area and centroid (shoelace), then centre the polygon on the node.
+    var A = 0, cx = 0, cy = 0;
+    for (var i = 0; i < pts.length; i++) {
+      var p = pts[i], q = pts[(i + 1) % pts.length], cr = p[0] * q[1] - q[0] * p[1];
+      A += cr; cx += (p[0] + q[0]) * cr; cy += (p[1] + q[1]) * cr;
+    }
+    A /= 2;
+    if (Math.abs(A) < 1e-8) return null;
+    cx /= 6 * A; cy /= 6 * A;
+    var poly = pts.map(function (p) { return [n.x + p[0] - cx, n.y + p[1] - cy]; });
+    // Faces as segments (for drawing): face k joins vertex k and k+1.
+    faces.forEach(function (fa, k) { fa.a = poly[k]; fa.b = poly[(k + 1) % poly.length]; });
+    var outside = outline && outline.length >= 3 ? poly.some(function (p) { return !insideOrOn(p[0], p[1], outline, 0.005); }) : false;
+    return { sigma: sigma, scaled: scaled, util: sigma / limit, faces: faces, poly: poly, area: Math.abs(A), closure: closure, outside: outside };
+  }
+
+  // Distance (m) from (x, y) along the unit direction (dx, dy) to the outline.
+  function rayToOutline(x, y, dx, dy, poly) {
+    var best = Infinity;
+    for (var i = 0; i < poly.length; i++) {
+      var a = poly[i], c = poly[(i + 1) % poly.length], ex = c[0] - a[0], ey = c[1] - a[1];
+      var den = dx * ey - dy * ex;
+      if (Math.abs(den) < 1e-12) continue;
+      var t = ((a[0] - x) * ey - (a[1] - y) * ex) / den, u = ((a[0] - x) * dy - (a[1] - y) * dx) / den;
+      if (t > 1e-9 && u >= -1e-9 && u <= 1 + 1e-9) best = Math.min(best, t);
+    }
+    return best;
+  }
+
+  // Development length of a straight bar (A23.3 12.2.3, simplified) and of a
+  // standard hook (A23.3 12.5.2, basic length × fy / 400).
+  function developmentLength(type, db, fy, fc, opts) {
+    var sq = Math.min(Math.sqrt(fc), 8);
+    if (type === 'hook') return Math.max(100 * db / sq * fy / 400, 8 * db, 150);
+    var k = opts.k || 0.45, k1 = opts.top ? 1.3 : 1.0, k4 = db <= 20 ? 0.8 : 1.0;
+    return Math.max(k * k1 * k4 * fy / sq * db, 300);
+  }
+
+  // Tie anchorage: at each node where a tie ends, the bars must develop fy at
+  // the edge of the extended nodal zone. Available length la = critical-section
+  // offset (strut edge or hydrostatic zone crossing the tie axis) + extension of
+  // the bars beyond the node to the concrete face, less the cover.
+  function anchorageChecks(model, byId, atNode, nodeChecks, o) {
+    var out = [], poly = model.outline || [], zoneOf = {};
+    nodeChecks.forEach(function (c) { zoneOf[c.id] = c.zone; });
+    var cover = Number(o.mat.cover) >= 0 ? Number(o.mat.cover) : 50;
+    model.members.forEach(function (m) {
+      var f = byId[m.id];
+      if (!f || f.kind !== 'tie') return;
+      [m.i, m.j].forEach(function (nid) {
+        var sgn = m.i === nid ? 1 : -1, dx = sgn * f.c, dy = sgn * f.s;
+        var continues = atNode[nid].some(function (o2) {
+          if (o2.id === m.id) return false;
+          var g = byId[o2.id];
+          return g && g.kind === 'tie' && Math.abs(g.c * f.s - g.s * f.c) < Math.sin(5 * Math.PI / 180);
+        });
+        if (continues) return;
+        var n = model.nodes.filter(function (x) { return x.id === nid; })[0];
+        // A support reaction in line with the tie stands for its continuation
+        // (symmetry plane, continuous member): no anchorage there.
+        var Rn = o.reactions[nid];
+        if (Rn && Math.abs(Rn.rx * dx + Rn.ry * dy) >= 0.9 * f.N) return;
+        var dc = 0;
+        atNode[nid].forEach(function (o2) {
+          var g = byId[o2.id];
+          if (!g || g.kind !== 'strut') return;
+          var th = acuteAngle(f, g);
+          if (th > 5 * Math.PI / 180) dc = Math.max(dc, (Number(o2.w) || 0) / 2 / Math.sin(th));
+        });
+        var z = zoneOf[nid];
+        if (z) z.poly.forEach(function (p) { dc = Math.max(dc, ((p[0] - n.x) * dx + (p[1] - n.y) * dy) * 1000); });
+        var ray = poly.length >= 3 ? rayToOutline(n.x, n.y, -dx, -dy, poly) : 0;
+        var e = isFinite(ray) ? Math.max(0, ray * 1000 - cover) : 0;
+        var la = dc + e, type = m.anchor || 'straight';
+        var db = m.bars && BARS[m.bars.size] ? BARS[m.bars.size].d : (Number(m.db) > 0 ? Number(m.db) : null);
+        // Top bars: more than 300 mm of concrete below them (k1 = 1.3).
+        var below = poly.length >= 3 ? rayToOutline(n.x, n.y, 0, -1, poly) : 0;
+        var top = isFinite(below) && below > 0.3;
+        var rec = { id: m.id + '@' + nid, kind: 'anchor', member: m.id, node: nid, type: type, la: la, e: e, dc: dc, db: db, top: top, clause: o.code.clause.anchor, end: [n.x - dx * e / 1000, n.y - dy * e / 1000], dir: [-dx, -dy] };
+        if (type === 'plate' || type === 'stirrup') { rec.req = 0; rec.util = 0; rec.mechanical = true; }
+        else if (!db) { rec.na = true; rec.util = 0; }
+        else { rec.req = developmentLength(type, db, o.fy, o.fc, { k: Number(o.mat.ldFactor) || 0.45, top: top }); rec.util = la > 0 ? rec.req / la : Infinity; }
+        out.push(rec);
+      });
+    });
     return out;
   }
 
@@ -978,9 +1060,9 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
     return Math.hypot(x - a[0] - t * dx, y - a[1] - t * dy);
   }
 
-  function insideOrOn(x, y, poly) {
+  function insideOrOn(x, y, poly, tol) {
     if (pointInPolygon(x, y, poly)) return true;
-    for (var i = 0; i < poly.length; i++) if (distToSegment(x, y, poly[i], poly[(i + 1) % poly.length]) < 1e-6) return true;
+    for (var i = 0; i < poly.length; i++) if (distToSegment(x, y, poly[i], poly[(i + 1) % poly.length]) < (tol || 1e-6)) return true;
     return false;
   }
 
@@ -1006,7 +1088,8 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
   var api = {
     CODES: CODES, BARS: BARS, alpha1: alpha1, check: check, strutFcu: strutFcu, factors: factors,
     memberArea: memberArea, normalize: normalize, geometryWarnings: geometryWarnings,
-    pointInPolygon: pointInPolygon, acuteAngle: acuteAngle
+    pointInPolygon: pointInPolygon, acuteAngle: acuteAngle, hydrostaticZone: hydrostaticZone,
+    developmentLength: developmentLength, rayToOutline: rayToOutline
   };
   root.QST = root.QST || {};
   root.QST.csa = api;
@@ -1015,12 +1098,13 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
 
 </script>
 <script>/* js/examples.js */
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — example models (ULS factored loads, kN; geometry in m). */
 (function (root) {
   'use strict';
 
   function material(over) {
-    var m = { fc: 35, fy: 400, Es: 200000, b: 400, phiC: 0, phiS: 0, epsMode: 'computed', rhoH: 0.003, rhoV: 0.003, spacing: 300, tieFaces: true };
+    var m = { fc: 35, fy: 400, Es: 200000, b: 400, phiC: 0, phiS: 0, epsMode: 'computed', rhoH: 0.003, rhoV: 0.003, spacing: 300, tieFaces: true, cover: 50, ldFactor: 0.45 };
     for (var k in over) m[k] = over[k];
     return m;
   }
@@ -1029,8 +1113,8 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
     return { id: id, x: x, y: y, support: o.support || null, fx: o.fx || 0, fy: o.fy || 0, bearing: o.bearing || 0 };
   }
   function S(id, i, j, w) { return { id: id, i: i, j: j, role: 'auto', w: w, bars: null, As: 0 }; }
-  function T(id, i, j, n, size, w) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: { n: n, size: size }, As: 0 }; }
-  function TA(id, i, j, As, w) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: null, As: As }; }
+  function T(id, i, j, n, size, w, anchor) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: { n: n, size: size }, As: 0, anchor: anchor || 'hook' }; }
+  function TA(id, i, j, As, w, db, anchor) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: null, As: As, db: db, anchor: anchor || 'hook' }; }
   var IN = 0.0254, KIP = 4.448222;
 
   var EXAMPLES = [
@@ -1090,7 +1174,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
           N('N6', 0.15, 0.0, { support: 'pin', bearing: 200 })
         ],
         members: [
-          T('M1', 'N1', 'N2', 4, '20M', 120),
+          T('M1', 'N1', 'N2', 4, '20M', 120, 'plate'),
           S('M2', 'N1', 'N3', 150), S('M3', 'N2', 'N4', 150),
           S('M4', 'N3', 'N4', 120), S('M5', 'N3', 'N5', 200), S('M6', 'N4', 'N6', 200),
           S('M7', 'N3', 'N2', 100), S('M8', 'N3', 'N6', 100)
@@ -1141,11 +1225,11 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
           N('N10', 3.0, 0.08, { support: 'rx' })
         ],
         members: [
-          S('M1', 'N1', 'N2', 300), T('M2', 'N1', 'N4', 5, '20M', 150), T('M3', 'N2', 'N3', 6, '20M', 150),
-          S('M4', 'N2', 'N5', 150), S('M5', 'N3', 'N4', 250), S('M6', 'N3', 'N5', 300), T('M7', 'N3', 'N6', 6, '25M', 150),
-          S('M8', 'N5', 'N4', 150), T('M9', 'N4', 'N6', 5, '15M', 150), S('M10', 'N5', 'N7', 150), T('M11', 'N6', 'N8', 6, '25M', 150),
-          S('M12', 'N6', 'N7', 250), T('M13', 'N7', 'N8', 4, '15M', 150), S('M14', 'N7', 'N9', 150), T('M15', 'N8', 'N10', 6, '25M', 150),
-          S('M16', 'N8', 'N9', 250), T('M17', 'N9', 'N10', 4, '15M', 150)
+          S('M1', 'N1', 'N2', 300), T('M2', 'N1', 'N4', 5, '20M', 150, 'plate'), T('M3', 'N2', 'N3', 6, '20M', 150, 'stirrup'),
+          S('M4', 'N2', 'N5', 150), S('M5', 'N3', 'N4', 250), S('M6', 'N3', 'N5', 300), T('M7', 'N3', 'N6', 6, '25M', 150, 'plate'),
+          S('M8', 'N5', 'N4', 150), T('M9', 'N4', 'N6', 5, '15M', 150, 'stirrup'), S('M10', 'N5', 'N7', 150), T('M11', 'N6', 'N8', 6, '25M', 150),
+          S('M12', 'N6', 'N7', 250), T('M13', 'N7', 'N8', 4, '15M', 150, 'stirrup'), S('M14', 'N7', 'N9', 150), T('M15', 'N8', 'N10', 6, '25M', 150),
+          S('M16', 'N8', 'N9', 250), T('M17', 'N9', 'N10', 4, '15M', 150, 'stirrup')
         ]
       }
     },
@@ -1167,8 +1251,8 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
           N('F', 228 * IN, 69 * IN, { fy: -600 * KIP, bearing: 12 * IN * 1000 })
         ],
         members: [
-          TA('AB', 'A', 'B', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000), TA('BC', 'B', 'C', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000),
-          S('AD', 'A', 'D', 400), T('BD', 'B', 'D', 26, '20M', 0), S('BE', 'B', 'E', 400), S('CF', 'C', 'F', 287),
+          TA('AB', 'A', 'B', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000, 1.27 * IN * 1000), TA('BC', 'B', 'C', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000, 1.27 * IN * 1000),
+          S('AD', 'A', 'D', 400), T('BD', 'B', 'D', 26, '20M', 0, 'stirrup'), S('BE', 'B', 'E', 400), S('CF', 'C', 'F', 287),
           S('DE', 'D', 'E', 6 * IN * 1000), S('EF', 'E', 'F', 6 * IN * 1000),
           // Bracing diagonal (zero force) so that the stiffness matrix is regular.
           S('BF', 'B', 'F', 150)
@@ -1221,7 +1305,271 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
+<script>/* js/templates.js */
+// SPDX-License-Identifier: GPL-3.0-or-later
+/* QuickerStrut&Tie — parametric bridge templates, automatic sizing and pile
+ * head loads export.
+ *
+ * Templates (geometry in m, loads in kN, factored):
+ *   dappedEnd   about réduit / demi-joint, orthogonal model, half span with symmetry
+ *   bentCap     multi-column bent cap, truss with diagonals towards the columns
+ *   pileCap     pile cap on 2, 3 or 4 piles, 2D elevation (see pileMap / tie3D)
+ */
+(function (root) {
+  'use strict';
+  var Q = root.QST || {};
+  var solver = Q.solver || (typeof require !== 'undefined' ? require('./solver.js') : null);
+  var csa = Q.csa || (typeof require !== 'undefined' ? require('./csa.js') : null);
+  var examples = Q.examples || (typeof require !== 'undefined' ? require('./examples.js') : null);
+
+  function r6(v) { return Math.round(v * 1e6) / 1e6; }
+  function node(id, x, y, o) {
+    o = o || {};
+    return { id: id, x: r6(x), y: r6(y), support: o.support || null, fx: o.fx || 0, fy: r6(o.fy || 0), bearing: o.bearing || 0 };
+  }
+  function bar(id, i, j, o) {
+    o = o || {};
+    return { id: id, i: i, j: j, role: 'auto', w: o.w || 200, bars: o.tie ? { n: 4, size: '20M' } : null, As: 0, anchor: o.anchor || 'hook', db: 0 };
+  }
+
+  var DEFAULTS = {
+    dappedEnd: { h: 1.2, hn: 0.6, ln: 0.45, a: 0.2, half: 3.0, R: 600, n: 3, b: 1000, fc: 35 },
+    bentCap: { ncol: 3, spacing: 6.0, overhang: 1.8, h: 1.5, colWidth: 1.0, nGirders: 5, girderSpacing: 3.2, P: 1500, b: 1200, fc: 35 },
+    pileCap: { np: 4, s: 2.7, edge: 0.75, h: 1.6, colWidth: 1.0, pileD: 0.6, P: 8000, fc: 30 }
+  };
+
+  // ---------------------------------------------------------------- about réduit
+  function dappedEnd(p) {
+    p = Object.assign({}, DEFAULTS.dappedEnd, p || {});
+    var h = p.h, hn = p.hn, ln = p.ln, c = Math.min(0.1, 0.07 * h), yNib = h - hn + c;
+    var xh = ln + Math.max(0.1, 0.08 * h), n = Math.max(1, Math.round(p.n));
+    var errors = [];
+    if (!(hn > 0.2 * h && hn < 0.9 * h)) errors.push('hn');
+    if (!(p.a > 0 && p.a < ln)) errors.push('a');
+    if (!(p.half > xh + 0.3)) errors.push('half');
+    var xs = [];
+    for (var i = 1; i <= n; i++) xs.push(xh + i * (p.half - xh) / n);
+    var P = p.R / (n - 0.5);
+    var nodes = [
+      node('N1', p.a, yNib, { support: 'ry', bearing: 250 }),
+      node('N2', xh, h - c), node('N3', xh, c), node('N4', xs[0], yNib)
+    ];
+    var T = [], B = [];
+    xs.forEach(function (x, k) {
+      var last = k === n - 1;
+      T.push('N' + (5 + 2 * k)); B.push('N' + (6 + 2 * k));
+      nodes.push(node(T[k], x, h - c, { fy: -(last ? P / 2 : P), bearing: last ? 0 : 300, support: last ? 'rx' : null }));
+      nodes.push(node(B[k], x, c, { support: last ? 'rx' : null }));
+    });
+    var mem = [], id = 0;
+    function add(i, j, o) { mem.push(bar('M' + (++id), i, j, o)); }
+    add('N1', 'N2', { w: 300 });
+    add('N1', 'N4', { tie: true, w: 150, anchor: 'plate' });
+    add('N2', 'N3', { tie: true, w: 150, anchor: 'stirrup' });
+    add('N2', T[0], { w: 150 });
+    add('N3', 'N4', { w: 250 });
+    add('N3', T[0], { w: 300 });
+    add('N3', B[0], { tie: true, w: 150, anchor: 'plate' });
+    add(T[0], 'N4', { w: 150, anchor: 'stirrup' });
+    add('N4', B[0], { tie: true, w: 150, anchor: 'stirrup' });
+    for (var k = 0; k < n - 1; k++) {
+      add(T[k], T[k + 1], { w: 150 });
+      add(B[k], B[k + 1], { tie: true, w: 150, anchor: 'hook' });
+      add(B[k], T[k + 1], { w: 250 });
+      add(T[k + 1], B[k + 1], { tie: true, w: 150, anchor: 'stirrup' });
+    }
+    return {
+      errors: errors,
+      model: {
+        schema: 1, code: 'S6', material: examples.material({ fc: p.fc, b: p.b }),
+        outline: [[0, h - hn], [ln, h - hn], [ln, 0], [p.half, 0], [p.half, h], [0, h]].map(function (q) { return [r6(q[0]), r6(q[1])]; }),
+        nodes: nodes, members: mem, meta: { template: 'dappedEnd', params: p }
+      }
+    };
+  }
+
+  // ------------------------------------------------------- chevêtre multicolonne
+  function bentCap(p) {
+    p = Object.assign({}, DEFAULTS.bentCap, p || {});
+    var ncol = Math.max(2, Math.min(4, Math.round(p.ncol))), ng = Math.max(1, Math.round(p.nGirders));
+    var h = p.h, c = Math.max(0.1, 0.08 * h), errors = [];
+    var cols = [], girders = [];
+    for (var i = 0; i < ncol; i++) cols.push((i - (ncol - 1) / 2) * p.spacing);
+    for (var g = 0; g < ng; g++) girders.push((g - (ng - 1) / 2) * p.girderSpacing);
+    var x0 = cols[0] - p.overhang, x1 = cols[ncol - 1] + p.overhang;
+    girders.forEach(function (x) { if (x < x0 + 0.2 || x > x1 - 0.2) errors.push('girders'); });
+    var xs = cols.concat(girders).sort(function (a, b) { return a - b; });
+    xs = xs.filter(function (x, k) { return k === 0 || x - xs[k - 1] > 1e-3; });
+    var nodes = [], T = [], B = [];
+    xs.forEach(function (x, k) {
+      var load = girders.some(function (gx) { return Math.abs(gx - x) < 1e-3; });
+      var col = cols.findIndex(function (cx) { return Math.abs(cx - x) < 1e-3; });
+      T.push('N' + (2 * k + 1)); B.push('N' + (2 * k + 2));
+      nodes.push(node(T[k], x, h - c, { fy: load ? -p.P : 0, bearing: load ? 500 : 0 }));
+      nodes.push(node(B[k], x, c, { support: col < 0 ? null : col === 0 ? 'pin' : 'ry', bearing: col < 0 ? 0 : p.colWidth * 1000 }));
+    });
+    var mem = [], id = 0;
+    function add(i, j, o) { mem.push(bar('M' + (++id), i, j, o)); }
+    for (var k = 0; k < xs.length; k++) {
+      add(T[k], B[k], { tie: true, w: 150, anchor: 'stirrup' });
+      if (k === xs.length - 1) break;
+      add(T[k], T[k + 1], { tie: true, w: 200, anchor: 'hook' });
+      add(B[k], B[k + 1], { tie: true, w: 200, anchor: 'hook' });
+      // Diagonal strut falls towards the nearest column.
+      var mid = (xs[k] + xs[k + 1]) / 2, near = cols.reduce(function (a, b) { return Math.abs(b - mid) < Math.abs(a - mid) ? b : a; });
+      if (near > mid) add(T[k], B[k + 1], { w: 350 }); else add(T[k + 1], B[k], { w: 350 });
+    }
+    var cw = p.colWidth / 2, stub = Math.min(1.2, h);
+    var outline = [[x0, 0]];
+    cols.forEach(function (cx) { outline.push([cx - cw, 0], [cx - cw, -stub], [cx + cw, -stub], [cx + cw, 0]); });
+    outline.push([x1, 0], [x1, h], [x0, h]);
+    return {
+      errors: errors,
+      model: {
+        schema: 1, code: 'S6', material: examples.material({ fc: p.fc, b: p.b }),
+        outline: outline.map(function (q) { return [r6(q[0]), r6(q[1])]; }),
+        nodes: nodes, members: mem, meta: { template: 'bentCap', params: p }
+      }
+    };
+  }
+
+  // ------------------------------------------------------- semelle sur pieux
+  // 2D elevation. 2 piles: as drawn. 4 piles (square, side s): each pile line
+  // stands for two piles; the 2D tie is shared by two parallel ties. 3 piles
+  // (equilateral triangle, side s): section through pile A and the B–C line;
+  // the side ties of the triangle carry T2D / √3.
+  function pileCap(p) {
+    p = Object.assign({}, DEFAULTS.pileCap, p || {});
+    var np = [2, 3, 4].indexOf(Math.round(p.np)) >= 0 ? Math.round(p.np) : 4;
+    var h = p.h, c = 0.15, ytop = h - 0.15, errors = [];
+    var s = p.s, e = p.edge, d = p.pileD, cw = p.colWidth, stub = 0.6;
+    if (!(e >= d / 2 + 0.15)) errors.push('edge');
+    if (!(s >= 2.5 * d)) errors.push('s');
+    var nodes, mem, xa, xb, b, pileMap, tie3D;
+    // Plate lengths over the full width b giving the real bearing areas
+    // (square pile of equal area 0.886 d, square column cw × cw).
+    var bmm = (np === 3 ? s + 2 * e : np === 4 ? s + 2 * e : 2 * e) * 1000, sq = 0.886 * d * 1000;
+    var plate1 = Math.round(sq * sq / bmm), colPlate = Math.round(cw * cw * 1e6 / bmm);
+    if (np === 3) {
+      var r = s / Math.sqrt(3);
+      xa = -r / 2; xb = r;
+      b = s + 2 * e;
+      nodes = [
+        node('N1', 0, ytop, { fy: -p.P, bearing: colPlate }),
+        node('N2', xa, c, { support: 'pin', bearing: 2 * plate1 }),
+        node('N3', xb, c, { support: 'ry', bearing: plate1 })
+      ];
+      mem = [bar('M1', 'N2', 'N3', { tie: true, w: 250, anchor: 'hook' }), bar('M2', 'N1', 'N2', { w: 400 }), bar('M3', 'N1', 'N3', { w: 400 })];
+      pileMap = { N2: [{ pile: 'P2', share: 0.5 }, { pile: 'P3', share: 0.5 }], N3: [{ pile: 'P1', share: 1 }] };
+      tie3D = { factor: 1 / Math.sqrt(3), ties: 3 };
+    } else {
+      xa = -s / 2; xb = s / 2;
+      b = np === 4 ? s + 2 * e : 2 * e;
+      nodes = [
+        node('N1', -cw / 4, ytop, { fy: -p.P / 2, bearing: Math.round(colPlate / 2) }),
+        node('N2', cw / 4, ytop, { fy: -p.P / 2, bearing: Math.round(colPlate / 2) }),
+        node('N3', xa, c, { support: 'pin', bearing: plate1 * (np === 4 ? 2 : 1) }),
+        node('N4', xb, c, { support: 'ry', bearing: plate1 * (np === 4 ? 2 : 1) })
+      ];
+      mem = [bar('M1', 'N3', 'N4', { tie: true, w: 250, anchor: 'hook' }), bar('M2', 'N1', 'N3', { w: 400 }), bar('M3', 'N2', 'N4', { w: 400 }),
+        bar('M4', 'N1', 'N2', { w: 250 }), bar('M5', 'N1', 'N4', { w: 150 })];
+      pileMap = np === 4
+        ? { N3: [{ pile: 'P1', share: 0.5 }, { pile: 'P3', share: 0.5 }], N4: [{ pile: 'P2', share: 0.5 }, { pile: 'P4', share: 0.5 }] }
+        : { N3: [{ pile: 'P1', share: 1 }], N4: [{ pile: 'P2', share: 1 }] };
+      tie3D = np === 4 ? { factor: 0.5, ties: 4 } : { factor: 1, ties: 1 };
+    }
+    var L0 = xa - e, L1 = xb + e;
+    var outline = [[L0, 0], [xa - d / 2, 0], [xa - d / 2, -stub], [xa + d / 2, -stub], [xa + d / 2, 0],
+      [xb - d / 2, 0], [xb - d / 2, -stub], [xb + d / 2, -stub], [xb + d / 2, 0], [L1, 0],
+      [L1, h], [cw / 2, h], [cw / 2, h + stub], [-cw / 2, h + stub], [-cw / 2, h], [L0, h]];
+    return {
+      errors: errors,
+      model: {
+        schema: 1, code: 'S6', material: examples.material({ fc: p.fc, b: Math.round(b * 1000) }),
+        outline: outline.map(function (q) { return [r6(q[0]), r6(q[1])]; }),
+        nodes: nodes, members: mem, meta: { template: 'pileCap', params: Object.assign({}, p, { np: np }), pileMap: pileMap, tie3D: tie3D }
+      }
+    };
+  }
+
+  // ------------------------------------------------------- automatic sizing
+  // Picks tie bars, strut widths and missing plates so that every check is at
+  // or below the target utilization (three passes: strut strength depends on
+  // the tie strains, which depend on the bars).
+  var SIZES = ['15M', '20M', '25M', '30M', '35M'];
+  function autoSize(model, opt) {
+    opt = opt || {};
+    var target = opt.target || 0.85;
+    var info = { passes: 0 };
+    for (var pass = 0; pass < 4; pass++) {
+      csa.normalize(model);
+      var r = solver.solve(model);
+      if (!r.ok) { info.error = r.error; return info; }
+      var c = csa.check(model, r), F = csa.factors(model), fy = model.material.fy, b = model.material.b;
+      info.passes = pass + 1;
+      model.members.forEach(function (m) {
+        var f = r.forces.filter(function (x) { return x.id === m.id; })[0];
+        if (f.kind === 'tie') {
+          var T = f.N, size = T < 250 ? '15M' : T < 700 ? '20M' : T < 1800 ? '25M' : T < 3500 ? '30M' : '35M';
+          var A = csa.BARS[size].A, n = Math.max(2, Math.ceil(T * 1000 / (target * F.phiS * fy * A)));
+          while (n > 16 && SIZES.indexOf(size) < SIZES.length - 1) { size = SIZES[SIZES.indexOf(size) + 1]; A = csa.BARS[size].A; n = Math.max(2, Math.ceil(T * 1000 / (target * F.phiS * fy * A))); }
+          m.bars = { n: n, size: size };
+        } else if (f.kind === 'strut') {
+          var ck = c.members.filter(function (x) { return x.id === m.id; })[0];
+          if (ck && isFinite(ck.wReq)) m.w = Math.max(100, Math.ceil(ck.wReq / target / 10) * 10);
+        }
+      });
+      // Anchorage: upgrade straight → hook → plate where the length is short.
+      c.anchors.forEach(function (a) {
+        if (a.na || a.mechanical || a.util <= target) return;
+        var m = model.members.filter(function (x) { return x.id === a.member; })[0];
+        m.anchor = a.type === 'straight' ? 'hook' : 'plate';
+      });
+      // Plates on loaded or supported nodes: at least the width giving the
+      // target stress on the bearing face.
+      c.nodes.forEach(function (nc) {
+        var n = model.nodes.filter(function (x) { return x.id === nc.id; })[0];
+        nc.faces.forEach(function (fa) {
+          if ((fa.kind === 'support' || fa.kind === 'load') && fa.util > target) n.bearing = Math.ceil(fa.force * 1000 / (target * nc.limit * b) / 10) * 10;
+        });
+      });
+    }
+    csa.normalize(model);
+    return info;
+  }
+
+  // ------------------------------------------------------- QuickerPile export
+  // Factored pile head loads (N > 0 compression, H along x, M = 0 pinned head).
+  function pileLoads(model, result, meta) {
+    if (!result || !result.ok) return null;
+    var map = model.meta && model.meta.pileMap, piles = [];
+    result.reactions.forEach(function (R) {
+      var n = model.nodes.filter(function (x) { return x.id === R.node; })[0];
+      var list = map && map[R.node] ? map[R.node] : [{ pile: 'P' + (piles.length + 1), share: 1 }];
+      list.forEach(function (it) {
+        piles.push({ id: it.pile, node: R.node, x: n.x, N: r6(R.ry * it.share), H: r6(R.rx * it.share), M: 0 });
+      });
+    });
+    piles.sort(function (a, b) { return a.id.localeCompare(b.id, undefined, { numeric: true }); });
+    return {
+      format: 'quickerpile-head-loads', version: 1,
+      source: 'QuickerStrut&Tie' + (meta && meta.version ? ' v' + meta.version : ''),
+      project: model.name || '', code: model.code, limitState: 'ULS (factored)',
+      units: { force: 'kN', moment: 'kN·m', length: 'm' },
+      convention: 'N > 0 compression at the pile head; H along the model x axis; M = 0 (pinned head in the strut-and-tie model)',
+      piles: piles
+    };
+  }
+
+  var api = { DEFAULTS: DEFAULTS, dappedEnd: dappedEnd, bentCap: bentCap, pileCap: pileCap, autoSize: autoSize, pileLoads: pileLoads };
+  root.QST = root.QST || {};
+  root.QST.templates = api;
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
 <script>/* js/i18n.js */
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — French / English strings. */
 (function (root) {
   'use strict';
@@ -1232,9 +1580,11 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
     '<h3>Bielles</h3><span class="eq">Cr = φc · fcu · Acs,&nbsp;&nbsp; Acs = w · b</span><span class="eq">fcu = f′c / (0,8 + 170 ε1) ≤ 0,85 f′c (A23.3) ou α1 f′c (S6),&nbsp;&nbsp; ε1 = εs + (εs + 0,002) cot²θs</span><p>Pour la S6, α1 = 0,85 − 0,0015 f′c ≥ 0,67. θs est le plus petit angle entre la bielle et un tirant adjacent, évalué aux deux extrémités ; la valeur de fcu la plus faible gouverne. Un tirant dans le prolongement de la bielle (à moins de 5°) ne la traverse pas et n’est pas pris en compte. εs est la déformation du tirant, calculée (Tf / Es·As) ou prise égale à fy / Es. Sans tirant adjacent, fcu atteint la limite supérieure.</p>',
     '<h3>Tirants</h3><span class="eq">Tr = φs · fy · Ast</span><p>Les armatures sont choisies en nombre × diamètre (barres CSA G30.18). L’ancrage n’est pas vérifié : la pleine résistance doit être développée à la sortie de la zone nodale prolongée.</p>',
     '<h3>Zones nodales</h3><p>Contrainte sur chaque face ≤ 0,85 / 0,75 / 0,65 φc f′c selon l’A23.3, ou α1 / 0,88 α1 / 0,76 α1 φc f′c selon la S6, pour les nœuds CCC (bielles et appuis), CCT (un tirant ancré) et CTT (tirants dans plus d’une direction). Faces vérifiées : bielles (C / w·b), plaques d’appui et de charge (R / lb·b) et, en option, face d’ancrage des tirants (T / w·b).</p>',
+    '<h3>Zones nodales hydrostatiques</h3><p>Chaque force sur le nœud est une poussée sur une face : bielles de leur côté, tirants sur la face arrière (force nette des tirants alignés), charges et réactions sur leur plaque. Le polygone des forces fermé, tourné de 90° et mis à l’échelle 1 / (σh·b), donne la zone nodale : chaque face est perpendiculaire à sa force et toutes portent la même contrainte σh. σh est la plus forte contrainte des faces de largeur saisie ; la zone est tracée au canevas et un avertissement signale un dépassement du contour.</p>',
+    '<h3>Ancrage des tirants</h3><p>À chaque nœud où un tirant se termine (sauf plan de symétrie), l<sub>a</sub> = distance à la section critique (bord de la bielle ou de la zone hydrostatique sur l’axe du tirant) + prolongement des barres jusqu’à la face du béton − enrobage. Exigé : l<sub>d</sub> = k·k1·k4·fy/√f′c·db ≥ 300 mm (barre droite, k = 0,45 ou 0,6, k1 = 1,3 barres supérieures, k4 = 0,8 jusqu’au 20M) ou l<sub>dh</sub> = 100·db/√f′c·fy/400 ≥ 8db, 150 mm (crochet), selon l’A23.3 12.2.3 et 12.5 (méthode simplifiée, aussi utilisée avec la S6 : à confirmer avec la S6 8.15). Plaques, barres soudées et étriers fermés sont considérés ancrés mécaniquement.</p>',
     '<h3>Armature de contrôle de la fissuration</h3><p>Grille orthogonale près de chaque face : ρ ≥ 0,003 (S6) ou 0,002 (A23.3) dans chaque direction, espacement ≤ 300 mm. Selon la S6, la grille n’a pas à dépasser 1500 mm²/m par face.</p>',
     '<h3>Coefficients</h3><table><tr><th></th><th>φc</th><th>φs</th><th>Articles</th></tr><tr><td>CSA S6</td><td>0,75</td><td>0,90</td><td>8.4.6, 8.10.3.3, 8.10.4.1, 8.10.5.1</td></tr><tr><td>CSA A23.3</td><td>0,65</td><td>0,85</td><td>8.4, 11.4.2.3, 11.4.3.1, 11.4.4.1, 11.4.5</td></tr></table><p>Les coefficients peuvent être remplacés (béton préfabriqué, etc.). Les numéros d’article et facteurs sont à confirmer avec l’édition de la norme applicable au projet.</p>',
-    '<h3>Limites</h3><p>Modèle 2D, un seul cas de charge pondéré, épaisseur b constante. Pas de poids propre automatique, de génération automatique du modèle, de vérification d’ancrage ni de champs de contraintes. La géométrie du modèle (position des nœuds, largeurs) relève du jugement de l’ingénieur.</p>'
+    '<h3>Limites</h3><p>Modèle 2D, un seul cas de charge pondéré, épaisseur b constante. Pas de poids propre automatique, de génération automatique du modèle ni de champs de contraintes. La géométrie du modèle (position des nœuds, largeurs) relève du jugement de l’ingénieur.</p>'
   ].join('');
   var METHOD_EN = [
     '<h3>Model</h3><p>A strut-and-tie model is a plane pin-jointed truss: nodes are linked by bars carrying axial force only. Factored (ULS) loads act at the nodes. The truss is solved with the direct stiffness method; N &gt; 0 is tension (tie), N &lt; 0 compression (strut). A bar’s role follows the sign of its force, or can be imposed.</p>',
@@ -1242,13 +1592,39 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
     '<h3>Struts</h3><span class="eq">Cr = φc · fcu · Acs,&nbsp;&nbsp; Acs = w · b</span><span class="eq">fcu = f′c / (0.8 + 170 ε1) ≤ 0.85 f′c (A23.3) or α1 f′c (S6),&nbsp;&nbsp; ε1 = εs + (εs + 0.002) cot²θs</span><p>For S6, α1 = 0.85 − 0.0015 f′c ≥ 0.67. θs is the smallest angle between the strut and an adjoining tie, evaluated at both ends; the lowest fcu governs. A tie in line with the strut (within 5°) does not cross it and is ignored. εs is the tie strain, computed (Tf / Es·As) or taken as fy / Es. With no adjoining tie, fcu reaches the upper limit.</p>',
     '<h3>Ties</h3><span class="eq">Tr = φs · fy · Ast</span><p>Reinforcement is entered as number × bar size (CSA G30.18 bars). Anchorage is not checked: full strength must be developed where the tie leaves the extended nodal zone.</p>',
     '<h3>Nodal zones</h3><p>Stress on each face ≤ 0.85 / 0.75 / 0.65 φc f′c to A23.3, or α1 / 0.88 α1 / 0.76 α1 φc f′c to S6, for CCC (struts and bearings), CCT (one anchored tie) and CTT (ties in more than one direction) nodes. Faces checked: struts (C / w·b), bearing and load plates (R / lb·b) and, optionally, the anchorage face of ties (T / w·b).</p>',
+    '<h3>Hydrostatic nodal zones</h3><p>Each force on the node is a push on one face: struts on their own side, ties on the back face (net force of collinear ties), loads and reactions on their plate. The closed force polygon, rotated by 90° and scaled by 1 / (σh·b), is the nodal zone: every face is perpendicular to its force and all carry the same stress σh. σh is the highest stress on a face with an entered width; the zone is drawn on the canvas and a warning flags a zone outside the outline.</p>',
+    '<h3>Tie anchorage</h3><p>At every node where a tie ends (except a symmetry plane), l<sub>a</sub> = distance to the critical section (strut or hydrostatic zone edge on the tie axis) + bar extension to the concrete face − cover. Required: l<sub>d</sub> = k·k1·k4·fy/√f′c·db ≥ 300 mm (straight, k = 0.45 or 0.6, k1 = 1.3 top bars, k4 = 0.8 up to 20M) or l<sub>dh</sub> = 100·db/√f′c·fy/400 ≥ 8db, 150 mm (hook), to A23.3 12.2.3 and 12.5 (simplified, also used with S6: to be confirmed with S6 8.15). Plates, welded bars and closed stirrups are taken as mechanically anchored.</p>',
     '<h3>Crack control reinforcement</h3><p>Orthogonal grid near each face: ρ ≥ 0.003 (S6) or 0.002 (A23.3) in each direction, spacing ≤ 300 mm. To S6, the grid need not exceed 1500 mm²/m on each face.</p>',
     '<h3>Factors</h3><table><tr><th></th><th>φc</th><th>φs</th><th>Clauses</th></tr><tr><td>CSA S6</td><td>0.75</td><td>0.90</td><td>8.4.6, 8.10.3.3, 8.10.4.1, 8.10.5.1</td></tr><tr><td>CSA A23.3</td><td>0.65</td><td>0.85</td><td>8.4, 11.4.2.3, 11.4.3.1, 11.4.4.1, 11.4.5</td></tr></table><p>The factors can be overridden (precast concrete, etc.). Clause numbers and factors must be confirmed against the edition of the standard that applies to the project.</p>',
-    '<h3>Limits</h3><p>2D model, a single factored load case, constant thickness b. No automatic self-weight, automatic model generation, anchorage check or stress fields. The model geometry (node positions, widths) is the engineer’s judgement.</p>'
+    '<h3>Limits</h3><p>2D model, a single factored load case, constant thickness b. No automatic self-weight, automatic model generation or stress fields. The model geometry (node positions, widths) is the engineer’s judgement.</p>'
   ].join('');
 
   var STR = {
     fr: {
+      chipZones: 'Zones nodales', anchorage: 'Ancrage', anchorages: 'Ancrages des tirants', cover: 'Enrobage', ldFactor: 'Coefficient de l<sub>d</sub>', ldFav: 'enrobage et espacement minimaux', ldOther: 'autres cas',
+      anchorNote: 'Longueur disponible l<sub>a</sub> = distance du nœud à la section critique (bord de la zone nodale prolongée) + prolongement des barres jusqu’à la face du béton, moins l’enrobage. l<sub>d</sub> barre droite (12.2.3) ou l<sub>dh</sub> crochet normalisé (12.5) selon l’A23.3, méthode simplifiée ; k1 = 1,3 pour les barres ayant plus de 300 mm de béton dessous.',
+      autoSizeTitle: 'Prédimensionnement', autoSize: 'Prédimensionner automatiquement', autoSizeNote: 'Choisit les barres des tirants, les largeurs des bielles, les plaques manquantes et le type d’ancrage (droit → crochet → plaque) pour viser une utilisation de 0,85. La géométrie n’est pas modifiée.',
+      autoSizeDone: 'Prédimensionnement appliqué', autoSizeFail: 'Prédimensionnement impossible : modèle instable',
+      hydroZone: 'Zone nodale hydrostatique · σh', hydroZones: 'Zones nodales hydrostatiques', face: 'Face',
+      hydroNoteFace: 'Polygone des forces tourné de 90° : chaque face est perpendiculaire à sa force et toutes les faces portent la même contrainte σh, égale à la plus forte contrainte des faces de largeur saisie (w<sub>h</sub> ≤ w).',
+      hydroNoteLimit: 'Aucune largeur saisie : zone minimale dimensionnée à la contrainte limite du nœud.',
+      zoneOutside: 'La zone nodale hydrostatique dépasse le contour du béton.',
+      anchorType: 'Ancrage du tirant', anchor_straight: 'Barre droite', anchor_hook: 'Crochet normalisé', anchor_plate: 'Plaque / barre soudée', anchor_stirrup: 'Étriers fermés',
+      anchorSteps: 'l<sub>a</sub> = section critique + prolongement − enrobage ≥ l<sub>d</sub>.', dbUnknown: 'diamètre inconnu (As direct)', mechanicalNote: 'ancrage mécanique, vérifier la face arrière',
+      pile: 'Pieu', pileNote: 'Charges pondérées en tête de pieu : N &gt; 0 en compression, H selon x, M = 0 (tête articulée dans le modèle).', tie3D: 'Semelle 3D : chaque tirant réel porte {f} × le tirant du modèle 2D.',
+      exportPile: 'Exporter vers QuickerPile', exportPileSub: 'Charges en tête de pieu (.json)', noPiles: 'Aucun appui : rien à exporter', pileExported: '{n} pieux exportés', pileLoadsTitle: 'Charges en tête de pieu',
+      templatesMenu: 'Gabarits', templatesSub: 'Modèles paramétriques de ponts, prédimensionnés', tplCreate: 'Créer le modèle', tplCreated: 'Modèle créé à partir du gabarit',
+      tpl_dappedEnd: 'About réduit (demi-joint)', tpl_bentCap: 'Chevêtre multicolonne', tpl_pileCap: 'Semelle sur pieux',
+      tplSub_dappedEnd: 'Suspente, tirant de chaise, demi-portée', tplSub_bentCap: '2 à 4 colonnes, poutres réparties', tplSub_pileCap: '2, 3 ou 4 pieux · coupe 2D',
+      tplNote_dappedEnd: 'Modèle orthogonal : bielle de la plaque au sommet de la suspente, tirant de chaise prolongé jusqu’au premier montant, treillis jusqu’à la mi-portée (plan de symétrie). Réaction R répartie sur les nœuds supérieurs.',
+      tplNote_bentCap: 'Treillis à membrures supérieure et inférieure, montants à chaque poutre et colonne, diagonales comprimées dirigées vers la colonne la plus proche. Hyperstatique dès 3 colonnes (r = n − 2).',
+      tplNote_pileCap: 'Coupe 2D. 4 pieux : chaque ligne représente deux pieux et le tirant 2D se partage entre deux tirants parallèles. 3 pieux (triangle) : coupe par un pieu et la ligne des deux autres ; tirants de côté = T2D / √3. Plaques équivalentes aux aires réelles.',
+      tplAutoNote: 'Barres, largeurs et plaques prédimensionnées automatiquement (utilisation visée 0,85).',
+      tf_h: 'Hauteur h', tf_hn: 'Hauteur de la chaise', tf_ln: 'Longueur de la chaise', tf_a: 'Appui depuis l’about', tf_half: 'Demi-portée', tf_R: 'Réaction R', tf_n: 'Panneaux', tf_b: 'Épaisseur b', tf_fc: "f'c",
+      tf_ncol: 'Colonnes', tf_spacing: 'Entraxe des colonnes', tf_overhang: 'Porte-à-faux', tf_colWidth: 'Largeur de colonne', tf_nGirders: 'Poutres', tf_girderSpacing: 'Entraxe des poutres', tf_P: 'Charge par poutre / colonne',
+      tf_np: 'Nombre de pieux', tf_s: 'Entraxe des pieux', tf_edge: 'Distance au bord', tf_pileD: 'Diamètre des pieux',
+      tplErr_hn: 'hauteur de chaise hors limites', tplErr_a: 'l’appui doit être sur la chaise', tplErr_half: 'demi-portée trop courte', tplErr_girders: 'poutres hors du chevêtre', tplErr_edge: 'distance au bord trop faible', tplErr_s: 'entraxe < 2,5 diamètres',
+      license: 'Licence GPL-3.0',
       warning: 'Valeurs préliminaires indicatives — ne remplace pas la conception détaillée.',
       methodOpen: 'Méthode et hypothèses', methodSub: 'Comment QuickerStrut&Tie calcule', methodHtml: METHOD_FR,
       released: 'Version du', model: 'Modèle bielles-tirants', reset: 'Réinitialiser', modelName: 'Nom du modèle', untitled: 'Modèle sans titre',
@@ -1259,7 +1635,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
       tabParams: 'Paramètres', tabNodes: 'Nœuds', tabMembers: 'Barres', unitsNote: 'm · kN · mm · MPa', autosaved: 'Sauvegarde auto ✓',
       undo: 'Annuler (Ctrl Z)', redo: 'Rétablir (Ctrl Y)', fit: 'Recadrer (F)',
       viewChecks: 'Vérifications', viewForces: 'Efforts', viewReactions: 'Réactions',
-      footerNote: 'Calcul local dans le navigateur · aucune donnée transmise', cancel: 'Annuler',
+      footerNote: 'Calcul local dans le navigateur · aucune donnée transmise · logiciel libre GPL-3.0', cancel: 'Annuler',
       grid: 'Grille', hintChain: 'Échap pour terminer la chaîne',
       hint_select: 'Glisser un nœud ou une barre · glisser le fond pour déplacer · molette pour zoomer',
       hint_node: 'Cliquer pour ajouter un nœud · sur une barre pour la diviser',
@@ -1314,6 +1690,30 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
       resetTitle: 'Réinitialiser le modèle ?', resetBody: 'Le modèle actuel sera remplacé par l’exemple de départ.'
     },
     en: {
+      chipZones: 'Nodal zones', anchorage: 'Anchorage', anchorages: 'Tie anchorages', cover: 'Cover', ldFactor: 'l<sub>d</sub> factor', ldFav: 'minimum cover and spacing', ldOther: 'other cases',
+      anchorNote: 'Available length l<sub>a</sub> = distance from the node to the critical section (edge of the extended nodal zone) + extension of the bars to the concrete face, less the cover. l<sub>d</sub> straight bar (12.2.3) or l<sub>dh</sub> standard hook (12.5) to A23.3, simplified; k1 = 1.3 for bars with more than 300 mm of concrete below.',
+      autoSizeTitle: 'Preliminary sizing', autoSize: 'Size automatically', autoSizeNote: 'Picks tie bars, strut widths, missing plates and the anchorage type (straight → hook → plate) for a target utilization of 0.85. The geometry is not changed.',
+      autoSizeDone: 'Sizing applied', autoSizeFail: 'Sizing not possible: unstable model',
+      hydroZone: 'Hydrostatic nodal zone · σh', hydroZones: 'Hydrostatic nodal zones', face: 'Face',
+      hydroNoteFace: 'Force polygon rotated by 90°: each face is perpendicular to its force and all faces carry the same stress σh, equal to the highest stress on a face with an entered width (w<sub>h</sub> ≤ w).',
+      hydroNoteLimit: 'No width entered: smallest zone sized at the node stress limit.',
+      zoneOutside: 'The hydrostatic nodal zone extends beyond the concrete outline.',
+      anchorType: 'Tie anchorage', anchor_straight: 'Straight bar', anchor_hook: 'Standard hook', anchor_plate: 'Plate / welded bar', anchor_stirrup: 'Closed stirrups',
+      anchorSteps: 'l<sub>a</sub> = critical section + extension − cover ≥ l<sub>d</sub>.', dbUnknown: 'bar size unknown (direct As)', mechanicalNote: 'mechanical anchorage, check the back face',
+      pile: 'Pile', pileNote: 'Factored pile head loads: N &gt; 0 compression, H along x, M = 0 (pinned head in the model).', tie3D: '3D cap: each real tie carries {f} × the 2D model tie.',
+      exportPile: 'Export to QuickerPile', exportPileSub: 'Pile head loads (.json)', noPiles: 'No supports: nothing to export', pileExported: '{n} piles exported', pileLoadsTitle: 'Pile head loads',
+      templatesMenu: 'Templates', templatesSub: 'Parametric bridge models, pre-sized', tplCreate: 'Create model', tplCreated: 'Model created from the template',
+      tpl_dappedEnd: 'Dapped end (half-joint)', tpl_bentCap: 'Multi-column bent cap', tpl_pileCap: 'Pile cap',
+      tplSub_dappedEnd: 'Hanger, nib tie, half span', tplSub_bentCap: '2 to 4 columns, distributed girders', tplSub_pileCap: '2, 3 or 4 piles · 2D section',
+      tplNote_dappedEnd: 'Orthogonal model: strut from the plate to the top of the hanger, nib tie extended to the first vertical, truss to mid-span (symmetry plane). Reaction R spread over the top nodes.',
+      tplNote_bentCap: 'Truss with top and bottom chords, verticals at every girder and column, compression diagonals towards the nearest column. Indeterminate from 3 columns (r = n − 2).',
+      tplNote_pileCap: '2D section. 4 piles: each line stands for two piles and the 2D tie is shared by two parallel ties. 3 piles (triangle): section through one pile and the line of the other two; side ties = T2D / √3. Plates equivalent to the real areas.',
+      tplAutoNote: 'Bars, widths and plates sized automatically (target utilization 0.85).',
+      tf_h: 'Depth h', tf_hn: 'Nib depth', tf_ln: 'Nib length', tf_a: 'Bearing from the end', tf_half: 'Half span', tf_R: 'Reaction R', tf_n: 'Panels', tf_b: 'Thickness b', tf_fc: "f'c",
+      tf_ncol: 'Columns', tf_spacing: 'Column spacing', tf_overhang: 'Overhang', tf_colWidth: 'Column width', tf_nGirders: 'Girders', tf_girderSpacing: 'Girder spacing', tf_P: 'Load per girder / column',
+      tf_np: 'Number of piles', tf_s: 'Pile spacing', tf_edge: 'Edge distance', tf_pileD: 'Pile diameter',
+      tplErr_hn: 'nib depth out of range', tplErr_a: 'the bearing must be on the nib', tplErr_half: 'half span too short', tplErr_girders: 'girders outside the cap', tplErr_edge: 'edge distance too small', tplErr_s: 'spacing < 2.5 diameters',
+      license: 'GPL-3.0 licence',
       warning: 'Indicative preliminary values only — not a substitute for detailed design.',
       methodOpen: 'Method and assumptions', methodSub: 'How QuickerStrut&Tie calculates', methodHtml: METHOD_EN,
       released: 'Released', model: 'Strut-and-tie model', reset: 'Reset', modelName: 'Model name', untitled: 'Untitled model',
@@ -1324,7 +1724,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
       tabParams: 'Parameters', tabNodes: 'Nodes', tabMembers: 'Members', unitsNote: 'm · kN · mm · MPa', autosaved: 'Autosaved ✓',
       undo: 'Undo (Ctrl Z)', redo: 'Redo (Ctrl Y)', fit: 'Fit view (F)',
       viewChecks: 'Checks', viewForces: 'Forces', viewReactions: 'Reactions',
-      footerNote: 'Computed locally in your browser · no data leaves your computer', cancel: 'Cancel',
+      footerNote: 'Computed locally in your browser · no data leaves your computer · free software, GPL-3.0', cancel: 'Cancel',
       grid: 'Grid', hintChain: 'Esc to end the chain',
       hint_select: 'Drag a node or a member · drag the background to pan · wheel to zoom',
       hint_node: 'Click to add a node · on a member to split it',
@@ -1395,6 +1795,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
 
 </script>
 <script>/* js/app.js */
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — application state, model operations, history, storage. */
 (function () {
   'use strict';
@@ -1406,7 +1807,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
   var App = {
     model: null, result: null, checks: null, warnings: [],
     sel: null, hover: null, tool: 'select',
-    display: { mode: 'forces', bands: true, ids: true, snap: true },
+    display: { mode: 'forces', bands: true, ids: true, snap: true, zones: true },
     panel: 'params', view: 'checks',
     history: [], future: [], dirty: false,
     listeners: []
@@ -1484,8 +1885,8 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
     var dup = App.model.members.some(function (m) { return (m.i === i && m.j === j) || (m.i === j && m.j === i); });
     if (dup) return null;
     var id = App.nextId('M', App.model.members);
-    var m = { id: id, i: i, j: j, role: 'auto', w: 200, bars: { n: 4, size: '20M' }, As: 0 };
-    if (proto) { m.role = proto.role; m.w = proto.w; m.bars = proto.bars ? { n: proto.bars.n, size: proto.bars.size } : null; m.As = proto.As; }
+    var m = { id: id, i: i, j: j, role: 'auto', w: 200, bars: { n: 4, size: '20M' }, As: 0, anchor: 'hook', db: 0 };
+    if (proto) { m.role = proto.role; m.w = proto.w; m.bars = proto.bars ? { n: proto.bars.n, size: proto.bars.size } : null; m.As = proto.As; m.anchor = proto.anchor || 'hook'; }
     App.model.members.push(m);
     return id;
   };
@@ -1603,9 +2004,11 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
       var id = String(b.id || App.nextId('M', out.members));
       mids[id] = 1;
       var bars = b.bars && b.bars.n > 0 && QST.csa.BARS[b.bars.size] ? { n: Math.round(+b.bars.n), size: b.bars.size } : null;
-      out.members.push({ id: id, i: b.i, j: b.j, role: ['auto', 'strut', 'tie'].indexOf(b.role) >= 0 ? b.role : 'auto', w: Math.max(0, +b.w || 0), bars: bars, As: Math.max(0, +b.As || 0) });
+      out.members.push({ id: id, i: b.i, j: b.j, role: ['auto', 'strut', 'tie'].indexOf(b.role) >= 0 ? b.role : 'auto', w: Math.max(0, +b.w || 0), bars: bars, As: Math.max(0, +b.As || 0),
+        anchor: ['straight', 'hook', 'plate', 'stirrup'].indexOf(b.anchor) >= 0 ? b.anchor : 'hook', db: Math.max(0, +b.db || 0) });
     });
     if (out.outline.length < 3) out.outline = base.outline;
+    if (m.meta && typeof m.meta === 'object') { try { out.meta = JSON.parse(JSON.stringify(m.meta)); } catch (e) {} }
     return out;
   };
 
@@ -1653,6 +2056,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
 
 </script>
 <script>/* js/canvas.js */
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — interactive SVG model editor and static drawings. */
 (function () {
   'use strict';
@@ -1837,6 +2241,47 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
       out.push('<line x1="' + n2(g.a[0]) + '" y1="' + n2(g.a[1]) + '" x2="' + n2(g.b[0]) + '" y2="' + n2(g.b[1]) + '" stroke="' + c + '" stroke-width="' + sw + '"' + dash + ' stroke-linecap="round"/>');
     });
 
+    // Hydrostatic nodal zones and tie anchorages
+    if (o.zones !== false && checks && checks.ok) {
+      var zs = [];
+      checks.nodes.forEach(function (nc) {
+        var z = nc.zone; if (!z) return;
+        var pts = z.poly.map(function (q) { var sp = toScreen(v, q[0], q[1]); return n2(sp[0]) + ',' + n2(sp[1]); }).join(' ');
+        var fillZ = mode === 'util' ? App.utilColor(z.util) : (o.palette === 'light' ? '#dfe9ef' : '#e8fff8');
+        zs.push('<polygon points="' + pts + '" fill="' + fillZ + '" fill-opacity="' + (mode === 'util' ? 0.45 : (o.palette === 'light' ? 0.7 : 0.16)) + '" stroke="' + (z.outside ? pal.warn : (o.palette === 'light' ? '#5d7684' : '#cfe6ef')) + '" stroke-width="1.2" stroke-linejoin="round"' + (z.outside ? ' stroke-dasharray="3 2"' : '') + '/>');
+        z.faces.forEach(function (fa) {
+          var A = toScreen(v, fa.a[0], fa.a[1]), Bp = toScreen(v, fa.b[0], fa.b[1]);
+          var col = fa.kind === 'strut' ? pal.strut : fa.kind === 'tie' ? pal.tie : fa.kind === 'load' ? pal.load : pal.react;
+          zs.push('<line x1="' + n2(A[0]) + '" y1="' + n2(A[1]) + '" x2="' + n2(Bp[0]) + '" y2="' + n2(Bp[1]) + '" stroke="' + col + '" stroke-width="2.4" stroke-linecap="round"/>');
+        });
+      });
+      var opl = model.outline || [], cen = [0, 0];
+      opl.forEach(function (q) { cen[0] += q[0] / opl.length; cen[1] += q[1] / opl.length; });
+      (checks.anchors || []).forEach(function (an) {
+        var nn = nm[an.node]; if (!nn) return;
+        var s0 = toScreen(v, nn.x, nn.y), s1 = toScreen(v, an.end[0], an.end[1]);
+        var col = mode === 'util' && !an.na && !an.mechanical ? App.utilColor(an.util) : pal.tie;
+        zs.push('<line x1="' + n2(s0[0]) + '" y1="' + n2(s0[1]) + '" x2="' + n2(s1[0]) + '" y2="' + n2(s1[1]) + '" stroke="' + col + '" stroke-width="2" stroke-dasharray="1 0" opacity=".9"/>');
+        var ux = an.dir[0], uy = -an.dir[1];
+        if (an.type === 'hook') {
+          // 90° hook turned towards the inside of the concrete (away from the nearest face)
+          var px = -an.dir[1], py = an.dir[0];
+          if (px * (cen[0] - nn.x) + py * (cen[1] - nn.y) < 0) { px = -px; py = -py; }
+          var hx = px, hy = -py;
+          var hl = Math.min(18, Math.max(8, 0.012 * v.k * 10));
+          zs.push('<path d="M' + n2(s1[0]) + ' ' + n2(s1[1]) + 'q' + n2(ux * 5) + ' ' + n2(uy * 5) + ' ' + n2(ux * 5 + hx * 6) + ' ' + n2(uy * 5 + hy * 6) + 'l' + n2(hx * hl) + ' ' + n2(hy * hl) + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linecap="round"/>');
+        } else if (an.type === 'plate') {
+          zs.push('<line x1="' + n2(s1[0] - uy * 9) + '" y1="' + n2(s1[1] + ux * 9) + '" x2="' + n2(s1[0] + uy * 9) + '" y2="' + n2(s1[1] - ux * 9) + '" stroke="' + col + '" stroke-width="4" stroke-linecap="round"/>');
+        } else if (an.type === 'straight') {
+          zs.push('<circle cx="' + n2(s1[0]) + '" cy="' + n2(s1[1]) + '" r="2.4" fill="' + col + '"/>');
+        }
+        // Critical section (edge of the extended nodal zone)
+        var cx0 = nn.x - an.dir[0] * an.dc / 1000, cy0 = nn.y - an.dir[1] * an.dc / 1000, cs = toScreen(v, cx0, cy0);
+        zs.push('<line x1="' + n2(cs[0] - uy * 7) + '" y1="' + n2(cs[1] + ux * 7) + '" x2="' + n2(cs[0] + uy * 7) + '" y2="' + n2(cs[1] - ux * 7) + '" stroke="' + col + '" stroke-width="1.4" opacity=".8"/>');
+      });
+      out.push('<g class="zones">' + zs.join('') + '</g>');
+    }
+
     // Supports
     model.nodes.forEach(function (n) {
       if (!n.support) return;
@@ -1976,7 +2421,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
       svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
       svg.setAttribute('class', 'tool-' + App.tool + (drag && drag.kind === 'pan' ? ' panning' : '') + (drag && drag.moved && drag.kind !== 'pan' ? ' dragging' : ''));
       svg.innerHTML = draw(App.model, App.result, App.checks, {
-        view: view, w: W, h: H, palette: 'dark', mode: App.display.mode, bands: App.display.bands, ids: App.display.ids,
+        view: view, w: W, h: H, palette: 'dark', mode: App.display.mode, bands: App.display.bands, ids: App.display.ids, zones: App.display.zones,
         interactive: true, sel: App.sel, hover: App.hover, warnings: App.warnings
       });
       hud();
@@ -2243,15 +2688,16 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
   // Light drawing for reports and SVG export.
   App.staticSVG = function (opts) {
     opts = opts || {};
+    var model = opts.model || App.model, result = opts.result || App.result, checks = opts.checks || App.checks;
     var w = opts.width || 1000;
-    var b = bbox(App.model), bw = Math.max(b.x1 - b.x0, 0.2), bh = Math.max(b.y1 - b.y0, 0.2);
-    var h = Math.round(Math.max(340, Math.min(720, (w - 140) * bh / bw + 150)));
-    var v = fitView(App.model, w, h, { l: 70, r: 70, t: 80, b: 70 });
-    var body = draw(App.model, App.result, App.checks, { view: v, w: w, h: h, palette: 'light', mode: opts.mode || 'forces', bands: true, ids: true, grid: opts.grid !== false, interactive: false });
+    var b = bbox(model), bw = Math.max(b.x1 - b.x0, 0.2), bh = Math.max(b.y1 - b.y0, 0.2);
+    var h = opts.height || Math.round(Math.max(340, Math.min(720, (w - 140) * bh / bw + 150)));
+    var pad = opts.pad || { l: 70, r: 70, t: 80, b: 70 };
+    var v = fitView(model, w, h, pad);
+    var body = draw(model, result, checks, { view: v, w: w, h: h, palette: opts.palette || 'light', mode: opts.mode || 'forces', bands: true, ids: opts.ids !== false, zones: opts.zones !== false, grid: opts.grid !== false, interactive: false });
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" font-family="Segoe UI, Inter, Roboto, Arial, sans-serif">' + body + '</svg>';
   };
 
-  App.coarse = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
   App.initCanvas = function () {
     svg = document.getElementById('canvas');
     wrap = document.getElementById('canvas-wrap');
@@ -2290,6 +2736,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
 
 </script>
 <script>/* js/panels.js */
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — side panel, inspector, metrics, result tables, toolbar. */
 (function () {
   'use strict';
@@ -2323,7 +2770,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
     $('#display-mode').innerHTML = ['geometry', 'forces', 'util'].map(function (m) {
       return '<button type="button" data-mode="' + m + '" class="' + (App.display.mode === m ? 'active' : '') + '">' + t('mode_' + m) + '</button>';
     }).join('');
-    var chips = { bands: 'chipBands', ids: 'chipIds', snap: 'chipSnap' };
+    var chips = { bands: 'chipBands', zones: 'chipZones', ids: 'chipIds', snap: 'chipSnap' };
     Object.keys(chips).forEach(function (k) {
       var el = $('#toggle-' + k);
       el.setAttribute('aria-pressed', String(!!App.display[k]));
@@ -2390,6 +2837,12 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
     h += '<div class="field-row">' + unitField(t('width'), 'rect.w', App.round(b.x1 - b.x0), 'm') + unitField(t('height'), 'rect.h', App.round(b.y1 - b.y0), 'm') + '</div>';
     h += '<button type="button" class="add-button" id="apply-rect">' + t('applyRect') + '</button>';
     h += '<p class="note">' + t('outlineNote') + '</p>';
+    h += '<div class="section-label">' + t('anchorage') + '<span style="font-weight:500;letter-spacing:0;text-transform:none">' + t('clause') + ' ' + code.clause.anchor.split(' · ')[0] + '</span></div>';
+    h += '<div class="field-row">' + unitField(t('cover'), 'mat.cover', mat.cover, 'mm') +
+      '<label class="field"><span>' + t('ldFactor') + '</span><select data-k="mat.ldFactor"><option value="0.45"' + (Number(mat.ldFactor) !== 0.6 ? ' selected' : '') + '>0,45 · ' + t('ldFav') + '</option><option value="0.6"' + (Number(mat.ldFactor) === 0.6 ? ' selected' : '') + '>0,6 · ' + t('ldOther') + '</option></select></label></div>';
+    h += '<p class="note">' + t('anchorNote') + '</p>';
+    h += '<div class="section-label">' + t('autoSizeTitle') + '</div>';
+    h += '<button type="button" class="add-button" id="auto-size">⚙ ' + t('autoSize') + '</button><p class="note">' + t('autoSizeNote') + '</p>';
     return h;
   }
   function bounds(pts) {
@@ -2458,6 +2911,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
     if (parts[0] === 'mat') {
       var key = parts[1];
       if (key === 'epsMode') m.material.epsMode = val;
+      else if (key === 'ldFactor') m.material.ldFactor = Number(val);
       else if (key === 'tieFaces') m.material.tieFaces = !!val;
       else m.material[key] = val === null ? 0 : Math.max(0, val);
     } else if (parts[0] === 'n') {
@@ -2477,6 +2931,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
       else if (f === 'barsN') { var nb = Math.max(0, Math.round(val)); b.bars = nb > 0 ? { n: nb, size: b.bars ? b.bars.size : '20M' } : null; if (!nb) b.As = 0; }
       else if (f === 'barsSize') { b.bars = { n: b.bars && b.bars.n > 0 ? b.bars.n : 2, size: val }; }
       else if (f === 'As') { b.bars = null; b.As = Math.max(0, val); }
+      else if (f === 'anchor') b.anchor = val;
       App.lastMemberProto = { role: 'auto', w: b.w, bars: b.bars, As: b.As };
     } else if (parts[0] === 'rect') {
       App.history.pop();
@@ -2532,6 +2987,13 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
       if (nc.governingFace) { var g = nc.governingFace; h += '<div class="eq">σ = F / (w · b) = ' + fmt(g.force, 0) + ' kN / (' + fmt(g.width, 0) + ' × ' + fmt(App.model.material.b, 0) + ') = ' + fmt(g.stress, 2) + ' MPa</div>'; }
       h += '</div></div>';
     }
+    if (nc && nc.zone) {
+      var z = nc.zone;
+      h += '<div class="ins-result"><div class="big"><div><small>' + t('hydroZone') + '</small><br><b style="color:' + App.utilInk(z.util) + '">' + fmt(z.sigma, 2) + ' <small>MPa</small></b></div><div style="text-align:right"><small>' + t('utilShort') + '</small><br><b style="color:' + App.utilInk(z.util) + '">' + fmt(z.util, 2) + '</b></div></div>';
+      h += '<div class="kv"><span><b>' + t('face') + '</b></span><span><b>F · w → w<sub>h</sub></b></span>';
+      z.faces.forEach(function (fa) { h += '<span>' + t('face_' + fa.kind) + ' ' + (fa.kind === 'strut' || fa.kind === 'tie' ? fa.ref : '') + '</span><span>' + fmt(fa.force, 0) + ' kN · ' + (fa.wGiven > 0 ? fmt(fa.wGiven, 0) : '—') + ' → ' + fmt(fa.wHydro, 0) + ' mm</span>'; });
+      h += '</div><div class="steps">' + t(z.scaled === 'face' ? 'hydroNoteFace' : 'hydroNoteLimit') + (z.outside ? '<div style="color:var(--bad)">⚠ ' + t('zoneOutside') + '</div>' : '') + '</div></div>';
+    }
     h += '<p class="ins-hint">' + t('nodeHint') + '</p></div>';
     return h;
   }
@@ -2573,6 +3035,17 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
       }
       h += '</div>';
     }
+    h += '<label class="field" style="margin-top:10px"><span>' + t('anchorType') + '</span><select data-k="m.' + m.id + '.anchor">' + ['straight', 'hook', 'plate', 'stirrup'].map(function (a) { return '<option value="' + a + '"' + ((m.anchor || 'hook') === a ? ' selected' : '') + '>' + t('anchor_' + a) + '</option>'; }).join('') + '</select></label>';
+    var ans = App.checks && App.checks.ok ? App.checks.anchors.filter(function (a) { return a.member === m.id; }) : [];
+    if (ans.length) {
+      h += '<div class="ins-result"><div class="kv">';
+      ans.forEach(function (a) {
+        h += '<span><b>' + t('anchorage') + ' ' + a.node + '</b>' + (a.top ? ' · k1 = 1,3' : '') + '</span><span>' + (a.mechanical ? '<span class="status ok">' + t('anchor_' + a.type) + '</span>' : a.na ? '<span class="status na">db ?</span>' : '<b style="color:' + App.utilInk(a.util) + '">' + fmt(a.util, 2) + '</b>') + '</span>';
+        h += '<span>l<sub>a</sub> = ' + fmt(a.dc, 0) + ' + ' + fmt(a.e, 0) + '</span><span>' + fmt(a.la, 0) + ' mm</span>';
+        if (!a.mechanical && !a.na) h += '<span>' + (a.type === 'hook' ? 'l<sub>dh</sub>' : 'l<sub>d</sub>') + ' (d<sub>b</sub> ' + fmt(a.db, 1) + ')</span><span>' + fmt(a.req, 0) + ' mm</span>';
+      });
+      h += '</div><div class="steps">' + t('anchorSteps') + '<span class="cl">' + QST.csa.CODES[App.model.code].name + ' ' + QST.csa.CODES[App.model.code].clause.anchor + '</span></div></div>';
+    }
     h += '<p class="ins-hint">' + t('memberHint') + '</p></div>';
     return h;
   }
@@ -2597,7 +3070,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
     var r0 = r.indeterminacy;
     var stat = r0 === 0 ? t('determinate') : r0 > 0 ? t('indeterminate') + ' (r = ' + r0 + ')' : t('mechanism');
     el.innerHTML =
-      metric(t('mUtil'), gov ? '<span style="color:' + App.utilInk(c.maxUtil) + '">' + fmt(c.maxUtil, 2) + '</span>' : '—', '', gov ? (gov.kind === 'node' ? t('node') + ' ' + gov.id + ' · ' + gov.type : t('kind_' + gov.kind) + ' ' + gov.id) + ' · ' + statusText(c.maxUtil) : '', gov ? (gov.kind === 'node' ? 'node:' + gov.id : 'member:' + gov.id) : null) +
+      metric(t('mUtil'), gov ? '<span style="color:' + App.utilInk(c.maxUtil) + '">' + fmt(c.maxUtil, 2) + '</span>' : '—', '', gov ? (gov.kind === 'node' ? t('node') + ' ' + gov.id + ' · ' + gov.type : gov.kind === 'anchor' ? t('anchorage') + ' ' + gov.member + ' · ' + gov.node : t('kind_' + gov.kind) + ' ' + gov.id) + ' · ' + statusText(c.maxUtil) : '', gov ? (gov.kind === 'node' ? 'node:' + gov.id : gov.kind === 'anchor' ? 'member:' + gov.member : 'member:' + gov.id) : null) +
       metric(t('mStrut'), maxS ? '<span style="color:var(--blue)">' + fmt(-maxS.N, 0) + '</span>' : '—', 'kN', maxS ? maxS.id : t('none'), maxS ? 'member:' + maxS.id : null) +
       metric(t('mTie'), maxT ? '<span style="color:var(--amber)">' + fmt(maxT.N, 0) + '</span>' : '—', 'kN', maxT ? maxT.id : t('none'), maxT ? 'member:' + maxT.id : null) +
       metric(t('mModel'), '<span style="font-size:1.1rem">' + stat + '</span>', '', App.model.nodes.length + ' ' + t('nodesLc') + ' · ' + App.model.members.length + ' ' + t('membersLc') + ' · ΣF ' + fmt(r.globalResidual, 3) + ' kN · ' + fmt(App.computeMs, 1) + ' ms', null);
@@ -2655,6 +3128,10 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
         var g = e.governingFace;
         h += '<tr data-target="node:' + e.id + '"' + isSel('node', e.id) + '><td>' + e.id + '</td><td class="l">' + e.type + '</td><td>' + (g ? fmt(g.stress, 2) + ' MPa' : '—') + '</td><td>' + fmt(e.limit, 2) + ' MPa</td><td>' + (g ? t('face_' + g.kind) + (g.kind === 'strut' || g.kind === 'tie' ? ' ' + g.ref : '') + ' · w ' + fmt(g.width, 0) : '') + '</td><td class="l">' + cellU(e.util) + '</td><td class="l">' + code.clause.node + '</td></tr>';
       });
+      if (c.anchors.length) h += '<tr class="group"><td colspan="7">' + t('anchorages') + ' · l<sub>a</sub> ≥ l<sub>d</sub></td></tr>';
+      c.anchors.forEach(function (a) {
+        h += '<tr data-target="member:' + a.member + '"' + isSel('member', a.member) + '><td>' + a.member + ' · ' + a.node + '</td><td class="l">' + t('anchor_' + a.type) + '</td><td>' + (a.mechanical || a.na ? '—' : fmt(a.req, 0) + ' mm') + '</td><td>' + fmt(a.la, 0) + ' mm</td><td>' + (a.na ? t('dbUnknown') : a.mechanical ? t('mechanicalNote') : 'd<sub>b</sub> ' + fmt(a.db, 1) + (a.top ? ' · k1 1,3' : '')) + '</td><td class="l">' + (a.mechanical || a.na ? '<span class="status ' + (a.na ? 'na' : 'ok') + '">' + (a.na ? '?' : '✓') + '</span>' : cellU(a.util)) + '</td><td class="l">' + a.clause.split(' · ')[0] + '</td></tr>';
+      });
       var ck = c.crack;
       h += '<tr class="group"><td colspan="7">' + t('crackControl') + '</td></tr>';
       h += '<tr><td>ρh · ρv</td><td class="l">' + t('grid') + '</td><td>' + fmt(ck.rhoH, 4) + ' · ' + fmt(ck.rhoV, 4) + '</td><td>≥ ' + fmt(ck.rhoMin, 4) + '</td><td>s = ' + fmt(ck.spacing, 0) + ' ≤ ' + fmt(ck.sMax, 0) + ' mm</td><td class="l">' + cellU(ck.util) + '</td><td class="l">' + ck.clause + '</td></tr>';
@@ -2678,6 +3155,13 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
       h += '<tr><td>Σ ' + t('reactions') + '</td><td></td><td>' + fmt(sx, 1) + '</td><td>' + fmt(sy, 1) + '</td><td></td></tr>';
       h += '<tr><td>' + t('residual') + '</td><td></td><td colspan="3">' + r.globalResidual.toExponential(1) + ' kN</td></tr>';
       h += '</tbody></table></div>';
+      var pl = QST.templates.pileLoads(App.model, r, window.QST_META);
+      if (pl && pl.piles.length && App.model.meta && App.model.meta.pileMap) {
+        h += '<div class="table-scroll" style="margin-top:12px"><table><thead><tr><th>' + t('pile') + '</th><th class="l">' + t('node') + '</th><th>x (m)</th><th>N (kN)</th><th>H (kN)</th><th>M (kN·m)</th></tr></thead><tbody>';
+        pl.piles.forEach(function (q) { h += '<tr data-target="node:' + q.node + '"><td>' + q.id + '</td><td class="l">' + q.node + '</td><td>' + fmt(q.x, 3) + '</td><td>' + fmt(q.N, 1) + '</td><td>' + fmt(q.H, 1) + '</td><td>0</td></tr>'; });
+        h += '</tbody></table></div><p class="table-note">' + t('pileNote') + (App.model.meta && App.model.meta.tie3D && App.model.meta.tie3D.factor !== 1 ? ' ' + t('tie3D').replace('{f}', App.model.meta.tie3D.factor === 0.5 ? (App.lang === 'fr' ? '0,5 (deux tirants parallèles)' : '0.5 (two parallel ties)') : '1/√3') : '') + '</p>';
+        h += '<button type="button" class="add-button" id="export-pile" style="max-width:340px">↗ ' + t('exportPile') + '</button>';
+      }
     }
     el.innerHTML = h;
   }
@@ -2707,7 +3191,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
   function bind() {
     $('#toolbox').addEventListener('click', function (e) { var b = e.target.closest('[data-tool]'); if (b) App.setTool(b.dataset.tool); });
     $('#display-mode').addEventListener('click', function (e) { var b = e.target.closest('[data-mode]'); if (!b) return; App.display.mode = b.dataset.mode; App.saveUi(); renderToolbox(); renderLegend(); App.renderCanvas(); });
-    ['bands', 'ids', 'snap'].forEach(function (k) { $('#toggle-' + k).addEventListener('click', function () { App.display[k] = !App.display[k]; App.saveUi(); renderToolbox(); App.renderCanvas(); }); });
+    ['bands', 'zones', 'ids', 'snap'].forEach(function (k) { $('#toggle-' + k).addEventListener('click', function () { App.display[k] = !App.display[k]; App.saveUi(); renderToolbox(); App.renderCanvas(); }); });
     $('#undo').addEventListener('click', App.undo);
     $('#redo').addEventListener('click', App.redo);
     $('#fit').addEventListener('click', App.fit);
@@ -2730,6 +3214,13 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
     box.addEventListener('click', function (e) {
       var b;
       if ((b = e.target.closest('[data-code]'))) { App.commit(); App.model.code = b.dataset.code; App.update({ inputs: true }); return; }
+      if ((b = e.target.closest('#auto-size'))) {
+        App.commit();
+        var info = QST.templates.autoSize(App.model);
+        App.update({ inputs: true });
+        App.toast(info.error ? t('autoSizeFail') : t('autoSizeDone'));
+        return;
+      }
       if ((b = e.target.closest('#apply-rect'))) {
         var w = App.parse($('[data-k="rect.w"]').value), hgt = App.parse($('[data-k="rect.h"]').value);
         if (!(w > 0 && hgt > 0)) return;
@@ -2761,7 +3252,10 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
     ins.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
     ins.addEventListener('wheel', function (e) { e.stopPropagation(); }, { passive: true });
     $('#metrics').addEventListener('click', function (e) { var b = e.target.closest('[data-target]'); if (b) pick(b.dataset.target); });
-    $('#result-view').addEventListener('click', function (e) { var b = e.target.closest('[data-target]'); if (b) pick(b.dataset.target); });
+    $('#result-view').addEventListener('click', function (e) {
+      if (e.target.closest('#export-pile')) { App.exportPileLoads(); return; }
+      var b = e.target.closest('[data-target]'); if (b) pick(b.dataset.target);
+    });
     $('#project-name').addEventListener('change', function (e) { App.commit(); App.model.name = e.target.value.trim(); App.update({ inputs: true }); });
   }
   function applyVertex(el) {
@@ -2796,6 +3290,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
 
 </script>
 <script>/* js/report.js */
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — printable calculation report (browser print → PDF) and CSV export. */
 (function () {
   'use strict';
@@ -2860,10 +3355,29 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
         var calc = '<span class="rp-eq">' + e.type + ' : f<sub>lim</sub> = ' + App.nodeFactorText(e.type) + ' φc f′c = ' + fmt(e.limit, 2) + ' MPa' + (g ? ' ; σ = ' + fmt(g.force, 0) + ' kN / (' + fmt(g.width, 0) + ' × ' + fmt(mat.b, 0) + ') = ' + fmt(g.stress, 2) + ' MPa (' + t('face_' + g.kind) + (g.kind === 'strut' || g.kind === 'tie' ? ' ' + g.ref : '') + ')' : '') + '</span> <small>(' + code.clause.node + ')</small>';
         h += '<tr><td>' + e.id + '<br><small>' + t('nodalZone') + '</small></td><td>' + calc + '</td><td>' + ok(e.util) + '</td></tr>';
       });
+      c.anchors.forEach(function (a) {
+        var calc = a.mechanical ? t('anchor_' + a.type) + ' — ' + t('mechanicalNote') : a.na ? t('dbUnknown') :
+          '<span class="rp-eq">l<sub>a</sub> = ' + fmt(a.dc, 0) + ' + ' + fmt(a.e, 0) + ' = ' + fmt(a.la, 0) + ' mm ≥ ' + (a.type === 'hook' ? 'l<sub>dh</sub>' : 'l<sub>d</sub>') + ' = ' + fmt(a.req, 0) + ' mm (d<sub>b</sub> = ' + fmt(a.db, 1) + ' mm' + (a.top ? ', k1 = 1,3' : '') + ')</span>';
+        h += '<tr><td>' + a.member + ' · ' + a.node + '<br><small>' + t('anchorage') + '</small></td><td>' + calc + ' <small>(' + a.clause + ')</small></td><td>' + (a.mechanical || a.na ? '—' : ok(a.util)) + '</td></tr>';
+      });
       var ck = c.crack;
       h += '<tr><td>' + t('crackControl') + '</td><td>ρh = ' + fmt(ck.rhoH, 4) + ', ρv = ' + fmt(ck.rhoV, 4) + ' ≥ ' + fmt(ck.rhoMin, 4) + ' ; s = ' + fmt(ck.spacing, 0) + ' ≤ ' + fmt(ck.sMax, 0) + ' mm <small>(' + ck.clause + ')</small></td><td>' + ok(ck.util) + '</td></tr>';
       h += '</tbody></table>';
-      h += '<p><b>' + t('mUtil') + ' : ' + fmt(c.maxUtil, 2) + '</b> (' + (c.governing.kind === 'node' ? t('node') : t('kind_' + c.governing.kind)) + ' ' + c.governing.id + ')</p>';
+      h += '<p><b>' + t('mUtil') + ' : ' + fmt(c.maxUtil, 2) + '</b> (' + (c.governing.kind === 'node' ? t('node') : c.governing.kind === 'anchor' ? t('anchorage') : t('kind_' + c.governing.kind)) + ' ' + c.governing.id + ')</p>';
+      var zones = c.nodes.filter(function (e) { return e.zone; });
+      if (zones.length) {
+        h += '<h2>5. ' + t('hydroZones') + '</h2><table><thead><tr><th>' + t('node') + '</th><th>σ<sub>h</sub> (MPa)</th><th>' + t('face') + ' : F (kN) · w → w<sub>h</sub> (mm)</th></tr></thead><tbody>';
+        zones.forEach(function (e) {
+          h += '<tr><td>' + e.id + ' (' + e.type + ')</td><td>' + fmt(e.zone.sigma, 2) + '</td><td>' + e.zone.faces.map(function (fa) { return t('face_' + fa.kind) + (fa.kind === 'strut' || fa.kind === 'tie' ? ' ' + fa.ref : '') + ' : ' + fmt(fa.force, 0) + ' · ' + (fa.wGiven > 0 ? fmt(fa.wGiven, 0) : '—') + ' → ' + fmt(fa.wHydro, 0); }).join(' ; ') + (e.zone.outside ? ' <span class="rp-bad">' + t('zoneOutside') + '</span>' : '') + '</td></tr>';
+        });
+        h += '</tbody></table>';
+      }
+      var pl = QST.templates.pileLoads(App.model, r, window.QST_META);
+      if (pl && App.model.meta && App.model.meta.pileMap) {
+        h += '<h2>6. ' + t('pileLoadsTitle') + '</h2><table><thead><tr><th>' + t('pile') + '</th><th>N (kN)</th><th>H (kN)</th></tr></thead><tbody>';
+        pl.piles.forEach(function (q) { h += '<tr><td>' + q.id + '</td><td>' + fmt(q.N, 1) + '</td><td>' + fmt(q.H, 1) + '</td></tr>'; });
+        h += '</tbody></table><p>' + t('pileNote') + '</p>';
+      }
       if (App.warnings.length) h += '<p class="rp-bad">' + t('outsideMsg') + ' ' + App.warnings.map(function (w) { return w.id; }).join(', ') + '</p>';
     }
     h += '<div class="rp-disclaimer"><b>' + t('warning') + '</b><br>' + t('reportDisclaimer') + '</div>';
@@ -2873,6 +3387,13 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
   App.printReport = function () {
     document.getElementById('report').innerHTML = App.buildReport();
     setTimeout(function () { window.print(); }, 60);
+  };
+
+  App.exportPileLoads = function () {
+    var data = QST.templates.pileLoads(App.model, App.result, window.QST_META);
+    if (!data || !data.piles.length) { App.toast(App.t('noPiles')); return; }
+    App.download(App.fileBase() + '-quickerpile.json', JSON.stringify(data, null, 2), 'application/json');
+    App.toast(App.t('pileExported').replace('{n}', data.piles.length));
   };
 
   App.exportCSV = function () {
@@ -2890,6 +3411,7 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
 
 </script>
 <script>/* js/main.js */
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — start-up, language, menus, files and keyboard shortcuts. */
 (function () {
   'use strict';
@@ -2951,6 +3473,72 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
     reader.readAsText(file);
   }
 
+
+  // ---------------------------------------------------------------- templates
+  var TPL = {
+    dappedEnd: [['h', 'm'], ['hn', 'm'], ['ln', 'm'], ['a', 'm'], ['half', 'm'], ['R', 'kN'], ['n', ''], ['b', 'mm'], ['fc', 'MPa']],
+    bentCap: [['ncol', ''], ['spacing', 'm'], ['overhang', 'm'], ['h', 'm'], ['colWidth', 'm'], ['nGirders', ''], ['girderSpacing', 'm'], ['P', 'kN'], ['b', 'mm'], ['fc', 'MPa']],
+    pileCap: [['np', ''], ['s', 'm'], ['edge', 'm'], ['h', 'm'], ['colWidth', 'm'], ['pileD', 'm'], ['P', 'kN'], ['fc', 'MPa']]
+  };
+  var tplState = { kind: 'dappedEnd', params: {} };
+  Object.keys(TPL).forEach(function (k) { tplState.params[k] = Object.assign({}, QST.templates.DEFAULTS[k]); });
+
+  function tplGenerate() {
+    var g = QST.templates[tplState.kind](tplState.params[tplState.kind]);
+    var m = App.sanitize(g.model);
+    m.meta = g.model.meta;
+    var info = QST.templates.autoSize(m);
+    QST.csa.normalize(m);
+    var r = QST.solver.solve(m), c = QST.csa.check(m, r);
+    return { model: m, result: r, checks: c, errors: g.errors, info: info };
+  }
+  function tplRender() {
+    var t = App.t, fmt = App.fmt;
+    $('#tpl-kinds').innerHTML = Object.keys(TPL).map(function (k) {
+      return '<button type="button" class="tpl-kind' + (k === tplState.kind ? ' active' : '') + '" data-kind="' + k + '"><b>' + t('tpl_' + k) + '</b><small>' + t('tplSub_' + k) + '</small></button>';
+    }).join('');
+    var p = tplState.params[tplState.kind];
+    $('#tpl-form').innerHTML = '<div class="field-row">' + TPL[tplState.kind].map(function (f) {
+      if (f[0] === 'np') return '<label class="field"><span>' + t('tf_np') + '</span><select data-tf="np">' + [2, 3, 4].map(function (n) { return '<option' + (p.np === n ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></label>';
+      return '<label class="field"><span>' + t('tf_' + f[0]) + '</span><span class="unit-wrap"><input class="num" inputmode="decimal" data-tf="' + f[0] + '" value="' + App.esc(App.fmtInput(p[f[0]])) + '"><i>' + f[1] + '</i></span></label>';
+    }).join('') + '</div>';
+    tplPreview();
+  }
+  function tplPreview() {
+    var t = App.t, fmt = App.fmt, g;
+    try { g = tplGenerate(); } catch (e) { $('#tpl-svg').innerHTML = ''; $('#tpl-info').innerHTML = '<span class="bad">' + App.esc(e.message) + '</span>'; return; }
+    $('#tpl-svg').innerHTML = App.staticSVG({ model: g.model, result: g.result, checks: g.checks, mode: 'forces', width: 760, height: 380, grid: false, ids: false, pad: { l: 40, r: 40, t: 60, b: 50 } });
+    var h = '';
+    if (g.errors.length) h += '<div class="bad">⚠ ' + g.errors.map(function (e) { return t('tplErr_' + e); }).join(' · ') + '</div>';
+    if (!g.result.ok) h += '<div class="bad">' + t('mechanism') + '</div>';
+    else h += '<div><b>' + t('mUtil') + ' ' + fmt(g.checks.maxUtil, 2) + '</b> · ' + (g.result.indeterminacy === 0 ? t('determinate') : t('indeterminate') + ' (r = ' + g.result.indeterminacy + ')') + ' · ' + g.model.nodes.length + ' ' + t('nodesLc') + ' · ' + g.model.members.length + ' ' + t('membersLc') + '</div>';
+    h += '<div>' + t('tplNote_' + tplState.kind) + '</div><div>' + t('tplAutoNote') + '</div>';
+    $('#tpl-info').innerHTML = h;
+  }
+  function bindTemplates() {
+    $('#open-templates').addEventListener('click', function () { closeMenus(); tplRender(); $('#tpl-dialog').showModal(); });
+    $('#tpl-kinds').addEventListener('click', function (e) { var b = e.target.closest('[data-kind]'); if (!b) return; tplState.kind = b.dataset.kind; tplRender(); });
+    $('#tpl-form').addEventListener('change', function (e) {
+      var el = e.target, k = el.dataset.tf; if (!k) return;
+      var v = el.tagName === 'SELECT' ? Number(el.value) : App.parse(el.value);
+      if (!(isFinite(v) && v > 0)) { el.classList.add('num-err'); return; }
+      el.classList.remove('num-err');
+      tplState.params[tplState.kind][k] = v;
+      tplPreview();
+    });
+    $('#tpl-form').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
+    $('#tpl-create').addEventListener('click', function () {
+      var g = tplGenerate();
+      guard().then(function (go) {
+        if (!go) return;
+        g.model.name = App.t('tpl_' + tplState.kind);
+        App.load(g.model);
+        $('#tpl-dialog').close();
+        App.toast(App.t('tplCreated'));
+      });
+    });
+  }
+
   function bind() {
     $('#lang-fr').addEventListener('click', function () { App.setLang('fr'); applyLanguage(); });
     $('#lang-en').addEventListener('click', function () { App.setLang('en'); applyLanguage(); });
@@ -2980,6 +3568,8 @@ window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chér
     $('#print-report').addEventListener('click', function () { closeMenus(); App.printReport(); });
     $('#export-svg').addEventListener('click', function () { closeMenus(); App.download(App.fileBase() + '-' + App.display.mode + '.svg', App.staticSVG({ mode: App.display.mode === 'geometry' ? 'forces' : App.display.mode }), 'image/svg+xml'); });
     $('#export-csv').addEventListener('click', function () { closeMenus(); App.exportCSV(); });
+    $('#export-pile-menu').addEventListener('click', function () { closeMenus(); App.exportPileLoads(); });
+    bindTemplates();
     $('#method-open').addEventListener('click', function () { $('#method-dialog').showModal(); });
     $$('dialog [data-close]').forEach(function (b) { b.addEventListener('click', function () { b.closest('dialog').close(); }); });
     $('#method-dialog').addEventListener('click', function (e) { if (e.target === e.currentTarget) e.currentTarget.close(); });

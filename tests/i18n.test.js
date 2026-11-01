@@ -25,7 +25,10 @@ test('dynamic key families are complete', () => {
     hint_: ['select', 'node', 'member', 'support', 'load', 'outline', 'erase'],
     mode_: ['geometry', 'forces', 'util'], kind_: ['strut', 'tie', 'zero'],
     sup_: ['none', 'null', 'pin', 'rx', 'ry'], face_: ['strut', 'tie', 'support', 'load'],
-    nodeType_: ['CCC', 'CCT', 'CTT'], code_: ['S6', 'A23'], err_: ['missingNode', 'zeroLength']
+    nodeType_: ['CCC', 'CCT', 'CTT'], code_: ['S6', 'A23'], err_: ['missingNode', 'zeroLength'],
+    anchor_: ['straight', 'hook', 'plate', 'stirrup'], tpl_: ['dappedEnd', 'bentCap', 'pileCap'], tplSub_: ['dappedEnd', 'bentCap', 'pileCap'],
+    tplNote_: ['dappedEnd', 'bentCap', 'pileCap'], tplErr_: ['hn', 'a', 'half', 'girders', 'edge', 's'],
+    tf_: ['h', 'hn', 'ln', 'a', 'half', 'R', 'n', 'b', 'fc', 'ncol', 'spacing', 'overhang', 'colWidth', 'nGirders', 'girderSpacing', 'P', 'np', 's', 'edge', 'pileD']
   };
   const missing = [];
   for (const [p, list] of Object.entries(fam)) for (const k of list) for (const lang of ['fr', 'en']) if (STR[lang][p + k] === undefined) missing.push(lang + ':' + p + k);

@@ -1,5 +1,26 @@
 # Version history
 
+## 0.2 — 2026-11-01
+
+- **Hydrostatic nodal zones**, built graphically from the force polygon rotated by 90°:
+  drawn on the canvas and in the report, hydrostatic face widths compared with the widths
+  entered, warning when a zone leaves the concrete; toggle *Nodal zones*.
+- **Tie anchorage check** at every node where a tie ends: available length (critical
+  section at the edge of the extended nodal zone + bar extension to the concrete face −
+  cover) against the straight-bar or standard-hook development length (A23.3 12.2.3 /
+  12.5, simplified; k1 = 1.3 for top bars); plates, welded bars and closed stirrups as
+  mechanical anchorages; no check at symmetry planes or through ties. Bar extensions,
+  hooks, plates and critical sections are drawn.
+- **Parametric bridge templates** (*Templates* button): dapped end (half-joint),
+  multi-column bent cap (2–4 columns, r = n − 2) and pile cap on 2, 3 or 4 piles (2D
+  section with 3D tie factors), with live preview.
+- **Automatic sizing** of tie bars, strut widths, missing plates and anchorage type
+  (target utilization 0.85), used by the templates and available for any model.
+- **QuickerPile link**: pile head loads (N, H, M per pile) exported as a
+  `quickerpile-head-loads` JSON file; pile table in the reactions view and the report.
+- Licence **GPL-3.0-or-later** (LICENSE file, SPDX headers).
+- Intro animation removed: the application opens directly.
+
 ## 0.1.1 — 2026-11-01
 
 - **CSA S6 limits corrected** after comparison with the literature: strut stress capped at

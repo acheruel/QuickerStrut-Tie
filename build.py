@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Build the portable single-file QuickerStrut&Tie HTML from app/.
 
     python build.py            # writes QuickerStrut-Tie-v<version>-<date>.html

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — printable calculation report (browser print → PDF) and CSV export. */
 (function () {
   'use strict';
@@ -62,10 +63,29 @@
         var calc = '<span class="rp-eq">' + e.type + ' : f<sub>lim</sub> = ' + App.nodeFactorText(e.type) + ' φc f′c = ' + fmt(e.limit, 2) + ' MPa' + (g ? ' ; σ = ' + fmt(g.force, 0) + ' kN / (' + fmt(g.width, 0) + ' × ' + fmt(mat.b, 0) + ') = ' + fmt(g.stress, 2) + ' MPa (' + t('face_' + g.kind) + (g.kind === 'strut' || g.kind === 'tie' ? ' ' + g.ref : '') + ')' : '') + '</span> <small>(' + code.clause.node + ')</small>';
         h += '<tr><td>' + e.id + '<br><small>' + t('nodalZone') + '</small></td><td>' + calc + '</td><td>' + ok(e.util) + '</td></tr>';
       });
+      c.anchors.forEach(function (a) {
+        var calc = a.mechanical ? t('anchor_' + a.type) + ' — ' + t('mechanicalNote') : a.na ? t('dbUnknown') :
+          '<span class="rp-eq">l<sub>a</sub> = ' + fmt(a.dc, 0) + ' + ' + fmt(a.e, 0) + ' = ' + fmt(a.la, 0) + ' mm ≥ ' + (a.type === 'hook' ? 'l<sub>dh</sub>' : 'l<sub>d</sub>') + ' = ' + fmt(a.req, 0) + ' mm (d<sub>b</sub> = ' + fmt(a.db, 1) + ' mm' + (a.top ? ', k1 = 1,3' : '') + ')</span>';
+        h += '<tr><td>' + a.member + ' · ' + a.node + '<br><small>' + t('anchorage') + '</small></td><td>' + calc + ' <small>(' + a.clause + ')</small></td><td>' + (a.mechanical || a.na ? '—' : ok(a.util)) + '</td></tr>';
+      });
       var ck = c.crack;
       h += '<tr><td>' + t('crackControl') + '</td><td>ρh = ' + fmt(ck.rhoH, 4) + ', ρv = ' + fmt(ck.rhoV, 4) + ' ≥ ' + fmt(ck.rhoMin, 4) + ' ; s = ' + fmt(ck.spacing, 0) + ' ≤ ' + fmt(ck.sMax, 0) + ' mm <small>(' + ck.clause + ')</small></td><td>' + ok(ck.util) + '</td></tr>';
       h += '</tbody></table>';
-      h += '<p><b>' + t('mUtil') + ' : ' + fmt(c.maxUtil, 2) + '</b> (' + (c.governing.kind === 'node' ? t('node') : t('kind_' + c.governing.kind)) + ' ' + c.governing.id + ')</p>';
+      h += '<p><b>' + t('mUtil') + ' : ' + fmt(c.maxUtil, 2) + '</b> (' + (c.governing.kind === 'node' ? t('node') : c.governing.kind === 'anchor' ? t('anchorage') : t('kind_' + c.governing.kind)) + ' ' + c.governing.id + ')</p>';
+      var zones = c.nodes.filter(function (e) { return e.zone; });
+      if (zones.length) {
+        h += '<h2>5. ' + t('hydroZones') + '</h2><table><thead><tr><th>' + t('node') + '</th><th>σ<sub>h</sub> (MPa)</th><th>' + t('face') + ' : F (kN) · w → w<sub>h</sub> (mm)</th></tr></thead><tbody>';
+        zones.forEach(function (e) {
+          h += '<tr><td>' + e.id + ' (' + e.type + ')</td><td>' + fmt(e.zone.sigma, 2) + '</td><td>' + e.zone.faces.map(function (fa) { return t('face_' + fa.kind) + (fa.kind === 'strut' || fa.kind === 'tie' ? ' ' + fa.ref : '') + ' : ' + fmt(fa.force, 0) + ' · ' + (fa.wGiven > 0 ? fmt(fa.wGiven, 0) : '—') + ' → ' + fmt(fa.wHydro, 0); }).join(' ; ') + (e.zone.outside ? ' <span class="rp-bad">' + t('zoneOutside') + '</span>' : '') + '</td></tr>';
+        });
+        h += '</tbody></table>';
+      }
+      var pl = QST.templates.pileLoads(App.model, r, window.QST_META);
+      if (pl && App.model.meta && App.model.meta.pileMap) {
+        h += '<h2>6. ' + t('pileLoadsTitle') + '</h2><table><thead><tr><th>' + t('pile') + '</th><th>N (kN)</th><th>H (kN)</th></tr></thead><tbody>';
+        pl.piles.forEach(function (q) { h += '<tr><td>' + q.id + '</td><td>' + fmt(q.N, 1) + '</td><td>' + fmt(q.H, 1) + '</td></tr>'; });
+        h += '</tbody></table><p>' + t('pileNote') + '</p>';
+      }
       if (App.warnings.length) h += '<p class="rp-bad">' + t('outsideMsg') + ' ' + App.warnings.map(function (w) { return w.id; }).join(', ') + '</p>';
     }
     h += '<div class="rp-disclaimer"><b>' + t('warning') + '</b><br>' + t('reportDisclaimer') + '</div>';
@@ -75,6 +95,13 @@
   App.printReport = function () {
     document.getElementById('report').innerHTML = App.buildReport();
     setTimeout(function () { window.print(); }, 60);
+  };
+
+  App.exportPileLoads = function () {
+    var data = QST.templates.pileLoads(App.model, App.result, window.QST_META);
+    if (!data || !data.piles.length) { App.toast(App.t('noPiles')); return; }
+    App.download(App.fileBase() + '-quickerpile.json', JSON.stringify(data, null, 2), 'application/json');
+    App.toast(App.t('pileExported').replace('{n}', data.piles.length));
   };
 
   App.exportCSV = function () {

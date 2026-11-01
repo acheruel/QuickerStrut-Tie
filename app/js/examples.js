@@ -1,9 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — example models (ULS factored loads, kN; geometry in m). */
 (function (root) {
   'use strict';
 
   function material(over) {
-    var m = { fc: 35, fy: 400, Es: 200000, b: 400, phiC: 0, phiS: 0, epsMode: 'computed', rhoH: 0.003, rhoV: 0.003, spacing: 300, tieFaces: true };
+    var m = { fc: 35, fy: 400, Es: 200000, b: 400, phiC: 0, phiS: 0, epsMode: 'computed', rhoH: 0.003, rhoV: 0.003, spacing: 300, tieFaces: true, cover: 50, ldFactor: 0.45 };
     for (var k in over) m[k] = over[k];
     return m;
   }
@@ -12,8 +13,8 @@
     return { id: id, x: x, y: y, support: o.support || null, fx: o.fx || 0, fy: o.fy || 0, bearing: o.bearing || 0 };
   }
   function S(id, i, j, w) { return { id: id, i: i, j: j, role: 'auto', w: w, bars: null, As: 0 }; }
-  function T(id, i, j, n, size, w) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: { n: n, size: size }, As: 0 }; }
-  function TA(id, i, j, As, w) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: null, As: As }; }
+  function T(id, i, j, n, size, w, anchor) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: { n: n, size: size }, As: 0, anchor: anchor || 'hook' }; }
+  function TA(id, i, j, As, w, db, anchor) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: null, As: As, db: db, anchor: anchor || 'hook' }; }
   var IN = 0.0254, KIP = 4.448222;
 
   var EXAMPLES = [
@@ -73,7 +74,7 @@
           N('N6', 0.15, 0.0, { support: 'pin', bearing: 200 })
         ],
         members: [
-          T('M1', 'N1', 'N2', 4, '20M', 120),
+          T('M1', 'N1', 'N2', 4, '20M', 120, 'plate'),
           S('M2', 'N1', 'N3', 150), S('M3', 'N2', 'N4', 150),
           S('M4', 'N3', 'N4', 120), S('M5', 'N3', 'N5', 200), S('M6', 'N4', 'N6', 200),
           S('M7', 'N3', 'N2', 100), S('M8', 'N3', 'N6', 100)
@@ -124,11 +125,11 @@
           N('N10', 3.0, 0.08, { support: 'rx' })
         ],
         members: [
-          S('M1', 'N1', 'N2', 300), T('M2', 'N1', 'N4', 5, '20M', 150), T('M3', 'N2', 'N3', 6, '20M', 150),
-          S('M4', 'N2', 'N5', 150), S('M5', 'N3', 'N4', 250), S('M6', 'N3', 'N5', 300), T('M7', 'N3', 'N6', 6, '25M', 150),
-          S('M8', 'N5', 'N4', 150), T('M9', 'N4', 'N6', 5, '15M', 150), S('M10', 'N5', 'N7', 150), T('M11', 'N6', 'N8', 6, '25M', 150),
-          S('M12', 'N6', 'N7', 250), T('M13', 'N7', 'N8', 4, '15M', 150), S('M14', 'N7', 'N9', 150), T('M15', 'N8', 'N10', 6, '25M', 150),
-          S('M16', 'N8', 'N9', 250), T('M17', 'N9', 'N10', 4, '15M', 150)
+          S('M1', 'N1', 'N2', 300), T('M2', 'N1', 'N4', 5, '20M', 150, 'plate'), T('M3', 'N2', 'N3', 6, '20M', 150, 'stirrup'),
+          S('M4', 'N2', 'N5', 150), S('M5', 'N3', 'N4', 250), S('M6', 'N3', 'N5', 300), T('M7', 'N3', 'N6', 6, '25M', 150, 'plate'),
+          S('M8', 'N5', 'N4', 150), T('M9', 'N4', 'N6', 5, '15M', 150, 'stirrup'), S('M10', 'N5', 'N7', 150), T('M11', 'N6', 'N8', 6, '25M', 150),
+          S('M12', 'N6', 'N7', 250), T('M13', 'N7', 'N8', 4, '15M', 150, 'stirrup'), S('M14', 'N7', 'N9', 150), T('M15', 'N8', 'N10', 6, '25M', 150),
+          S('M16', 'N8', 'N9', 250), T('M17', 'N9', 'N10', 4, '15M', 150, 'stirrup')
         ]
       }
     },
@@ -150,8 +151,8 @@
           N('F', 228 * IN, 69 * IN, { fy: -600 * KIP, bearing: 12 * IN * 1000 })
         ],
         members: [
-          TA('AB', 'A', 'B', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000), TA('BC', 'B', 'C', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000),
-          S('AD', 'A', 'D', 400), T('BD', 'B', 'D', 26, '20M', 0), S('BE', 'B', 'E', 400), S('CF', 'C', 'F', 287),
+          TA('AB', 'A', 'B', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000, 1.27 * IN * 1000), TA('BC', 'B', 'C', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000, 1.27 * IN * 1000),
+          S('AD', 'A', 'D', 400), T('BD', 'B', 'D', 26, '20M', 0, 'stirrup'), S('BE', 'B', 'E', 400), S('CF', 'C', 'F', 287),
           S('DE', 'D', 'E', 6 * IN * 1000), S('EF', 'E', 'F', 6 * IN * 1000),
           // Bracing diagonal (zero force) so that the stiffness matrix is regular.
           S('BF', 'B', 'F', 150)

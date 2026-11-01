@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — French / English strings. */
 (function (root) {
   'use strict';
@@ -8,9 +9,11 @@
     '<h3>Bielles</h3><span class="eq">Cr = φc · fcu · Acs,&nbsp;&nbsp; Acs = w · b</span><span class="eq">fcu = f′c / (0,8 + 170 ε1) ≤ 0,85 f′c (A23.3) ou α1 f′c (S6),&nbsp;&nbsp; ε1 = εs + (εs + 0,002) cot²θs</span><p>Pour la S6, α1 = 0,85 − 0,0015 f′c ≥ 0,67. θs est le plus petit angle entre la bielle et un tirant adjacent, évalué aux deux extrémités ; la valeur de fcu la plus faible gouverne. Un tirant dans le prolongement de la bielle (à moins de 5°) ne la traverse pas et n’est pas pris en compte. εs est la déformation du tirant, calculée (Tf / Es·As) ou prise égale à fy / Es. Sans tirant adjacent, fcu atteint la limite supérieure.</p>',
     '<h3>Tirants</h3><span class="eq">Tr = φs · fy · Ast</span><p>Les armatures sont choisies en nombre × diamètre (barres CSA G30.18). L’ancrage n’est pas vérifié : la pleine résistance doit être développée à la sortie de la zone nodale prolongée.</p>',
     '<h3>Zones nodales</h3><p>Contrainte sur chaque face ≤ 0,85 / 0,75 / 0,65 φc f′c selon l’A23.3, ou α1 / 0,88 α1 / 0,76 α1 φc f′c selon la S6, pour les nœuds CCC (bielles et appuis), CCT (un tirant ancré) et CTT (tirants dans plus d’une direction). Faces vérifiées : bielles (C / w·b), plaques d’appui et de charge (R / lb·b) et, en option, face d’ancrage des tirants (T / w·b).</p>',
+    '<h3>Zones nodales hydrostatiques</h3><p>Chaque force sur le nœud est une poussée sur une face : bielles de leur côté, tirants sur la face arrière (force nette des tirants alignés), charges et réactions sur leur plaque. Le polygone des forces fermé, tourné de 90° et mis à l’échelle 1 / (σh·b), donne la zone nodale : chaque face est perpendiculaire à sa force et toutes portent la même contrainte σh. σh est la plus forte contrainte des faces de largeur saisie ; la zone est tracée au canevas et un avertissement signale un dépassement du contour.</p>',
+    '<h3>Ancrage des tirants</h3><p>À chaque nœud où un tirant se termine (sauf plan de symétrie), l<sub>a</sub> = distance à la section critique (bord de la bielle ou de la zone hydrostatique sur l’axe du tirant) + prolongement des barres jusqu’à la face du béton − enrobage. Exigé : l<sub>d</sub> = k·k1·k4·fy/√f′c·db ≥ 300 mm (barre droite, k = 0,45 ou 0,6, k1 = 1,3 barres supérieures, k4 = 0,8 jusqu’au 20M) ou l<sub>dh</sub> = 100·db/√f′c·fy/400 ≥ 8db, 150 mm (crochet), selon l’A23.3 12.2.3 et 12.5 (méthode simplifiée, aussi utilisée avec la S6 : à confirmer avec la S6 8.15). Plaques, barres soudées et étriers fermés sont considérés ancrés mécaniquement.</p>',
     '<h3>Armature de contrôle de la fissuration</h3><p>Grille orthogonale près de chaque face : ρ ≥ 0,003 (S6) ou 0,002 (A23.3) dans chaque direction, espacement ≤ 300 mm. Selon la S6, la grille n’a pas à dépasser 1500 mm²/m par face.</p>',
     '<h3>Coefficients</h3><table><tr><th></th><th>φc</th><th>φs</th><th>Articles</th></tr><tr><td>CSA S6</td><td>0,75</td><td>0,90</td><td>8.4.6, 8.10.3.3, 8.10.4.1, 8.10.5.1</td></tr><tr><td>CSA A23.3</td><td>0,65</td><td>0,85</td><td>8.4, 11.4.2.3, 11.4.3.1, 11.4.4.1, 11.4.5</td></tr></table><p>Les coefficients peuvent être remplacés (béton préfabriqué, etc.). Les numéros d’article et facteurs sont à confirmer avec l’édition de la norme applicable au projet.</p>',
-    '<h3>Limites</h3><p>Modèle 2D, un seul cas de charge pondéré, épaisseur b constante. Pas de poids propre automatique, de génération automatique du modèle, de vérification d’ancrage ni de champs de contraintes. La géométrie du modèle (position des nœuds, largeurs) relève du jugement de l’ingénieur.</p>'
+    '<h3>Limites</h3><p>Modèle 2D, un seul cas de charge pondéré, épaisseur b constante. Pas de poids propre automatique, de génération automatique du modèle ni de champs de contraintes. La géométrie du modèle (position des nœuds, largeurs) relève du jugement de l’ingénieur.</p>'
   ].join('');
   var METHOD_EN = [
     '<h3>Model</h3><p>A strut-and-tie model is a plane pin-jointed truss: nodes are linked by bars carrying axial force only. Factored (ULS) loads act at the nodes. The truss is solved with the direct stiffness method; N &gt; 0 is tension (tie), N &lt; 0 compression (strut). A bar’s role follows the sign of its force, or can be imposed.</p>',
@@ -18,13 +21,39 @@
     '<h3>Struts</h3><span class="eq">Cr = φc · fcu · Acs,&nbsp;&nbsp; Acs = w · b</span><span class="eq">fcu = f′c / (0.8 + 170 ε1) ≤ 0.85 f′c (A23.3) or α1 f′c (S6),&nbsp;&nbsp; ε1 = εs + (εs + 0.002) cot²θs</span><p>For S6, α1 = 0.85 − 0.0015 f′c ≥ 0.67. θs is the smallest angle between the strut and an adjoining tie, evaluated at both ends; the lowest fcu governs. A tie in line with the strut (within 5°) does not cross it and is ignored. εs is the tie strain, computed (Tf / Es·As) or taken as fy / Es. With no adjoining tie, fcu reaches the upper limit.</p>',
     '<h3>Ties</h3><span class="eq">Tr = φs · fy · Ast</span><p>Reinforcement is entered as number × bar size (CSA G30.18 bars). Anchorage is not checked: full strength must be developed where the tie leaves the extended nodal zone.</p>',
     '<h3>Nodal zones</h3><p>Stress on each face ≤ 0.85 / 0.75 / 0.65 φc f′c to A23.3, or α1 / 0.88 α1 / 0.76 α1 φc f′c to S6, for CCC (struts and bearings), CCT (one anchored tie) and CTT (ties in more than one direction) nodes. Faces checked: struts (C / w·b), bearing and load plates (R / lb·b) and, optionally, the anchorage face of ties (T / w·b).</p>',
+    '<h3>Hydrostatic nodal zones</h3><p>Each force on the node is a push on one face: struts on their own side, ties on the back face (net force of collinear ties), loads and reactions on their plate. The closed force polygon, rotated by 90° and scaled by 1 / (σh·b), is the nodal zone: every face is perpendicular to its force and all carry the same stress σh. σh is the highest stress on a face with an entered width; the zone is drawn on the canvas and a warning flags a zone outside the outline.</p>',
+    '<h3>Tie anchorage</h3><p>At every node where a tie ends (except a symmetry plane), l<sub>a</sub> = distance to the critical section (strut or hydrostatic zone edge on the tie axis) + bar extension to the concrete face − cover. Required: l<sub>d</sub> = k·k1·k4·fy/√f′c·db ≥ 300 mm (straight, k = 0.45 or 0.6, k1 = 1.3 top bars, k4 = 0.8 up to 20M) or l<sub>dh</sub> = 100·db/√f′c·fy/400 ≥ 8db, 150 mm (hook), to A23.3 12.2.3 and 12.5 (simplified, also used with S6: to be confirmed with S6 8.15). Plates, welded bars and closed stirrups are taken as mechanically anchored.</p>',
     '<h3>Crack control reinforcement</h3><p>Orthogonal grid near each face: ρ ≥ 0.003 (S6) or 0.002 (A23.3) in each direction, spacing ≤ 300 mm. To S6, the grid need not exceed 1500 mm²/m on each face.</p>',
     '<h3>Factors</h3><table><tr><th></th><th>φc</th><th>φs</th><th>Clauses</th></tr><tr><td>CSA S6</td><td>0.75</td><td>0.90</td><td>8.4.6, 8.10.3.3, 8.10.4.1, 8.10.5.1</td></tr><tr><td>CSA A23.3</td><td>0.65</td><td>0.85</td><td>8.4, 11.4.2.3, 11.4.3.1, 11.4.4.1, 11.4.5</td></tr></table><p>The factors can be overridden (precast concrete, etc.). Clause numbers and factors must be confirmed against the edition of the standard that applies to the project.</p>',
-    '<h3>Limits</h3><p>2D model, a single factored load case, constant thickness b. No automatic self-weight, automatic model generation, anchorage check or stress fields. The model geometry (node positions, widths) is the engineer’s judgement.</p>'
+    '<h3>Limits</h3><p>2D model, a single factored load case, constant thickness b. No automatic self-weight, automatic model generation or stress fields. The model geometry (node positions, widths) is the engineer’s judgement.</p>'
   ].join('');
 
   var STR = {
     fr: {
+      chipZones: 'Zones nodales', anchorage: 'Ancrage', anchorages: 'Ancrages des tirants', cover: 'Enrobage', ldFactor: 'Coefficient de l<sub>d</sub>', ldFav: 'enrobage et espacement minimaux', ldOther: 'autres cas',
+      anchorNote: 'Longueur disponible l<sub>a</sub> = distance du nœud à la section critique (bord de la zone nodale prolongée) + prolongement des barres jusqu’à la face du béton, moins l’enrobage. l<sub>d</sub> barre droite (12.2.3) ou l<sub>dh</sub> crochet normalisé (12.5) selon l’A23.3, méthode simplifiée ; k1 = 1,3 pour les barres ayant plus de 300 mm de béton dessous.',
+      autoSizeTitle: 'Prédimensionnement', autoSize: 'Prédimensionner automatiquement', autoSizeNote: 'Choisit les barres des tirants, les largeurs des bielles, les plaques manquantes et le type d’ancrage (droit → crochet → plaque) pour viser une utilisation de 0,85. La géométrie n’est pas modifiée.',
+      autoSizeDone: 'Prédimensionnement appliqué', autoSizeFail: 'Prédimensionnement impossible : modèle instable',
+      hydroZone: 'Zone nodale hydrostatique · σh', hydroZones: 'Zones nodales hydrostatiques', face: 'Face',
+      hydroNoteFace: 'Polygone des forces tourné de 90° : chaque face est perpendiculaire à sa force et toutes les faces portent la même contrainte σh, égale à la plus forte contrainte des faces de largeur saisie (w<sub>h</sub> ≤ w).',
+      hydroNoteLimit: 'Aucune largeur saisie : zone minimale dimensionnée à la contrainte limite du nœud.',
+      zoneOutside: 'La zone nodale hydrostatique dépasse le contour du béton.',
+      anchorType: 'Ancrage du tirant', anchor_straight: 'Barre droite', anchor_hook: 'Crochet normalisé', anchor_plate: 'Plaque / barre soudée', anchor_stirrup: 'Étriers fermés',
+      anchorSteps: 'l<sub>a</sub> = section critique + prolongement − enrobage ≥ l<sub>d</sub>.', dbUnknown: 'diamètre inconnu (As direct)', mechanicalNote: 'ancrage mécanique, vérifier la face arrière',
+      pile: 'Pieu', pileNote: 'Charges pondérées en tête de pieu : N &gt; 0 en compression, H selon x, M = 0 (tête articulée dans le modèle).', tie3D: 'Semelle 3D : chaque tirant réel porte {f} × le tirant du modèle 2D.',
+      exportPile: 'Exporter vers QuickerPile', exportPileSub: 'Charges en tête de pieu (.json)', noPiles: 'Aucun appui : rien à exporter', pileExported: '{n} pieux exportés', pileLoadsTitle: 'Charges en tête de pieu',
+      templatesMenu: 'Gabarits', templatesSub: 'Modèles paramétriques de ponts, prédimensionnés', tplCreate: 'Créer le modèle', tplCreated: 'Modèle créé à partir du gabarit',
+      tpl_dappedEnd: 'About réduit (demi-joint)', tpl_bentCap: 'Chevêtre multicolonne', tpl_pileCap: 'Semelle sur pieux',
+      tplSub_dappedEnd: 'Suspente, tirant de chaise, demi-portée', tplSub_bentCap: '2 à 4 colonnes, poutres réparties', tplSub_pileCap: '2, 3 ou 4 pieux · coupe 2D',
+      tplNote_dappedEnd: 'Modèle orthogonal : bielle de la plaque au sommet de la suspente, tirant de chaise prolongé jusqu’au premier montant, treillis jusqu’à la mi-portée (plan de symétrie). Réaction R répartie sur les nœuds supérieurs.',
+      tplNote_bentCap: 'Treillis à membrures supérieure et inférieure, montants à chaque poutre et colonne, diagonales comprimées dirigées vers la colonne la plus proche. Hyperstatique dès 3 colonnes (r = n − 2).',
+      tplNote_pileCap: 'Coupe 2D. 4 pieux : chaque ligne représente deux pieux et le tirant 2D se partage entre deux tirants parallèles. 3 pieux (triangle) : coupe par un pieu et la ligne des deux autres ; tirants de côté = T2D / √3. Plaques équivalentes aux aires réelles.',
+      tplAutoNote: 'Barres, largeurs et plaques prédimensionnées automatiquement (utilisation visée 0,85).',
+      tf_h: 'Hauteur h', tf_hn: 'Hauteur de la chaise', tf_ln: 'Longueur de la chaise', tf_a: 'Appui depuis l’about', tf_half: 'Demi-portée', tf_R: 'Réaction R', tf_n: 'Panneaux', tf_b: 'Épaisseur b', tf_fc: "f'c",
+      tf_ncol: 'Colonnes', tf_spacing: 'Entraxe des colonnes', tf_overhang: 'Porte-à-faux', tf_colWidth: 'Largeur de colonne', tf_nGirders: 'Poutres', tf_girderSpacing: 'Entraxe des poutres', tf_P: 'Charge par poutre / colonne',
+      tf_np: 'Nombre de pieux', tf_s: 'Entraxe des pieux', tf_edge: 'Distance au bord', tf_pileD: 'Diamètre des pieux',
+      tplErr_hn: 'hauteur de chaise hors limites', tplErr_a: 'l’appui doit être sur la chaise', tplErr_half: 'demi-portée trop courte', tplErr_girders: 'poutres hors du chevêtre', tplErr_edge: 'distance au bord trop faible', tplErr_s: 'entraxe < 2,5 diamètres',
+      license: 'Licence GPL-3.0',
       warning: 'Valeurs préliminaires indicatives — ne remplace pas la conception détaillée.',
       methodOpen: 'Méthode et hypothèses', methodSub: 'Comment QuickerStrut&Tie calcule', methodHtml: METHOD_FR,
       released: 'Version du', model: 'Modèle bielles-tirants', reset: 'Réinitialiser', modelName: 'Nom du modèle', untitled: 'Modèle sans titre',
@@ -35,7 +64,7 @@
       tabParams: 'Paramètres', tabNodes: 'Nœuds', tabMembers: 'Barres', unitsNote: 'm · kN · mm · MPa', autosaved: 'Sauvegarde auto ✓',
       undo: 'Annuler (Ctrl Z)', redo: 'Rétablir (Ctrl Y)', fit: 'Recadrer (F)',
       viewChecks: 'Vérifications', viewForces: 'Efforts', viewReactions: 'Réactions',
-      footerNote: 'Calcul local dans le navigateur · aucune donnée transmise', cancel: 'Annuler',
+      footerNote: 'Calcul local dans le navigateur · aucune donnée transmise · logiciel libre GPL-3.0', cancel: 'Annuler',
       grid: 'Grille', hintChain: 'Échap pour terminer la chaîne',
       hint_select: 'Glisser un nœud ou une barre · glisser le fond pour déplacer · molette pour zoomer',
       hint_node: 'Cliquer pour ajouter un nœud · sur une barre pour la diviser',
@@ -90,6 +119,30 @@
       resetTitle: 'Réinitialiser le modèle ?', resetBody: 'Le modèle actuel sera remplacé par l’exemple de départ.'
     },
     en: {
+      chipZones: 'Nodal zones', anchorage: 'Anchorage', anchorages: 'Tie anchorages', cover: 'Cover', ldFactor: 'l<sub>d</sub> factor', ldFav: 'minimum cover and spacing', ldOther: 'other cases',
+      anchorNote: 'Available length l<sub>a</sub> = distance from the node to the critical section (edge of the extended nodal zone) + extension of the bars to the concrete face, less the cover. l<sub>d</sub> straight bar (12.2.3) or l<sub>dh</sub> standard hook (12.5) to A23.3, simplified; k1 = 1.3 for bars with more than 300 mm of concrete below.',
+      autoSizeTitle: 'Preliminary sizing', autoSize: 'Size automatically', autoSizeNote: 'Picks tie bars, strut widths, missing plates and the anchorage type (straight → hook → plate) for a target utilization of 0.85. The geometry is not changed.',
+      autoSizeDone: 'Sizing applied', autoSizeFail: 'Sizing not possible: unstable model',
+      hydroZone: 'Hydrostatic nodal zone · σh', hydroZones: 'Hydrostatic nodal zones', face: 'Face',
+      hydroNoteFace: 'Force polygon rotated by 90°: each face is perpendicular to its force and all faces carry the same stress σh, equal to the highest stress on a face with an entered width (w<sub>h</sub> ≤ w).',
+      hydroNoteLimit: 'No width entered: smallest zone sized at the node stress limit.',
+      zoneOutside: 'The hydrostatic nodal zone extends beyond the concrete outline.',
+      anchorType: 'Tie anchorage', anchor_straight: 'Straight bar', anchor_hook: 'Standard hook', anchor_plate: 'Plate / welded bar', anchor_stirrup: 'Closed stirrups',
+      anchorSteps: 'l<sub>a</sub> = critical section + extension − cover ≥ l<sub>d</sub>.', dbUnknown: 'bar size unknown (direct As)', mechanicalNote: 'mechanical anchorage, check the back face',
+      pile: 'Pile', pileNote: 'Factored pile head loads: N &gt; 0 compression, H along x, M = 0 (pinned head in the model).', tie3D: '3D cap: each real tie carries {f} × the 2D model tie.',
+      exportPile: 'Export to QuickerPile', exportPileSub: 'Pile head loads (.json)', noPiles: 'No supports: nothing to export', pileExported: '{n} piles exported', pileLoadsTitle: 'Pile head loads',
+      templatesMenu: 'Templates', templatesSub: 'Parametric bridge models, pre-sized', tplCreate: 'Create model', tplCreated: 'Model created from the template',
+      tpl_dappedEnd: 'Dapped end (half-joint)', tpl_bentCap: 'Multi-column bent cap', tpl_pileCap: 'Pile cap',
+      tplSub_dappedEnd: 'Hanger, nib tie, half span', tplSub_bentCap: '2 to 4 columns, distributed girders', tplSub_pileCap: '2, 3 or 4 piles · 2D section',
+      tplNote_dappedEnd: 'Orthogonal model: strut from the plate to the top of the hanger, nib tie extended to the first vertical, truss to mid-span (symmetry plane). Reaction R spread over the top nodes.',
+      tplNote_bentCap: 'Truss with top and bottom chords, verticals at every girder and column, compression diagonals towards the nearest column. Indeterminate from 3 columns (r = n − 2).',
+      tplNote_pileCap: '2D section. 4 piles: each line stands for two piles and the 2D tie is shared by two parallel ties. 3 piles (triangle): section through one pile and the line of the other two; side ties = T2D / √3. Plates equivalent to the real areas.',
+      tplAutoNote: 'Bars, widths and plates sized automatically (target utilization 0.85).',
+      tf_h: 'Depth h', tf_hn: 'Nib depth', tf_ln: 'Nib length', tf_a: 'Bearing from the end', tf_half: 'Half span', tf_R: 'Reaction R', tf_n: 'Panels', tf_b: 'Thickness b', tf_fc: "f'c",
+      tf_ncol: 'Columns', tf_spacing: 'Column spacing', tf_overhang: 'Overhang', tf_colWidth: 'Column width', tf_nGirders: 'Girders', tf_girderSpacing: 'Girder spacing', tf_P: 'Load per girder / column',
+      tf_np: 'Number of piles', tf_s: 'Pile spacing', tf_edge: 'Edge distance', tf_pileD: 'Pile diameter',
+      tplErr_hn: 'nib depth out of range', tplErr_a: 'the bearing must be on the nib', tplErr_half: 'half span too short', tplErr_girders: 'girders outside the cap', tplErr_edge: 'edge distance too small', tplErr_s: 'spacing < 2.5 diameters',
+      license: 'GPL-3.0 licence',
       warning: 'Indicative preliminary values only — not a substitute for detailed design.',
       methodOpen: 'Method and assumptions', methodSub: 'How QuickerStrut&Tie calculates', methodHtml: METHOD_EN,
       released: 'Released', model: 'Strut-and-tie model', reset: 'Reset', modelName: 'Model name', untitled: 'Untitled model',
@@ -100,7 +153,7 @@
       tabParams: 'Parameters', tabNodes: 'Nodes', tabMembers: 'Members', unitsNote: 'm · kN · mm · MPa', autosaved: 'Autosaved ✓',
       undo: 'Undo (Ctrl Z)', redo: 'Redo (Ctrl Y)', fit: 'Fit view (F)',
       viewChecks: 'Checks', viewForces: 'Forces', viewReactions: 'Reactions',
-      footerNote: 'Computed locally in your browser · no data leaves your computer', cancel: 'Cancel',
+      footerNote: 'Computed locally in your browser · no data leaves your computer · free software, GPL-3.0', cancel: 'Cancel',
       grid: 'Grid', hintChain: 'Esc to end the chain',
       hint_select: 'Drag a node or a member · drag the background to pan · wheel to zoom',
       hint_node: 'Click to add a node · on a member to split it',

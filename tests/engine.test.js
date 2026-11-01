@@ -230,3 +230,115 @@ test('a tie collinear with a strut does not reduce the strut strength', () => {
   assert.ok(m8.ends.every((e) => e.tie !== 'M9'));
   assert.ok(m8.util < 1 && isFinite(m8.util));
 });
+
+// ------------------------------------------------- hydrostatic nodal zones
+test('hydrostatic zone: closed polygon, faces ⟂ forces, uniform stress, widths ∝ forces', () => {
+  const { c, m } = run('deep-beam-1');
+  const z = byId(c.nodes, 'N3').zone; // CCC: two struts + load plate 300 mm
+  assert.ok(z && z.poly.length === 3);
+  assert.ok(z.closure < 1e-9, 'force polygon closes');
+  close(z.sigma, 2000e3 / (300 * 400), 1e-9, 'σh set by the load plate');
+  for (const fa of z.faces) {
+    const ex = fa.b[0] - fa.a[0], ey = fa.b[1] - fa.a[1], L = Math.hypot(ex, ey);
+    close(L * 1000, fa.wHydro, 1e-6, 'face length');
+    close((ex * fa.ux + ey * fa.uy) / L, 0, 1e-9, 'face ⟂ force');
+    close(fa.force * 1000 / (fa.wHydro * m.material.b), z.sigma, 1e-9, 'uniform stress');
+  }
+  // Symmetric node: both strut faces equal; load face = 2 cos45° × strut face.
+  const s = z.faces.filter((f) => f.kind === 'strut');
+  close(s[0].wHydro, s[1].wHydro, 1e-9);
+  close(z.faces.find((f) => f.kind === 'load').wHydro, 300, 1e-9);
+  close(s[0].wHydro, 300 / Math.SQRT2, 1e-6);
+});
+
+test('hydrostatic zone: a CCT node uses the tie as a back-face push', () => {
+  const { c } = run('deep-beam-1');
+  const z = byId(c.nodes, 'N1').zone;
+  assert.deepEqual(z.faces.map((f) => f.kind).sort(), ['strut', 'support', 'tie']);
+  const tie = z.faces.find((f) => f.kind === 'tie');
+  close(tie.ux, -1, 1e-12, 'back face normal points away from the tie');
+  for (const n of c.nodes) if (n.zone) assert.ok(n.zone.closure < 1e-9, n.id);
+});
+
+// ------------------------------------------------------------ anchorage
+test('development lengths (A23.3 12.2.3 / 12.5, simplified)', () => {
+  // 25M (db 25.2), fy 400, f'c 35: ld = 0.45 × 1.0 × 400 / √35 × 25.2
+  close(csa.developmentLength('straight', 25.2, 400, 35, {}), 0.45 * 400 / Math.sqrt(35) * 25.2, 1e-9);
+  close(csa.developmentLength('straight', 19.5, 400, 35, { top: true }), 0.45 * 1.3 * 0.8 * 400 / Math.sqrt(35) * 19.5, 1e-9);
+  close(csa.developmentLength('hook', 25.2, 400, 35, {}), 100 * 25.2 / Math.sqrt(35), 1e-9);
+  close(csa.developmentLength('straight', 10, 400, 80, {}), 300, 0, 'minimum 300 mm, √f\'c ≤ 8');
+});
+
+test('anchorage: available length = critical section + extension − cover', () => {
+  const { c } = run('deep-beam-1');
+  const a = c.anchors.find((x) => x.member === 'M3' && x.node === 'N1');
+  close(a.e, 300 - 50, 1e-6, 'node 0.30 m from the end, 50 mm cover');
+  close(a.dc, Math.max(150 / Math.sin(Math.PI / 4), 0), 0.5, 'strut edge on the tie axis (w/2 / sin θ)');
+  close(a.la, a.dc + a.e, 1e-9);
+  close(a.req, 100 * 25.2 / Math.sqrt(35), 1e-9, 'standard hook');
+  close(a.util, a.req / a.la, 1e-12);
+  // No anchorage check at a symmetry plane or where a tie continues.
+  const hj = run('half-joint').c;
+  assert.ok(!hj.anchors.some((x) => x.node === 'N10'));
+  assert.ok(!run('deep-beam-2').c.anchors.some((x) => x.node === 'N5' || x.node === 'N6'));
+});
+
+// ------------------------------------------------------------ templates
+const templates = require('../app/js/templates.js');
+function solveTpl(kind, p) {
+  const g = templates[kind](p);
+  templates.autoSize(g.model);
+  const r = solver.solve(g.model);
+  return { g, r, c: csa.check(g.model, r) };
+}
+
+test('templates generate stable, sized models inside their outline', () => {
+  const cases = [['dappedEnd', {}], ['dappedEnd', { n: 1 }], ['dappedEnd', { n: 5, h: 1.5, hn: 0.7 }],
+    ['bentCap', {}], ['bentCap', { ncol: 2, nGirders: 4, girderSpacing: 2.4 }], ['bentCap', { ncol: 4, nGirders: 6, spacing: 5 }],
+    ['pileCap', { np: 2 }], ['pileCap', { np: 3 }], ['pileCap', { np: 4 }]];
+  for (const [k, p] of cases) {
+    const { g, r, c } = solveTpl(k, p);
+    const tag = k + ' ' + JSON.stringify(p);
+    assert.deepEqual(g.errors, [], tag + ' parameters');
+    assert.ok(r.ok && r.converged, tag + ' solves');
+    assert.ok(r.residual < 1e-6 && r.globalResidual < 1e-6, tag + ' equilibrium');
+    assert.deepEqual(csa.geometryWarnings(g.model), [], tag + ' inside outline');
+    assert.ok(c.maxUtil <= 1.0, tag + ' sized: ' + c.maxUtil.toFixed(2) + ' ' + c.governing.id);
+  }
+});
+
+test('bent cap: indeterminacy r = columns − 2 and reactions balance the girders', () => {
+  for (const ncol of [2, 3, 4]) {
+    const { r } = solveTpl('bentCap', { ncol, nGirders: 5, spacing: 5, overhang: 1.8, girderSpacing: 3.0, P: 1000 });
+    assert.equal(r.indeterminacy, ncol - 2);
+    close(r.reactions.reduce((s, R) => s + R.ry, 0), 5000, 1e-6);
+  }
+});
+
+test('dapped-end template: hanger = R and nib tie = R cot α', () => {
+  const { g, r } = solveTpl('dappedEnd', { R: 800 });
+  const n = (id) => g.model.nodes.find((x) => x.id === id);
+  const A = n('N1'), D = n('N2'), alpha = Math.atan2(D.y - A.y, D.x - A.x);
+  close(r.reactions.find((x) => x.node === 'N1').ry, 800, 1e-6);
+  close(byId(r.forces, 'M3').N, 800, 1e-6, 'hanger');
+  close(byId(r.forces, 'M2').N, 800 / Math.tan(alpha), 1e-6, 'nib tie');
+});
+
+test('pile caps: pile head loads and 3D tie factors', () => {
+  const P = 9000;
+  for (const [np, each] of [[2, P / 2], [3, P / 3], [4, P / 4]]) {
+    const { g, r } = solveTpl('pileCap', { np, P });
+    const pl = templates.pileLoads(g.model, r, { version: 'test' });
+    assert.equal(pl.format, 'quickerpile-head-loads');
+    assert.equal(pl.piles.length, np);
+    for (const p of pl.piles) close(p.N, each, 1e-6, np + ' piles');
+    close(pl.piles.reduce((s, p) => s + p.N, 0), P, 1e-6);
+  }
+  // 4-pile cap: 2D tie = R2D·(s/2)/z with R2D = P/2; each real tie carries half.
+  const { g, r } = solveTpl('pileCap', { np: 4, P, s: 2.7 });
+  const z = g.model.nodes.find((x) => x.id === 'N1').y - g.model.nodes.find((x) => x.id === 'N3').y;
+  const xa = g.model.nodes.find((x) => x.id === 'N3').x, xc = g.model.nodes.find((x) => x.id === 'N1').x;
+  close(byId(r.forces, 'M1').N, (P / 2) * (xc - xa) / z, 1e-6);
+  assert.equal(g.model.meta.tie3D.factor, 0.5);
+  close(solveTpl('pileCap', { np: 3 }).g.model.meta.tie3D.factor, 1 / Math.sqrt(3), 1e-12);
+});

@@ -1,4 +1,5 @@
 @charset "UTF-8";
+/* SPDX-License-Identifier: GPL-3.0-or-later */
 /* QuickerStrut&Tie — design tokens and layout. */
 :root{
   --navy:#102d41;--navy-2:#0b2436;--navy-3:#061520;--ink:#17374b;--muted:#566e7c;--axis:#5d7684;
@@ -261,17 +262,20 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:10px 16px;border-radius:9px;font-size:.84rem;box-shadow:0 10px 26px #0006;opacity:0;transition:all .25s;z-index:200;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ---------- Splash ---------- */
-#splash{position:fixed;inset:0;z-index:1000;background:#061520;display:flex;align-items:center;justify-content:center;transition:opacity .55s ease}
-#splash.out{opacity:0;pointer-events:none}
-#splash svg{width:100%;height:100%}
-#splash .sp-word{font:650 46px "Segoe UI",Inter,Arial,sans-serif;letter-spacing:-1.5px}
-#splash .sp-tag{font:500 15px "Segoe UI",Inter,Arial,sans-serif;fill:#9fc3d2;letter-spacing:2px}
-#splash .sp-small{font:600 12px "Segoe UI",Inter,Arial,sans-serif}
-#splash-skip{position:absolute;right:22px;bottom:22px;background:transparent;border:1px solid #2f5a70;color:#9fc3d2;border-radius:999px;width:38px;height:38px;font-size:1.2rem;padding:0}
-.reveal .inputs,.reveal .stage,.reveal .metrics,.reveal .chart-toolbar,.reveal .result-view{animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
-.reveal .stage{animation-delay:.08s}.reveal .metrics{animation-delay:.16s}.reveal .chart-toolbar,.reveal .result-view{animation-delay:.22s}
-@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+/* ---------- Templates dialog ---------- */
+.tpl-dialog{width:1040px}
+.tpl-body{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;padding:14px 18px;max-height:72vh;overflow:auto}
+.tpl-kinds{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.tpl-kind{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;padding:9px 11px;border-radius:9px}
+.tpl-kind small{font-weight:400;color:var(--muted)}
+.tpl-kind.active{border-color:var(--teal);background:#eefaf6;box-shadow:0 0 0 2px #56e0bb44}
+.tpl-form .field{margin-bottom:8px}
+.tpl-preview{display:flex;flex-direction:column;gap:10px;min-width:0}
+.tpl-svg{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.tpl-svg svg{width:100%;height:auto;display:block}
+.tpl-info{font-size:.8rem;color:var(--muted);line-height:1.55}
+.tpl-info b{color:var(--ink)}
+.tpl-info .bad{color:var(--bad)}
 
 /* ---------- Responsive ---------- */
 @media (max-width:1380px){.top-warning{display:none}}
@@ -282,6 +286,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
   .inspector{width:290px}
 }
 @media (max-width:760px){
+  .tpl-body{grid-template-columns:1fr}
   .topbar{padding:0 12px;height:56px}.brand{font-size:1.15rem}.release-info,.method-open .lbl{display:none}
   .header-right{gap:10px}
   .canvas-wrap{height:68vh}
@@ -350,6 +355,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
   .view-tabs button{padding:8px 1px;font-size:.8rem}
   .result-view{padding:8px 10px 10px}
   dialog{max-height:calc(100svh - 12px)}
+  .tpl-body{grid-template-columns:250px minmax(0,1fr);max-height:calc(100svh - 130px);padding:10px}
   .dlg-body{max-height:calc(100svh - 120px)}
 }
 @media (pointer:coarse){

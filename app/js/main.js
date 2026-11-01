@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — start-up, language, menus, files and keyboard shortcuts. */
 (function () {
   'use strict';
@@ -59,6 +60,72 @@
     reader.readAsText(file);
   }
 
+
+  // ---------------------------------------------------------------- templates
+  var TPL = {
+    dappedEnd: [['h', 'm'], ['hn', 'm'], ['ln', 'm'], ['a', 'm'], ['half', 'm'], ['R', 'kN'], ['n', ''], ['b', 'mm'], ['fc', 'MPa']],
+    bentCap: [['ncol', ''], ['spacing', 'm'], ['overhang', 'm'], ['h', 'm'], ['colWidth', 'm'], ['nGirders', ''], ['girderSpacing', 'm'], ['P', 'kN'], ['b', 'mm'], ['fc', 'MPa']],
+    pileCap: [['np', ''], ['s', 'm'], ['edge', 'm'], ['h', 'm'], ['colWidth', 'm'], ['pileD', 'm'], ['P', 'kN'], ['fc', 'MPa']]
+  };
+  var tplState = { kind: 'dappedEnd', params: {} };
+  Object.keys(TPL).forEach(function (k) { tplState.params[k] = Object.assign({}, QST.templates.DEFAULTS[k]); });
+
+  function tplGenerate() {
+    var g = QST.templates[tplState.kind](tplState.params[tplState.kind]);
+    var m = App.sanitize(g.model);
+    m.meta = g.model.meta;
+    var info = QST.templates.autoSize(m);
+    QST.csa.normalize(m);
+    var r = QST.solver.solve(m), c = QST.csa.check(m, r);
+    return { model: m, result: r, checks: c, errors: g.errors, info: info };
+  }
+  function tplRender() {
+    var t = App.t, fmt = App.fmt;
+    $('#tpl-kinds').innerHTML = Object.keys(TPL).map(function (k) {
+      return '<button type="button" class="tpl-kind' + (k === tplState.kind ? ' active' : '') + '" data-kind="' + k + '"><b>' + t('tpl_' + k) + '</b><small>' + t('tplSub_' + k) + '</small></button>';
+    }).join('');
+    var p = tplState.params[tplState.kind];
+    $('#tpl-form').innerHTML = '<div class="field-row">' + TPL[tplState.kind].map(function (f) {
+      if (f[0] === 'np') return '<label class="field"><span>' + t('tf_np') + '</span><select data-tf="np">' + [2, 3, 4].map(function (n) { return '<option' + (p.np === n ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></label>';
+      return '<label class="field"><span>' + t('tf_' + f[0]) + '</span><span class="unit-wrap"><input class="num" inputmode="decimal" data-tf="' + f[0] + '" value="' + App.esc(App.fmtInput(p[f[0]])) + '"><i>' + f[1] + '</i></span></label>';
+    }).join('') + '</div>';
+    tplPreview();
+  }
+  function tplPreview() {
+    var t = App.t, fmt = App.fmt, g;
+    try { g = tplGenerate(); } catch (e) { $('#tpl-svg').innerHTML = ''; $('#tpl-info').innerHTML = '<span class="bad">' + App.esc(e.message) + '</span>'; return; }
+    $('#tpl-svg').innerHTML = App.staticSVG({ model: g.model, result: g.result, checks: g.checks, mode: 'forces', width: 760, height: 380, grid: false, ids: false, pad: { l: 40, r: 40, t: 60, b: 50 } });
+    var h = '';
+    if (g.errors.length) h += '<div class="bad">⚠ ' + g.errors.map(function (e) { return t('tplErr_' + e); }).join(' · ') + '</div>';
+    if (!g.result.ok) h += '<div class="bad">' + t('mechanism') + '</div>';
+    else h += '<div><b>' + t('mUtil') + ' ' + fmt(g.checks.maxUtil, 2) + '</b> · ' + (g.result.indeterminacy === 0 ? t('determinate') : t('indeterminate') + ' (r = ' + g.result.indeterminacy + ')') + ' · ' + g.model.nodes.length + ' ' + t('nodesLc') + ' · ' + g.model.members.length + ' ' + t('membersLc') + '</div>';
+    h += '<div>' + t('tplNote_' + tplState.kind) + '</div><div>' + t('tplAutoNote') + '</div>';
+    $('#tpl-info').innerHTML = h;
+  }
+  function bindTemplates() {
+    $('#open-templates').addEventListener('click', function () { closeMenus(); tplRender(); $('#tpl-dialog').showModal(); });
+    $('#tpl-kinds').addEventListener('click', function (e) { var b = e.target.closest('[data-kind]'); if (!b) return; tplState.kind = b.dataset.kind; tplRender(); });
+    $('#tpl-form').addEventListener('change', function (e) {
+      var el = e.target, k = el.dataset.tf; if (!k) return;
+      var v = el.tagName === 'SELECT' ? Number(el.value) : App.parse(el.value);
+      if (!(isFinite(v) && v > 0)) { el.classList.add('num-err'); return; }
+      el.classList.remove('num-err');
+      tplState.params[tplState.kind][k] = v;
+      tplPreview();
+    });
+    $('#tpl-form').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
+    $('#tpl-create').addEventListener('click', function () {
+      var g = tplGenerate();
+      guard().then(function (go) {
+        if (!go) return;
+        g.model.name = App.t('tpl_' + tplState.kind);
+        App.load(g.model);
+        $('#tpl-dialog').close();
+        App.toast(App.t('tplCreated'));
+      });
+    });
+  }
+
   function bind() {
     $('#lang-fr').addEventListener('click', function () { App.setLang('fr'); applyLanguage(); });
     $('#lang-en').addEventListener('click', function () { App.setLang('en'); applyLanguage(); });
@@ -88,6 +155,8 @@
     $('#print-report').addEventListener('click', function () { closeMenus(); App.printReport(); });
     $('#export-svg').addEventListener('click', function () { closeMenus(); App.download(App.fileBase() + '-' + App.display.mode + '.svg', App.staticSVG({ mode: App.display.mode === 'geometry' ? 'forces' : App.display.mode }), 'image/svg+xml'); });
     $('#export-csv').addEventListener('click', function () { closeMenus(); App.exportCSV(); });
+    $('#export-pile-menu').addEventListener('click', function () { closeMenus(); App.exportPileLoads(); });
+    bindTemplates();
     $('#method-open').addEventListener('click', function () { $('#method-dialog').showModal(); });
     $$('dialog [data-close]').forEach(function (b) { b.addEventListener('click', function () { b.closest('dialog').close(); }); });
     $('#method-dialog').addEventListener('click', function (e) { if (e.target === e.currentTarget) e.currentTarget.close(); });

@@ -11,7 +11,7 @@ No installation, no server, no data leaves your computer.
 
 ![QuickerStrut&Tie — hammerhead pier cap, forces view](docs/screenshots/forces.png)
 
-*Version 0.1.1 · 2026-11-01 · Anthony Chéruel · [Version history](CHANGELOG.md) · [Français](#en-français)*
+*Version 0.2 · 2026-11-01 · Anthony Chéruel · [Version history](CHANGELOG.md) · [Français](#en-français)*
 
 ## What it does
 
@@ -21,15 +21,27 @@ No installation, no server, no data leaves your computer.
 - **Live analysis:** pin-jointed truss solved by the direct stiffness method at every
   change (a few milliseconds); struts and ties identified from the force sign; mechanism
   detection with the free node named; determinate and indeterminate models.
-- **CSA checks:** strut crushing with the ε1-based limit fcu = f′c / (0.8 + 170 ε1) ≤ 0.85 f′c,
-  tie yielding, CCC / CCT / CTT nodal zone stresses on strut, bearing and anchorage faces,
-  crack control reinforcement; CSA S6 (bridges) or CSA A23.3 (buildings) factors,
-  overridable.
+- **CSA checks:** strut crushing with the ε1-based limit (≤ 0.85 f′c to A23.3, ≤ α1 f′c to
+  S6), tie yielding, CCC / CCT / CTT nodal zone stresses on strut, bearing and anchorage
+  faces, **tie anchorage** (available length to the extended nodal zone vs. straight-bar or
+  hook development length; plates, welded bars and closed stirrups), crack control
+  reinforcement; CSA S6 (bridges) or CSA A23.3 (buildings) factors, overridable.
+- **Hydrostatic nodal zones drawn graphically:** the force polygon rotated by 90° gives each
+  node's outline, every face perpendicular to its force and at the same stress; the
+  hydrostatic face widths are compared with the widths entered and a zone that leaves the
+  concrete is flagged.
+- **Parametric bridge templates:** dapped end (half-joint), multi-column bent cap (2 to 4
+  columns, any number of girders) and pile cap on 2, 3 or 4 piles, generated and **sized
+  automatically** (bars, strut widths, plates, anchorage type); the sizing is also
+  available for any model.
+- **QuickerPile link:** factored pile head loads (N, H, M per pile, 3D pile caps expanded)
+  exported as a `quickerpile-head-loads` JSON file.
 - **Readable results:** forces and utilization views drawn with the real strut and tie
   widths, colour **and** line style (dashed struts, solid ties) with value labels; an
   inspector showing every step of each calculation; checks, forces and reactions tables.
-- **Outputs:** printable calculation note (PDF through the browser), SVG drawing, CSV
-  table, `.quickerstrut.json` projects, automatic local save.
+- **Outputs:** printable calculation note (PDF through the browser) with nodal zones,
+  anchorages and pile loads, SVG drawing, CSV table, `.quickerstrut.json` projects,
+  pile head loads for QuickerPile, automatic local save.
 - **Examples:** deep beams, double corbel, hammerhead pier cap, half-joint seat
   (dapped end), two-pile cap, and a deep beam from a published design manual whose
   member forces are reproduced exactly.
@@ -37,6 +49,8 @@ No installation, no server, no data leaves your computer.
   Galaxy Z Fold unfolded in landscape).
 
 ![Utilization view and inspector (French interface)](docs/screenshots/utilization-fr.png)
+
+![Parametric templates with live preview (French interface)](docs/screenshots/templates-fr.png)
 
 ![Half-joint seat on a Galaxy Z Fold unfolded in landscape](docs/screenshots/half-joint-fold.png)
 
@@ -72,11 +86,12 @@ examples: [VALIDATION.md](VALIDATION.md)
 Plain HTML, CSS and JavaScript with no dependencies and no build step for the web version.
 
 ```text
-app/index.html        page and intro animation
+app/index.html        page
 app/css/app.css       styles (screen and printed report)
 app/js/solver.js      truss solver (stiffness method)          ← unit tested
 app/js/csa.js         CSA S6 / A23.3 checks, bar sizes         ← unit tested
 app/js/examples.js    example models
+app/js/templates.js   parametric templates, automatic sizing, pile loads ← unit tested
 app/js/i18n.js        French / English strings and method text
 app/js/app.js         state, history, storage, formatting
 app/js/canvas.js      SVG editor, drawing and interactions
@@ -105,6 +120,12 @@ Dessinez le contour du béton, placez les nœuds et les barres, déplacez-les à
 efforts, résistances des bielles et tirants et contraintes des zones nodales se mettent à
 jour en direct. Aucune installation, aucun serveur, aucune donnée transmise.
 
+- **Gabarits paramétriques de ponts :** about réduit, chevêtre multicolonne (2 à 4 colonnes),
+  semelle sur 2, 3 ou 4 pieux, générés et **prédimensionnés automatiquement** ; export des
+  charges en tête de pieu vers **QuickerPile**.
+- **Zones nodales hydrostatiques** construites graphiquement (polygone des forces tourné de
+  90°) et **vérification de l’ancrage** des tirants (longueur disponible jusqu’à la zone
+  nodale prolongée contre l_d ou l_dh ; plaques, barres soudées, étriers fermés).
 - **Éditeur :** outils sélection, nœud, barre, appui, charge, contour et effacer ;
   aimantation à la grille, zoom, déplacement, annuler/rétablir, raccourcis clavier, tactile.
 - **Calcul en direct :** treillis articulé résolu par la méthode des rigidités à chaque
@@ -128,4 +149,12 @@ jour en direct. Aucune installation, aucun serveur, aucune donnée transmise.
 > coefficients sont à confirmer avec l’édition de la norme applicable. L’auteur ne peut
 > être tenu responsable des résultats.
 
-© 2026 Anthony Chéruel
+## Licence
+
+QuickerStrut&Tie is free software: you can redistribute it and/or modify it under the terms
+of the **GNU General Public License** as published by the Free Software Foundation, either
+version 3 of the License, or (at your option) any later version. It is distributed in the
+hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See [LICENSE](LICENSE).
+
+Logiciel libre sous licence **GPL-3.0-or-later** · © 2026 Anthony Chéruel

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — side panel, inspector, metrics, result tables, toolbar. */
 (function () {
   'use strict';
@@ -31,7 +32,7 @@
     $('#display-mode').innerHTML = ['geometry', 'forces', 'util'].map(function (m) {
       return '<button type="button" data-mode="' + m + '" class="' + (App.display.mode === m ? 'active' : '') + '">' + t('mode_' + m) + '</button>';
     }).join('');
-    var chips = { bands: 'chipBands', ids: 'chipIds', snap: 'chipSnap' };
+    var chips = { bands: 'chipBands', zones: 'chipZones', ids: 'chipIds', snap: 'chipSnap' };
     Object.keys(chips).forEach(function (k) {
       var el = $('#toggle-' + k);
       el.setAttribute('aria-pressed', String(!!App.display[k]));
@@ -98,6 +99,12 @@
     h += '<div class="field-row">' + unitField(t('width'), 'rect.w', App.round(b.x1 - b.x0), 'm') + unitField(t('height'), 'rect.h', App.round(b.y1 - b.y0), 'm') + '</div>';
     h += '<button type="button" class="add-button" id="apply-rect">' + t('applyRect') + '</button>';
     h += '<p class="note">' + t('outlineNote') + '</p>';
+    h += '<div class="section-label">' + t('anchorage') + '<span style="font-weight:500;letter-spacing:0;text-transform:none">' + t('clause') + ' ' + code.clause.anchor.split(' · ')[0] + '</span></div>';
+    h += '<div class="field-row">' + unitField(t('cover'), 'mat.cover', mat.cover, 'mm') +
+      '<label class="field"><span>' + t('ldFactor') + '</span><select data-k="mat.ldFactor"><option value="0.45"' + (Number(mat.ldFactor) !== 0.6 ? ' selected' : '') + '>0,45 · ' + t('ldFav') + '</option><option value="0.6"' + (Number(mat.ldFactor) === 0.6 ? ' selected' : '') + '>0,6 · ' + t('ldOther') + '</option></select></label></div>';
+    h += '<p class="note">' + t('anchorNote') + '</p>';
+    h += '<div class="section-label">' + t('autoSizeTitle') + '</div>';
+    h += '<button type="button" class="add-button" id="auto-size">⚙ ' + t('autoSize') + '</button><p class="note">' + t('autoSizeNote') + '</p>';
     return h;
   }
   function bounds(pts) {
@@ -166,6 +173,7 @@
     if (parts[0] === 'mat') {
       var key = parts[1];
       if (key === 'epsMode') m.material.epsMode = val;
+      else if (key === 'ldFactor') m.material.ldFactor = Number(val);
       else if (key === 'tieFaces') m.material.tieFaces = !!val;
       else m.material[key] = val === null ? 0 : Math.max(0, val);
     } else if (parts[0] === 'n') {
@@ -185,6 +193,7 @@
       else if (f === 'barsN') { var nb = Math.max(0, Math.round(val)); b.bars = nb > 0 ? { n: nb, size: b.bars ? b.bars.size : '20M' } : null; if (!nb) b.As = 0; }
       else if (f === 'barsSize') { b.bars = { n: b.bars && b.bars.n > 0 ? b.bars.n : 2, size: val }; }
       else if (f === 'As') { b.bars = null; b.As = Math.max(0, val); }
+      else if (f === 'anchor') b.anchor = val;
       App.lastMemberProto = { role: 'auto', w: b.w, bars: b.bars, As: b.As };
     } else if (parts[0] === 'rect') {
       App.history.pop();
@@ -240,6 +249,13 @@
       if (nc.governingFace) { var g = nc.governingFace; h += '<div class="eq">σ = F / (w · b) = ' + fmt(g.force, 0) + ' kN / (' + fmt(g.width, 0) + ' × ' + fmt(App.model.material.b, 0) + ') = ' + fmt(g.stress, 2) + ' MPa</div>'; }
       h += '</div></div>';
     }
+    if (nc && nc.zone) {
+      var z = nc.zone;
+      h += '<div class="ins-result"><div class="big"><div><small>' + t('hydroZone') + '</small><br><b style="color:' + App.utilInk(z.util) + '">' + fmt(z.sigma, 2) + ' <small>MPa</small></b></div><div style="text-align:right"><small>' + t('utilShort') + '</small><br><b style="color:' + App.utilInk(z.util) + '">' + fmt(z.util, 2) + '</b></div></div>';
+      h += '<div class="kv"><span><b>' + t('face') + '</b></span><span><b>F · w → w<sub>h</sub></b></span>';
+      z.faces.forEach(function (fa) { h += '<span>' + t('face_' + fa.kind) + ' ' + (fa.kind === 'strut' || fa.kind === 'tie' ? fa.ref : '') + '</span><span>' + fmt(fa.force, 0) + ' kN · ' + (fa.wGiven > 0 ? fmt(fa.wGiven, 0) : '—') + ' → ' + fmt(fa.wHydro, 0) + ' mm</span>'; });
+      h += '</div><div class="steps">' + t(z.scaled === 'face' ? 'hydroNoteFace' : 'hydroNoteLimit') + (z.outside ? '<div style="color:var(--bad)">⚠ ' + t('zoneOutside') + '</div>' : '') + '</div></div>';
+    }
     h += '<p class="ins-hint">' + t('nodeHint') + '</p></div>';
     return h;
   }
@@ -281,6 +297,17 @@
       }
       h += '</div>';
     }
+    h += '<label class="field" style="margin-top:10px"><span>' + t('anchorType') + '</span><select data-k="m.' + m.id + '.anchor">' + ['straight', 'hook', 'plate', 'stirrup'].map(function (a) { return '<option value="' + a + '"' + ((m.anchor || 'hook') === a ? ' selected' : '') + '>' + t('anchor_' + a) + '</option>'; }).join('') + '</select></label>';
+    var ans = App.checks && App.checks.ok ? App.checks.anchors.filter(function (a) { return a.member === m.id; }) : [];
+    if (ans.length) {
+      h += '<div class="ins-result"><div class="kv">';
+      ans.forEach(function (a) {
+        h += '<span><b>' + t('anchorage') + ' ' + a.node + '</b>' + (a.top ? ' · k1 = 1,3' : '') + '</span><span>' + (a.mechanical ? '<span class="status ok">' + t('anchor_' + a.type) + '</span>' : a.na ? '<span class="status na">db ?</span>' : '<b style="color:' + App.utilInk(a.util) + '">' + fmt(a.util, 2) + '</b>') + '</span>';
+        h += '<span>l<sub>a</sub> = ' + fmt(a.dc, 0) + ' + ' + fmt(a.e, 0) + '</span><span>' + fmt(a.la, 0) + ' mm</span>';
+        if (!a.mechanical && !a.na) h += '<span>' + (a.type === 'hook' ? 'l<sub>dh</sub>' : 'l<sub>d</sub>') + ' (d<sub>b</sub> ' + fmt(a.db, 1) + ')</span><span>' + fmt(a.req, 0) + ' mm</span>';
+      });
+      h += '</div><div class="steps">' + t('anchorSteps') + '<span class="cl">' + QST.csa.CODES[App.model.code].name + ' ' + QST.csa.CODES[App.model.code].clause.anchor + '</span></div></div>';
+    }
     h += '<p class="ins-hint">' + t('memberHint') + '</p></div>';
     return h;
   }
@@ -305,7 +332,7 @@
     var r0 = r.indeterminacy;
     var stat = r0 === 0 ? t('determinate') : r0 > 0 ? t('indeterminate') + ' (r = ' + r0 + ')' : t('mechanism');
     el.innerHTML =
-      metric(t('mUtil'), gov ? '<span style="color:' + App.utilInk(c.maxUtil) + '">' + fmt(c.maxUtil, 2) + '</span>' : '—', '', gov ? (gov.kind === 'node' ? t('node') + ' ' + gov.id + ' · ' + gov.type : t('kind_' + gov.kind) + ' ' + gov.id) + ' · ' + statusText(c.maxUtil) : '', gov ? (gov.kind === 'node' ? 'node:' + gov.id : 'member:' + gov.id) : null) +
+      metric(t('mUtil'), gov ? '<span style="color:' + App.utilInk(c.maxUtil) + '">' + fmt(c.maxUtil, 2) + '</span>' : '—', '', gov ? (gov.kind === 'node' ? t('node') + ' ' + gov.id + ' · ' + gov.type : gov.kind === 'anchor' ? t('anchorage') + ' ' + gov.member + ' · ' + gov.node : t('kind_' + gov.kind) + ' ' + gov.id) + ' · ' + statusText(c.maxUtil) : '', gov ? (gov.kind === 'node' ? 'node:' + gov.id : gov.kind === 'anchor' ? 'member:' + gov.member : 'member:' + gov.id) : null) +
       metric(t('mStrut'), maxS ? '<span style="color:var(--blue)">' + fmt(-maxS.N, 0) + '</span>' : '—', 'kN', maxS ? maxS.id : t('none'), maxS ? 'member:' + maxS.id : null) +
       metric(t('mTie'), maxT ? '<span style="color:var(--amber)">' + fmt(maxT.N, 0) + '</span>' : '—', 'kN', maxT ? maxT.id : t('none'), maxT ? 'member:' + maxT.id : null) +
       metric(t('mModel'), '<span style="font-size:1.1rem">' + stat + '</span>', '', App.model.nodes.length + ' ' + t('nodesLc') + ' · ' + App.model.members.length + ' ' + t('membersLc') + ' · ΣF ' + fmt(r.globalResidual, 3) + ' kN · ' + fmt(App.computeMs, 1) + ' ms', null);
@@ -363,6 +390,10 @@
         var g = e.governingFace;
         h += '<tr data-target="node:' + e.id + '"' + isSel('node', e.id) + '><td>' + e.id + '</td><td class="l">' + e.type + '</td><td>' + (g ? fmt(g.stress, 2) + ' MPa' : '—') + '</td><td>' + fmt(e.limit, 2) + ' MPa</td><td>' + (g ? t('face_' + g.kind) + (g.kind === 'strut' || g.kind === 'tie' ? ' ' + g.ref : '') + ' · w ' + fmt(g.width, 0) : '') + '</td><td class="l">' + cellU(e.util) + '</td><td class="l">' + code.clause.node + '</td></tr>';
       });
+      if (c.anchors.length) h += '<tr class="group"><td colspan="7">' + t('anchorages') + ' · l<sub>a</sub> ≥ l<sub>d</sub></td></tr>';
+      c.anchors.forEach(function (a) {
+        h += '<tr data-target="member:' + a.member + '"' + isSel('member', a.member) + '><td>' + a.member + ' · ' + a.node + '</td><td class="l">' + t('anchor_' + a.type) + '</td><td>' + (a.mechanical || a.na ? '—' : fmt(a.req, 0) + ' mm') + '</td><td>' + fmt(a.la, 0) + ' mm</td><td>' + (a.na ? t('dbUnknown') : a.mechanical ? t('mechanicalNote') : 'd<sub>b</sub> ' + fmt(a.db, 1) + (a.top ? ' · k1 1,3' : '')) + '</td><td class="l">' + (a.mechanical || a.na ? '<span class="status ' + (a.na ? 'na' : 'ok') + '">' + (a.na ? '?' : '✓') + '</span>' : cellU(a.util)) + '</td><td class="l">' + a.clause.split(' · ')[0] + '</td></tr>';
+      });
       var ck = c.crack;
       h += '<tr class="group"><td colspan="7">' + t('crackControl') + '</td></tr>';
       h += '<tr><td>ρh · ρv</td><td class="l">' + t('grid') + '</td><td>' + fmt(ck.rhoH, 4) + ' · ' + fmt(ck.rhoV, 4) + '</td><td>≥ ' + fmt(ck.rhoMin, 4) + '</td><td>s = ' + fmt(ck.spacing, 0) + ' ≤ ' + fmt(ck.sMax, 0) + ' mm</td><td class="l">' + cellU(ck.util) + '</td><td class="l">' + ck.clause + '</td></tr>';
@@ -386,6 +417,13 @@
       h += '<tr><td>Σ ' + t('reactions') + '</td><td></td><td>' + fmt(sx, 1) + '</td><td>' + fmt(sy, 1) + '</td><td></td></tr>';
       h += '<tr><td>' + t('residual') + '</td><td></td><td colspan="3">' + r.globalResidual.toExponential(1) + ' kN</td></tr>';
       h += '</tbody></table></div>';
+      var pl = QST.templates.pileLoads(App.model, r, window.QST_META);
+      if (pl && pl.piles.length && App.model.meta && App.model.meta.pileMap) {
+        h += '<div class="table-scroll" style="margin-top:12px"><table><thead><tr><th>' + t('pile') + '</th><th class="l">' + t('node') + '</th><th>x (m)</th><th>N (kN)</th><th>H (kN)</th><th>M (kN·m)</th></tr></thead><tbody>';
+        pl.piles.forEach(function (q) { h += '<tr data-target="node:' + q.node + '"><td>' + q.id + '</td><td class="l">' + q.node + '</td><td>' + fmt(q.x, 3) + '</td><td>' + fmt(q.N, 1) + '</td><td>' + fmt(q.H, 1) + '</td><td>0</td></tr>'; });
+        h += '</tbody></table></div><p class="table-note">' + t('pileNote') + (App.model.meta && App.model.meta.tie3D && App.model.meta.tie3D.factor !== 1 ? ' ' + t('tie3D').replace('{f}', App.model.meta.tie3D.factor === 0.5 ? (App.lang === 'fr' ? '0,5 (deux tirants parallèles)' : '0.5 (two parallel ties)') : '1/√3') : '') + '</p>';
+        h += '<button type="button" class="add-button" id="export-pile" style="max-width:340px">↗ ' + t('exportPile') + '</button>';
+      }
     }
     el.innerHTML = h;
   }
@@ -415,7 +453,7 @@
   function bind() {
     $('#toolbox').addEventListener('click', function (e) { var b = e.target.closest('[data-tool]'); if (b) App.setTool(b.dataset.tool); });
     $('#display-mode').addEventListener('click', function (e) { var b = e.target.closest('[data-mode]'); if (!b) return; App.display.mode = b.dataset.mode; App.saveUi(); renderToolbox(); renderLegend(); App.renderCanvas(); });
-    ['bands', 'ids', 'snap'].forEach(function (k) { $('#toggle-' + k).addEventListener('click', function () { App.display[k] = !App.display[k]; App.saveUi(); renderToolbox(); App.renderCanvas(); }); });
+    ['bands', 'zones', 'ids', 'snap'].forEach(function (k) { $('#toggle-' + k).addEventListener('click', function () { App.display[k] = !App.display[k]; App.saveUi(); renderToolbox(); App.renderCanvas(); }); });
     $('#undo').addEventListener('click', App.undo);
     $('#redo').addEventListener('click', App.redo);
     $('#fit').addEventListener('click', App.fit);
@@ -438,6 +476,13 @@
     box.addEventListener('click', function (e) {
       var b;
       if ((b = e.target.closest('[data-code]'))) { App.commit(); App.model.code = b.dataset.code; App.update({ inputs: true }); return; }
+      if ((b = e.target.closest('#auto-size'))) {
+        App.commit();
+        var info = QST.templates.autoSize(App.model);
+        App.update({ inputs: true });
+        App.toast(info.error ? t('autoSizeFail') : t('autoSizeDone'));
+        return;
+      }
       if ((b = e.target.closest('#apply-rect'))) {
         var w = App.parse($('[data-k="rect.w"]').value), hgt = App.parse($('[data-k="rect.h"]').value);
         if (!(w > 0 && hgt > 0)) return;
@@ -469,7 +514,10 @@
     ins.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
     ins.addEventListener('wheel', function (e) { e.stopPropagation(); }, { passive: true });
     $('#metrics').addEventListener('click', function (e) { var b = e.target.closest('[data-target]'); if (b) pick(b.dataset.target); });
-    $('#result-view').addEventListener('click', function (e) { var b = e.target.closest('[data-target]'); if (b) pick(b.dataset.target); });
+    $('#result-view').addEventListener('click', function (e) {
+      if (e.target.closest('#export-pile')) { App.exportPileLoads(); return; }
+      var b = e.target.closest('[data-target]'); if (b) pick(b.dataset.target);
+    });
     $('#project-name').addEventListener('change', function (e) { App.commit(); App.model.name = e.target.value.trim(); App.update({ inputs: true }); });
   }
   function applyVertex(el) {
