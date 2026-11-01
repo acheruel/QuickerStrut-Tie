@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QuickerStrut&amp;Tie · Strut-and-tie models</title>
+  <meta name="description" content="Interactive 2D strut-and-tie models checked to CSA S6 and CSA A23.3, computed in your browser.">
+  <meta property="og:title" content="QuickerStrut&amp;Tie · Strut-and-tie models"><meta property="og:description" content="Draw a 2D strut-and-tie model, drag its nodes and see forces and CSA S6 / A23.3 checks update live."><meta name="theme-color" content="#102d41">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23102d41'/%3E%3Ctext x='12' y='47' font-size='48' fill='%2356e0bb' font-family='sans-serif'%3EQ%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./css/app.css">
+  <script src="./js/version.js" defer></script>
+  <script src="./js/solver.js" defer></script>
+  <script src="./js/csa.js" defer></script>
+  <script src="./js/examples.js" defer></script>
+  <script src="./js/i18n.js" defer></script>
+  <script src="./js/app.js" defer></script>
+  <script src="./js/canvas.js" defer></script>
+  <script src="./js/panels.js" defer></script>
+  <script src="./js/report.js" defer></script>
+  <script src="./js/main.js" defer></script>
+</head>
+<body>
+<div id="splash" aria-hidden="true">
+  <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <radialGradient id="sp-bg" cx="50%" cy="42%" r="75%"><stop offset="0" stop-color="#123a52"/><stop offset=".55" stop-color="#0b2436"/><stop offset="1" stop-color="#061520"/></radialGradient>
+      <pattern id="sp-grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#2c5b72" stroke-width=".5"/></pattern>
+      <pattern id="sp-grid2" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M100 0H0V100" fill="none" stroke="#3a7390" stroke-width=".8"/></pattern>
+      <filter id="sp-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <marker id="sp-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#ff9b85"/></marker>
+    </defs>
+    <rect width="1000" height="600" fill="url(#sp-bg)"/>
+    <g id="sp-gridl" opacity="0"><rect width="1000" height="600" fill="url(#sp-grid)"/><rect width="1000" height="600" fill="url(#sp-grid2)"/></g>
+    <rect id="sp-concrete" x="290" y="200" width="420" height="230" rx="2" fill="#9fc3d2" fill-opacity=".09" stroke="#7fa8bb" stroke-width="1.4" opacity="0"/>
+    <path id="sp-band-l" d="M0 0" fill="#7cb4ff" fill-opacity=".17"/>
+    <path id="sp-band-r" d="M0 0" fill="#7cb4ff" fill-opacity=".17"/>
+    <rect id="sp-band-t" x="330" y="395" width="0" height="20" fill="#ffc978" fill-opacity=".2"/>
+    <line id="sp-strut-l" x1="500" y1="225" x2="500" y2="225" stroke="#7cb4ff" stroke-width="3" stroke-dasharray="10 6" filter="url(#sp-glow)"/>
+    <line id="sp-strut-r" x1="500" y1="225" x2="500" y2="225" stroke="#7cb4ff" stroke-width="3" stroke-dasharray="10 6" filter="url(#sp-glow)"/>
+    <line id="sp-tie" x1="335" y1="405" x2="335" y2="405" stroke="#ffc978" stroke-width="4" filter="url(#sp-glow)"/>
+    <g id="sp-nodes" opacity="0">
+      <circle cx="500" cy="225" r="7" fill="#e8fff8" stroke="#0b2436" stroke-width="2"/>
+      <circle cx="335" cy="405" r="7" fill="#e8fff8" stroke="#0b2436" stroke-width="2"/>
+      <circle cx="665" cy="405" r="7" fill="#e8fff8" stroke="#0b2436" stroke-width="2"/>
+      <path d="M335 413l-13 21h26Z M665 413l-13 21h26Z" fill="#cfe6ef" opacity=".9"/>
+      <path d="M315 439h40 M645 439h40" stroke="#6f98ab" stroke-width="1.5"/>
+    </g>
+    <line id="sp-load" x1="500" y1="120" x2="500" y2="120" stroke="#ff9b85" stroke-width="3" marker-end="url(#sp-arrow)"/>
+    <text id="sp-c" x="388" y="300" fill="#cfe2ff" class="sp-small" text-anchor="middle" opacity="0"></text>
+    <text id="sp-t" x="500" y="460" fill="#ffe2ae" class="sp-small" text-anchor="middle" opacity="0"></text>
+    <g id="sp-brand" opacity="0">
+      <text x="500" y="92" text-anchor="middle" class="sp-word"><tspan fill="#fff">Quicker</tspan><tspan fill="#56e0bb">Strut&amp;Tie</tspan></text>
+      <text id="sp-tagline" x="500" y="528" text-anchor="middle" class="sp-tag"></text>
+    </g>
+  </svg>
+  <button id="splash-skip" type="button" aria-label="Skip">›</button>
+</div>
+<script>
+/* Intro: a deep beam strut-and-tie model is drawn and its forces appear (2.4 s). */
+(function(){
+  'use strict';
+  var root=document.getElementById('splash');if(!root)return;
+  var lang='fr';try{var s=localStorage.getItem('qst-lang');if(s==='en'||s==='fr')lang=s;else if(!/^fr/i.test(navigator.language||'fr'))lang='en';}catch(e){}
+  var $=function(i){return document.getElementById(i);};
+  $('sp-tagline').textContent=lang==='fr'?'BIELLES ET TIRANTS · CSA S6 / A23.3':'STRUT-AND-TIE · CSA S6 / A23.3';
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var D=2400,t0=performance.now(),done=false;
+  var ease=function(u){u=Math.max(0,Math.min(1,u));return u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;};
+  var fmt=function(v){return Math.round(v).toLocaleString(lang==='fr'?'fr-CA':'en-CA');};
+  function band(id,x1,y1,x2,y2,w,p){var dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),nx=-dy/L*w/2,ny=dx/L*w/2,ex=x1+dx*p,ey=y1+dy*p;
+    $(id).setAttribute('d','M'+(x1+nx)+' '+(y1+ny)+'L'+(ex+nx)+' '+(ey+ny)+'L'+(ex-nx)+' '+(ey-ny)+'L'+(x1-nx)+' '+(y1-ny)+'Z');}
+  function frame(now){
+    var t=reduce?D:now-t0;
+    $('sp-gridl').setAttribute('opacity',(.5*ease(t/500)).toFixed(3));
+    $('sp-concrete').setAttribute('opacity',ease((t-150)/400).toFixed(3));
+    $('sp-nodes').setAttribute('opacity',ease((t-400)/300).toFixed(3));
+    var l=ease((t-500)/450);$('sp-load').setAttribute('y2',(120+88*l).toFixed(1));
+    var s=ease((t-800)/600);
+    $('sp-strut-l').setAttribute('x2',(500-165*s).toFixed(1));$('sp-strut-l').setAttribute('y2',(225+180*s).toFixed(1));
+    $('sp-strut-r').setAttribute('x2',(500+165*s).toFixed(1));$('sp-strut-r').setAttribute('y2',(225+180*s).toFixed(1));
+    band('sp-band-l',500,225,335,405,34,s);band('sp-band-r',500,225,665,405,34,s);
+    var ti=ease((t-1150)/550);$('sp-tie').setAttribute('x2',(335+330*ti).toFixed(1));$('sp-band-t').setAttribute('width',(330*ti).toFixed(1));
+    var f=ease((t-1350)/700);$('sp-c').setAttribute('opacity',f.toFixed(2));$('sp-t').setAttribute('opacity',f.toFixed(2));
+    $('sp-c').textContent='C '+fmt(1414*f)+' kN';$('sp-t').textContent='T '+fmt(1000*f)+' kN';
+    var b=ease((t-1500)/600);$('sp-brand').setAttribute('opacity',b.toFixed(3));$('sp-brand').setAttribute('transform','translate(0 '+(8*(1-b)).toFixed(2)+')');
+    if(t>=D){finish();return;}
+    requestAnimationFrame(frame);
+  }
+  function finish(){if(done)return;done=true;document.body.classList.add('reveal');setTimeout(function(){document.body.classList.remove('reveal');},1500);root.classList.add('out');setTimeout(function(){root.remove();},600);}
+  $('splash-skip').addEventListener('click',finish);
+  document.addEventListener('keydown',function k(e){if(e.key==='Escape'){finish();document.removeEventListener('keydown',k);}});
+  requestAnimationFrame(frame);
+})();
+</script>
+
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">Q<span>↗</span></span><div>Quicker<span>Strut&amp;Tie</span></div></div>
+  <p class="top-warning" role="note"><span class="warning-symbol" aria-hidden="true">!</span><span data-i18n="warning"></span></p>
+  <div class="header-right">
+    <div class="release-info"><b id="release-version"></b><small id="release-date"></small></div>
+    <button id="method-open" class="method-open" type="button"><span class="lbl" data-i18n="methodOpen"></span><span aria-hidden="true"> ⓘ</span></button>
+    <div class="language" role="group" aria-label="Language / Langue"><button id="lang-en" type="button">EN</button><button id="lang-fr" type="button">FR</button></div>
+    <a class="github-link" href="https://github.com/acheruel/QuickerStrut-Tie" target="_blank" rel="noopener noreferrer" title="GitHub · acheruel/QuickerStrut-Tie" aria-label="GitHub · acheruel/QuickerStrut-Tie"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+  </div>
+</header>
+
+<main class="workspace">
+  <aside class="inputs" aria-label="Model">
+    <div class="panel-heading"><h1 data-i18n="model"></h1><button class="text-button" id="reset" type="button" data-i18n="reset"></button></div>
+    <div class="project-bar">
+      <label for="project-name"><span class="pn-label"><span data-i18n="modelName"></span><span id="dirty" class="dirty"></span></span><span class="pn-wrap"><input id="project-name" maxlength="120" autocomplete="off" spellcheck="false"><svg class="pn-pencil" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 14.5l-.8 2.3 2.3-.8L15 6.5 13.5 5z M12.5 6l1.5 1.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span></label>
+      <div class="project-actions">
+        <div class="qst-menu"><button type="button" class="menu-button" data-menu-toggle aria-haspopup="menu" aria-expanded="false"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2.8h6.5L15.5 7v10.2H5z M11.5 2.8V7h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span data-i18n="fileMenu"></span><span class="caret" aria-hidden="true">▾</span></button>
+          <div class="menu-pop" role="menu">
+            <button type="button" id="new-project" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2.8h6.5L15.5 7v10.2H5z M10 9v6 M7 12h6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="newProject"></b><small data-i18n="newProjectSub"></small></span></button>
+            <button type="button" id="open-project" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 5.5h5l1.6 1.8h8.4v8.7h-15z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="openProject"></b><small data-i18n="openProjectSub"></small></span><kbd>Ctrl O</kbd></button>
+            <button type="button" id="save-project" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 3.5h10.5l2.5 2.5v10.5h-13z M6.5 3.5v4h6v-4 M6 16.5v-5h8v5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="saveProject"></b><small data-i18n="saveProjectSub"></small></span><kbd>Ctrl S</kbd></button>
+            <div class="menu-sep" role="separator"></div>
+            <button type="button" id="print-report" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 7.5V3h9v4.5 M5.5 14H3.5V8h13v6h-2 M5.5 11.5h9V17h-9z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="report"></b><small data-i18n="reportSub"></small></span><kbd>Ctrl P</kbd></button>
+            <button type="button" id="export-svg" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 15l4.5-9 4 6 2-3 3.5 6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="exportSvg"></b><small data-i18n="exportSvgSub"></small></span></button>
+            <button type="button" id="export-csv" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><rect x="3.5" y="3.5" width="13" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 8h13 M3.5 12.3h13 M8 3.5v13" stroke="currentColor" stroke-width="1.3"/></svg><span class="mi-text"><b data-i18n="exportCsv"></b><small data-i18n="exportCsvSub"></small></span></button>
+          </div></div>
+        <div class="qst-menu"><button type="button" class="menu-button" data-menu-toggle aria-haspopup="menu" aria-expanded="false"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 16h15 M4 16V9h12v7 M4 9l6-5 6 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span data-i18n="examplesMenu"></span><span class="caret" aria-hidden="true">▾</span></button>
+          <div class="menu-pop" role="menu" id="examples-list"></div></div>
+        <input id="project-file" type="file" accept=".json,application/json" hidden>
+      </div>
+    </div>
+    <div class="input-tabs" role="tablist"><button type="button" class="active" data-panel="params" data-i18n="tabParams"></button><button type="button" data-panel="nodes"><span data-i18n="tabNodes"></span><span class="count" id="count-nodes"></span></button><button type="button" data-panel="members"><span data-i18n="tabMembers"></span><span class="count" id="count-members"></span></button></div>
+    <div id="input-content" role="tabpanel"></div>
+    <div class="input-footer"><span id="footer-units" data-i18n="unitsNote"></span><span id="autosave-state"></span></div>
+  </aside>
+
+  <section class="results" aria-label="Results">
+    <div class="stage">
+      <div class="stage-top">
+        <div class="toolbox" role="toolbar" id="toolbox"></div>
+        <div class="stage-right">
+          <div class="dark-seg" id="display-mode" role="group"></div>
+          <button type="button" class="chip" id="toggle-bands" aria-pressed="true"></button>
+          <button type="button" class="chip" id="toggle-ids" aria-pressed="true"></button>
+          <button type="button" class="chip" id="toggle-snap" aria-pressed="true"></button>
+          <button type="button" class="icon-chip" id="undo" data-i18n-title="undo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 5L3.5 9l4 4 M3.8 9H12a4.5 4.5 0 010 9h-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" class="icon-chip" id="redo" data-i18n-title="redo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 5l4 4-4 4 M16.2 9H8a4.5 4.5 0 000 9h2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" class="icon-chip" id="fit" data-i18n-title="fit"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7.5V3h4.5 M12.5 3H17v4.5 M17 12.5V17h-4.5 M7.5 17H3v-4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-wrap" id="canvas-wrap">
+        <svg id="canvas" role="img" aria-label="Strut-and-tie model"></svg>
+        <div id="banner" class="banner hidden" role="alert"></div>
+        <div id="empty-hint" class="empty-hint hidden"></div>
+        <div id="inspector" class="inspector hidden" aria-live="polite"></div>
+        <div id="tooltip" class="tooltip hidden"></div>
+        <div class="hud" id="hud"></div>
+        <div class="legend-hud" id="legend"></div>
+      </div>
+    </div>
+    <div class="metrics" id="metrics"></div>
+    <div class="chart-toolbar"><div class="view-tabs" role="tablist" id="view-tabs"><button type="button" class="active" data-view="checks" data-i18n="viewChecks"></button><button type="button" data-view="forces" data-i18n="viewForces"></button><button type="button" data-view="reactions" data-i18n="viewReactions"></button></div></div>
+    <div class="result-view" id="result-view"></div>
+    <div class="result-footer"><span data-i18n="footerNote"></span><span id="footer-version"></span></div>
+  </section>
+</main>
+
+<dialog id="method-dialog"><div class="dlg-head"><span class="ins-badge">i</span><div><b data-i18n="methodOpen"></b><small data-i18n="methodSub"></small></div><button type="button" class="ins-close" data-close aria-label="Close">×</button></div><div class="dlg-body" id="method-body"></div></dialog>
+<dialog id="confirm-dialog" style="width:460px"><form method="dialog"><div class="dlg-head"><div><b id="confirm-title"></b></div></div><div class="dlg-body"><p id="confirm-body"></p></div><div class="dlg-actions"><button value="cancel" data-i18n="cancel"></button><button value="ok" class="primary" id="confirm-ok"></button></div></form></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="report"></div>
+</body>
+</html>
