@@ -111,12 +111,12 @@ python3 -m http.server -d app      # serve the app at http://localhost:8000
 python3 build.py                   # rebuild the dated portable HTML and index.html
 ```
 
-GitHub Pages serves the repository root (**Settings → Pages**: *Deploy from a branch*,
-`main`, `/ (root)`). `build.py` writes the portable page twice: the dated download
-`QuickerStrut-Tie-v<version>-<date>.html` and `index.html`, which Pages serves at
-https://acheruel.github.io/QuickerStrut-Tie/ (`.nojekyll` keeps Jekyll from rendering the
-README instead). Run `python build.py` before every commit; `python build.py --check`
-fails if either file is stale.
+GitHub Pages publishes the `app/` folder at https://acheruel.github.io/QuickerStrut-Tie/
+through the *Publish GitHub Pages* workflow (**Settings → Pages → GitHub Actions**). If the
+source is ever set back to *Deploy from a branch* (`main`, `/`), the root `index.html` —
+the same page as the dated download, written by `build.py` — still opens the app at that
+address (`.nojekyll` keeps Jekyll from rendering the README). Run `python build.py`
+before every commit; CI runs `python build.py --check`, which fails if either file is stale.
 
 ---
 

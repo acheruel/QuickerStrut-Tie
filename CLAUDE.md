@@ -27,9 +27,9 @@ python build.py --check         # fails if either built file is stale
 python -m http.server 8765 --directory app   # dev server
 ```
 
-Always run `python build.py` before committing: GitHub Pages serves the repository root
-(branch `main`, `/`), so `index.html` at the root **is** the published app, and `.nojekyll`
-keeps Jekyll from rendering the README instead. There is no Pages workflow.
+Always run `python build.py` before committing: CI (`.github/workflows/ci.yml`) runs the
+tests and `build.py --check`. Pages is deployed by `.github/workflows/pages.yml` from `app/`;
+the root `index.html` (+ `.nojekyll`) is the fallback if Pages is set to deploy from the branch.
 
 ## Conventions
 
