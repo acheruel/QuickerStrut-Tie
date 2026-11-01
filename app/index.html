@@ -1,0 +1,103 @@
+<!doctype html>
+<!-- QuickerStrut&Tie · © 2026 Anthony Chéruel · SPDX-License-Identifier: GPL-3.0-or-later -->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QuickerStrut&amp;Tie · Strut-and-tie models</title>
+  <meta name="description" content="Interactive 2D strut-and-tie models checked to CSA S6 and CSA A23.3, computed in your browser.">
+  <meta property="og:title" content="QuickerStrut&amp;Tie · Strut-and-tie models"><meta property="og:description" content="Draw a 2D strut-and-tie model, drag its nodes and see forces and CSA S6 / A23.3 checks update live."><meta name="theme-color" content="#102d41">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23102d41'/%3E%3Crect x='8' y='16' width='48' height='36' rx='3' fill='%239fc3d2' fill-opacity='.16'/%3E%3Cpath d='M32 22L15.5 45.5M32 22L48.5 45.5' stroke='%237cb4ff' stroke-width='5.5' stroke-linecap='round'/%3E%3Cpath d='M15.5 45.5H48.5' stroke='%23ffc978' stroke-width='6' stroke-linecap='round'/%3E%3Cg fill='%23e8fff8' stroke='%230b2436' stroke-width='2.2'%3E%3Ccircle cx='32' cy='22' r='5.5'/%3E%3Ccircle cx='15.5' cy='45.5' r='5.5'/%3E%3Ccircle cx='48.5' cy='45.5' r='5.5'/%3E%3C/g%3E%3Cpath d='M44 8.5h9.5V18M53 9l-7.5 7.5' fill='none' stroke='%2356e0bb' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./css/app.css">
+  <script src="./js/version.js" defer></script>
+  <script src="./js/solver.js" defer></script>
+  <script src="./js/csa.js" defer></script>
+  <script src="./js/examples.js" defer></script>
+  <script src="./js/templates.js" defer></script>
+  <script src="./js/i18n.js" defer></script>
+  <script src="./js/app.js" defer></script>
+  <script src="./js/canvas.js" defer></script>
+  <script src="./js/panels.js" defer></script>
+  <script src="./js/report.js" defer></script>
+  <script src="./js/main.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><svg class="brand-logo" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><defs><linearGradient id="qst-tile-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#174560"/><stop offset="1" stop-color="#0b2436"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#qst-tile-top)"/><rect x=".5" y=".5" width="63" height="63" rx="13.5" fill="none" stroke="#fff" stroke-opacity=".14"/><rect x="8" y="16" width="48" height="36" rx="3" fill="#9fc3d2" fill-opacity=".14"/><path d="M32 22L15.5 45.5M32 22L48.5 45.5" stroke="#7cb4ff" stroke-width="5" stroke-dasharray="6.4 3.4" stroke-linecap="round"/><path d="M15.5 45.5H48.5" stroke="#ffc978" stroke-width="5.6" stroke-linecap="round"/><g fill="#e8fff8" stroke="#0b2436" stroke-width="2.2"><circle cx="32" cy="22" r="5"/><circle cx="15.5" cy="45.5" r="5"/><circle cx="48.5" cy="45.5" r="5"/></g><path d="M44 8.5h9.5V18M53 9l-7.5 7.5" fill="none" stroke="#56e0bb" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg><div>Quicker<span>Strut&amp;Tie</span></div></div>
+  <p class="top-warning" role="note"><span class="warning-symbol" aria-hidden="true">!</span><span data-i18n="warning"></span></p>
+  <div class="header-right">
+    <div class="release-info"><b id="release-version"></b><small id="release-date"></small></div>
+    <button id="method-open" class="method-open" type="button"><span class="lbl" data-i18n="methodOpen"></span><span aria-hidden="true"> ⓘ</span></button>
+    <div class="language" role="group" aria-label="Language / Langue"><button id="lang-en" type="button">EN</button><button id="lang-fr" type="button">FR</button></div>
+    <a class="github-link" href="https://github.com/acheruel/QuickerStrut-Tie" target="_blank" rel="noopener noreferrer" title="GitHub · acheruel/QuickerStrut-Tie" aria-label="GitHub · acheruel/QuickerStrut-Tie"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+  </div>
+</header>
+
+<main class="workspace">
+  <aside class="inputs" aria-label="Model">
+    <div class="panel-heading"><h1 data-i18n="model"></h1><button class="text-button" id="reset" type="button" data-i18n="reset"></button></div>
+    <div class="project-bar">
+      <label for="project-name"><span class="pn-label"><span data-i18n="modelName"></span><span id="dirty" class="dirty"></span></span><span class="pn-wrap"><input id="project-name" maxlength="120" autocomplete="off" spellcheck="false"><svg class="pn-pencil" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 14.5l-.8 2.3 2.3-.8L15 6.5 13.5 5z M12.5 6l1.5 1.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span></label>
+      <div class="project-actions">
+        <div class="qst-menu"><button type="button" class="menu-button" data-menu-toggle aria-haspopup="menu" aria-expanded="false"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2.8h6.5L15.5 7v10.2H5z M11.5 2.8V7h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span data-i18n="fileMenu"></span><span class="caret" aria-hidden="true">▾</span></button>
+          <div class="menu-pop" role="menu">
+            <button type="button" id="new-project" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2.8h6.5L15.5 7v10.2H5z M10 9v6 M7 12h6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="newProject"></b><small data-i18n="newProjectSub"></small></span></button>
+            <button type="button" id="open-project" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 5.5h5l1.6 1.8h8.4v8.7h-15z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="openProject"></b><small data-i18n="openProjectSub"></small></span><kbd>Ctrl O</kbd></button>
+            <button type="button" id="save-project" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 3.5h10.5l2.5 2.5v10.5h-13z M6.5 3.5v4h6v-4 M6 16.5v-5h8v5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="saveProject"></b><small data-i18n="saveProjectSub"></small></span><kbd>Ctrl S</kbd></button>
+            <div class="menu-sep" role="separator"></div>
+            <button type="button" id="print-report" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 7.5V3h9v4.5 M5.5 14H3.5V8h13v6h-2 M5.5 11.5h9V17h-9z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="report"></b><small data-i18n="reportSub"></small></span><kbd>Ctrl P</kbd></button>
+            <button type="button" id="export-svg" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 15l4.5-9 4 6 2-3 3.5 6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="exportSvg"></b><small data-i18n="exportSvgSub"></small></span></button>
+            <button type="button" id="export-pile-menu" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h12v4H4z M6.5 8v9 M13.5 8v9 M5 17h3 M12 17h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="exportPile"></b><small data-i18n="exportPileSub"></small></span></button>
+            <button type="button" id="export-csv" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><rect x="3.5" y="3.5" width="13" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 8h13 M3.5 12.3h13 M8 3.5v13" stroke="currentColor" stroke-width="1.3"/></svg><span class="mi-text"><b data-i18n="exportCsv"></b><small data-i18n="exportCsvSub"></small></span></button>
+          </div></div>
+        <div class="qst-menu"><button type="button" class="menu-button" data-menu-toggle aria-haspopup="menu" aria-expanded="false"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 16h15 M4 16V9h12v7 M4 9l6-5 6 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span data-i18n="examplesMenu"></span><span class="caret" aria-hidden="true">▾</span></button>
+          <div class="menu-pop" role="menu" id="examples-list"></div></div>
+        <button type="button" class="menu-button" id="open-templates"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 16.5h14 M4.5 16.5v-9h11v9 M4.5 7.5l5.5-4 5.5 4 M8 16.5v-4.5h4v4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span data-i18n="templatesMenu"></span></button>
+        <input id="project-file" type="file" accept=".json,application/json" hidden>
+      </div>
+    </div>
+    <div class="input-tabs" role="tablist"><button type="button" class="active" data-panel="params" data-i18n="tabParams"></button><button type="button" data-panel="nodes"><span data-i18n="tabNodes"></span><span class="count" id="count-nodes"></span></button><button type="button" data-panel="members"><span data-i18n="tabMembers"></span><span class="count" id="count-members"></span></button></div>
+    <div id="input-content" role="tabpanel"></div>
+    <div class="input-footer"><span id="footer-units" data-i18n="unitsNote"></span><span id="autosave-state"></span></div>
+  </aside>
+
+  <section class="results" aria-label="Results">
+    <div class="stage">
+      <div class="stage-top">
+        <div class="toolbox" role="toolbar" id="toolbox"></div>
+        <div class="stage-right">
+          <div class="dark-seg" id="display-mode" role="group"></div>
+          <button type="button" class="chip" id="toggle-bands" aria-pressed="true"></button>
+          <button type="button" class="chip" id="toggle-zones" aria-pressed="true"></button>
+          <button type="button" class="chip" id="toggle-ids" aria-pressed="true"></button>
+          <button type="button" class="chip" id="toggle-snap" aria-pressed="true"></button>
+          <button type="button" class="icon-chip" id="undo" data-i18n-title="undo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 5L3.5 9l4 4 M3.8 9H12a4.5 4.5 0 010 9h-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" class="icon-chip" id="redo" data-i18n-title="redo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 5l4 4-4 4 M16.2 9H8a4.5 4.5 0 000 9h2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" class="icon-chip" id="fit" data-i18n-title="fit"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7.5V3h4.5 M12.5 3H17v4.5 M17 12.5V17h-4.5 M7.5 17H3v-4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-wrap" id="canvas-wrap">
+        <svg id="canvas" role="img" aria-label="Strut-and-tie model"></svg>
+        <div id="banner" class="banner hidden" role="alert"></div>
+        <div id="empty-hint" class="empty-hint hidden"></div>
+        <div id="inspector" class="inspector hidden" aria-live="polite"></div>
+        <div id="tooltip" class="tooltip hidden"></div>
+        <div class="hud" id="hud"></div>
+        <div class="legend-hud" id="legend"></div>
+      </div>
+    </div>
+    <div class="metrics" id="metrics"></div>
+    <div class="chart-toolbar"><div class="view-tabs" role="tablist" id="view-tabs"><button type="button" class="active" data-view="checks" data-i18n="viewChecks"></button><button type="button" data-view="forces" data-i18n="viewForces"></button><button type="button" data-view="reactions" data-i18n="viewReactions"></button></div></div>
+    <div class="result-view" id="result-view"></div>
+    <div class="result-footer"><span data-i18n="footerNote"></span><span id="footer-version"></span></div>
+  </section>
+</main>
+
+<dialog id="method-dialog"><div class="dlg-head"><span class="ins-badge">i</span><div><b data-i18n="methodOpen"></b><small data-i18n="methodSub"></small></div><button type="button" class="ins-close" data-close aria-label="Close">×</button></div><div class="dlg-body" id="method-body"></div></dialog>
+<dialog id="tpl-dialog" class="tpl-dialog"><div class="dlg-head"><span class="ins-badge">⌂</span><div><b data-i18n="templatesMenu"></b><small data-i18n="templatesSub"></small></div><button type="button" class="ins-close" data-close aria-label="Close">×</button></div>
+  <div class="tpl-body"><div class="tpl-side"><div class="tpl-kinds" id="tpl-kinds"></div><div id="tpl-form" class="tpl-form"></div></div><div class="tpl-preview"><div id="tpl-svg" class="tpl-svg"></div><div id="tpl-info" class="tpl-info"></div></div></div>
+  <div class="dlg-actions"><button type="button" data-close data-i18n="cancel"></button><button type="button" class="primary" id="tpl-create" data-i18n="tplCreate"></button></div></dialog>
+<dialog id="confirm-dialog" style="width:460px"><form method="dialog"><div class="dlg-head"><div><b id="confirm-title"></b></div></div><div class="dlg-body"><p id="confirm-body"></p></div><div class="dlg-actions"><button value="cancel" data-i18n="cancel"></button><button value="ok" class="primary" id="confirm-ok"></button></div></form></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="report"></div>
+</body>
+</html>
