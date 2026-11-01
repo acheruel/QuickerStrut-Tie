@@ -13,6 +13,8 @@
   }
   function S(id, i, j, w) { return { id: id, i: i, j: j, role: 'auto', w: w, bars: null, As: 0 }; }
   function T(id, i, j, n, size, w) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: { n: n, size: size }, As: 0 }; }
+  function TA(id, i, j, As, w) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: null, As: As }; }
+  var IN = 0.0254, KIP = 4.448222;
 
   var EXAMPLES = [
     {
@@ -98,6 +100,61 @@
           T('M1', 'N1', 'N2', 16, '35M', 200), T('M2', 'N2', 'N3', 20, '35M', 200), T('M3', 'N3', 'N4', 16, '35M', 200),
           S('M4', 'N1', 'N5', 450), S('M5', 'N2', 'N5', 350), S('M6', 'N3', 'N6', 350), S('M7', 'N4', 'N6', 450),
           S('M8', 'N5', 'N6', 300), S('M9', 'N2', 'N6', 200)
+        ]
+      }
+    },
+    {
+      key: 'half-joint',
+      title: { fr: 'Appui en chaise (demi-joint)', en: 'Half-joint seat (dapped end)' },
+      sub: { fr: 'Travée suspendue sur chaise · bande de 1 m', en: 'Suspended span on a seat · 1 m strip' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 35, b: 1000 }),
+        outline: [[0, 0.6], [0.45, 0.6], [0.45, 0], [3.0, 0], [3.0, 1.2], [0, 1.2]],
+        nodes: [
+          N('N1', 0.2, 0.68, { support: 'ry', bearing: 250 }),
+          N('N2', 0.55, 1.12),
+          N('N3', 0.55, 0.08),
+          N('N4', 1.3, 0.68),
+          N('N5', 1.3, 1.12, { fy: -330, bearing: 300 }),
+          N('N6', 1.3, 0.08),
+          N('N7', 2.15, 1.12, { fy: -190, bearing: 300 }),
+          N('N8', 2.15, 0.08),
+          N('N9', 3.0, 1.12, { support: 'rx', fy: -80 }),
+          N('N10', 3.0, 0.08, { support: 'rx' })
+        ],
+        members: [
+          S('M1', 'N1', 'N2', 300), T('M2', 'N1', 'N4', 5, '20M', 150), T('M3', 'N2', 'N3', 6, '20M', 150),
+          S('M4', 'N2', 'N5', 150), S('M5', 'N3', 'N4', 250), S('M6', 'N3', 'N5', 300), T('M7', 'N3', 'N6', 6, '25M', 150),
+          S('M8', 'N5', 'N4', 150), T('M9', 'N4', 'N6', 5, '15M', 150), S('M10', 'N5', 'N7', 150), T('M11', 'N6', 'N8', 6, '25M', 150),
+          S('M12', 'N6', 'N7', 250), T('M13', 'N7', 'N8', 4, '15M', 150), S('M14', 'N7', 'N9', 150), T('M15', 'N8', 'N10', 6, '25M', 150),
+          S('M16', 'N8', 'N9', 250), T('M17', 'N9', 'N10', 4, '15M', 150)
+        ]
+      }
+    },
+    {
+      key: 'fhwa-deep-beam',
+      literature: true,
+      title: { fr: 'Poutre-cloison · manuel FHWA, ex. 1', en: 'Deep beam · FHWA manual, ex. 1' },
+      sub: { fr: 'Géométrie et efforts publiés (conversion SI)', en: 'Published geometry and forces (SI units)' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 34.5, fy: 414, b: 48 * IN * 1000 }),
+        outline: [[0, 0], [29 * 12 * IN, 0], [29 * 12 * IN, 72 * IN], [0, 72 * IN]],
+        nodes: [
+          N('A', 12 * IN, 5 * IN, { support: 'pin', bearing: 12 * IN * 1000 }),
+          N('B', 66 * IN, 5 * IN),
+          N('C', 336 * IN, 5 * IN, { support: 'ry', bearing: 12 * IN * 1000 }),
+          N('D', 66 * IN, 69 * IN),
+          N('E', 120 * IN, 69 * IN, { fy: -600 * KIP, bearing: 12 * IN * 1000 }),
+          N('F', 228 * IN, 69 * IN, { fy: -600 * KIP, bearing: 12 * IN * 1000 })
+        ],
+        members: [
+          TA('AB', 'A', 'B', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000), TA('BC', 'B', 'C', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000),
+          S('AD', 'A', 'D', 400), T('BD', 'B', 'D', 26, '20M', 0), S('BE', 'B', 'E', 400), S('CF', 'C', 'F', 287),
+          S('DE', 'D', 'E', 6 * IN * 1000), S('EF', 'E', 'F', 6 * IN * 1000),
+          // Bracing diagonal (zero force) so that the stiffness matrix is regular.
+          S('BF', 'B', 'F', 150)
         ]
       }
     },

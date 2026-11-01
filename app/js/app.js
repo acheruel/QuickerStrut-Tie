@@ -51,6 +51,14 @@
     function expr() { var v = term(); while (peek() === '+' || peek() === '-') { var op = s[i++], r = term(); v = op === '+' ? v + r : v - r; } return v; }
     try { var v = expr(); return i === s.length && isFinite(v) ? v : NaN; } catch (e) { return NaN; }
   };
+  // Locale-aware decimal literal for formulas ("0,85" in French, "0.85" in English).
+  App.dl = function (s) { return App.lang === 'fr' ? s : s.replace(/,/g, '.'); };
+  // Strut stress cap as text: α1 f′c (S6) or 0,85 f′c (A23.3).
+  App.capLabel = function () {
+    if (App.model.code === 'S6') return 'α1 f′c';
+    return App.dl('0,85') + ' f′c';
+  };
+  App.nodeFactorText = function (type) { return App.dl(QST.csa.CODES[App.model.code].nodeText[type]); };
   App.esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
 
   // ---------- Model helpers ----------

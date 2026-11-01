@@ -52,14 +52,14 @@
           calc = '<span class="rp-eq">Tr = φs fy As = ' + fmt(c.phiS, 2) + ' × ' + fmt(mat.fy, 0) + ' × ' + fmt(e.As, 0) + ' = ' + fmt(e.capacity, 0) + ' kN ≥ Tf = ' + fmt(e.demand, 0) + ' kN</span> <small>(' + code.clause.tie + ')</small>';
         } else {
           var g = e.ends.filter(function (x) { return x.node === e.governingEnd; })[0];
-          calc = (g.tie ? '<span class="rp-eq">ε1 = ' + fmt(g.epsS * 1000, 3) + '‰ + (' + fmt(g.epsS * 1000, 3) + '‰ + 2‰) cot²(' + fmt(deg(g.theta), 1) + '°) = ' + fmt(g.eps1 * 1000, 3) + '‰ ; fcu = ' + fmt(mat.fc, 1) + ' / (0,8 + 170 ε1) = ' + fmt(g.fcuRaw, 2) + (g.capped ? ' → 0,85 f′c' : '') + ' = ' + fmt(g.fcu, 2) + ' MPa</span><br>' : t('noTieAtEnd') + ' → fcu = 0,85 f′c = ' + fmt(g.fcu, 2) + ' MPa<br>') +
+          calc = (g.tie ? '<span class="rp-eq">ε1 = ' + fmt(g.epsS * 1000, 3) + '‰ + (' + fmt(g.epsS * 1000, 3) + '‰ + 2‰) cot²(' + fmt(deg(g.theta), 1) + '°) = ' + fmt(g.eps1 * 1000, 3) + '‰ ; fcu = ' + fmt(mat.fc, 1) + ' / (' + App.dl('0,8') + ' + 170 ε1) = ' + fmt(g.fcuRaw, 2) + (g.capped ? ' → ' + App.capLabel() : '') + ' = ' + fmt(g.fcu, 2) + ' MPa</span><br>' : t('noTieAtEnd') + ' → fcu = ' + App.capLabel() + ' = ' + fmt(g.fcu, 2) + ' MPa<br>') +
             '<span class="rp-eq">Cr = φc fcu w b = ' + fmt(c.phiC, 2) + ' × ' + fmt(e.fcu, 2) + ' × ' + fmt(e.w, 0) + ' × ' + fmt(mat.b, 0) + ' = ' + fmt(e.capacity, 0) + ' kN ≥ Cf = ' + fmt(e.demand, 0) + ' kN</span> <small>(' + code.clause.strut + ', ' + t('end') + ' ' + e.governingEnd + ')</small>';
         }
         h += '<tr><td>' + e.id + '<br><small>' + t('kind_' + e.kind) + '</small></td><td>' + calc + '</td><td>' + ok(e.util) + '</td></tr>';
       });
       c.nodes.forEach(function (e) {
         var g = e.governingFace;
-        var calc = '<span class="rp-eq">' + e.type + ' : f<sub>lim</sub> = ' + fmt(e.factor, 2) + ' φc f′c = ' + fmt(e.limit, 2) + ' MPa' + (g ? ' ; σ = ' + fmt(g.force, 0) + ' kN / (' + fmt(g.width, 0) + ' × ' + fmt(mat.b, 0) + ') = ' + fmt(g.stress, 2) + ' MPa (' + t('face_' + g.kind) + (g.kind === 'strut' || g.kind === 'tie' ? ' ' + g.ref : '') + ')' : '') + '</span> <small>(' + code.clause.node + ')</small>';
+        var calc = '<span class="rp-eq">' + e.type + ' : f<sub>lim</sub> = ' + App.nodeFactorText(e.type) + ' φc f′c = ' + fmt(e.limit, 2) + ' MPa' + (g ? ' ; σ = ' + fmt(g.force, 0) + ' kN / (' + fmt(g.width, 0) + ' × ' + fmt(mat.b, 0) + ') = ' + fmt(g.stress, 2) + ' MPa (' + t('face_' + g.kind) + (g.kind === 'strut' || g.kind === 'tie' ? ' ' + g.ref : '') + ')' : '') + '</span> <small>(' + code.clause.node + ')</small>';
         h += '<tr><td>' + e.id + '<br><small>' + t('nodalZone') + '</small></td><td>' + calc + '</td><td>' + ok(e.util) + '</td></tr>';
       });
       var ck = c.crack;

@@ -1,3 +1,5 @@
+<img src="docs/logo.svg" width="88" alt="QuickerStrut&Tie logo" align="left">
+
 # QuickerStrut&Tie
 
 **Interactive 2D strut-and-tie models checked to CSA S6 and CSA A23.3, in your browser.**
@@ -9,7 +11,7 @@ No installation, no server, no data leaves your computer.
 
 ![QuickerStrut&Tie — hammerhead pier cap, forces view](docs/screenshots/forces.png)
 
-*Version 0.1 · 2026-11-01 · Anthony Chéruel · [Version history](CHANGELOG.md) · [Français](#en-français)*
+*Version 0.1.1 · 2026-11-01 · Anthony Chéruel · [Version history](CHANGELOG.md) · [Français](#en-français)*
 
 ## What it does
 
@@ -28,10 +30,15 @@ No installation, no server, no data leaves your computer.
   inspector showing every step of each calculation; checks, forces and reactions tables.
 - **Outputs:** printable calculation note (PDF through the browser), SVG drawing, CSV
   table, `.quickerstrut.json` projects, automatic local save.
-- **Examples:** deep beams, double corbel, hammerhead pier cap, two-pile cap.
-- **French and English** interface.
+- **Examples:** deep beams, double corbel, hammerhead pier cap, half-joint seat
+  (dapped end), two-pile cap, and a deep beam from a published design manual whose
+  member forces are reproduced exactly.
+- **French and English** interface; works on desktop, tablets and foldables (including a
+  Galaxy Z Fold unfolded in landscape).
 
 ![Utilization view and inspector (French interface)](docs/screenshots/utilization-fr.png)
+
+![Half-joint seat on a Galaxy Z Fold unfolded in landscape](docs/screenshots/half-joint-fold.png)
 
 ## Use it
 
@@ -57,7 +64,8 @@ in any tool.
 > confirmed against the edition of the standard that applies to the project. The author
 > cannot be held liable for the results.
 
-Method: [METHOD.md](METHOD.md) · Validation: [VALIDATION.md](VALIDATION.md)
+Method: [METHOD.md](METHOD.md) · Validation against hand calculations and published
+examples: [VALIDATION.md](VALIDATION.md)
 
 ## Development
 
@@ -107,6 +115,9 @@ jour en direct. Aucune installation, aucun serveur, aucune donnée transmise.
   coefficients S6 (ponts) ou A23.3 (bâtiments), modifiables.
 - **Résultats lisibles :** largeurs réelles des bielles et tirants, couleur **et** type de
   trait, étiquettes de valeurs ; inspecteur détaillant chaque étape de calcul ; tableaux.
+- **Exemples :** poutres-cloisons, corbeau double, chevêtre en porte-à-faux, **appui en
+  chaise (demi-joint)**, semelle sur deux pieux, et une poutre-cloison d’un manuel publié
+  dont les efforts sont reproduits exactement.
 - **Sorties :** note de calcul imprimable (PDF), dessin SVG, tableau CSV, projets
   `.quickerstrut.json`, sauvegarde locale automatique.
 - **Utilisation hors ligne :** téléchargez `QuickerStrut-Tie-v<version>-<date>.html` et

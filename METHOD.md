@@ -1,6 +1,6 @@
 # Method and assumptions · Méthode et hypothèses
 
-*QuickerStrut&Tie v0.1 · 2026-11-01*
+*QuickerStrut&Tie v0.1.1 · 2026-11-01*
 
 ## Units and sign convention
 
@@ -37,10 +37,12 @@ Bars whose force is below 0.05 kN are reported as zero-force members.
 | --- | --- | --- |
 | φc (concrete) | 0.75 | 0.65 |
 | φs (reinforcement) | 0.90 | 0.85 |
-| Struts | 8.10.3 | 11.4.2 |
-| Ties | 8.10.4 | 11.4.3 |
-| Nodal zones | 8.10.5.1 | 11.4.4.1 |
-| Crack control, ρmin | 8.10.6, 0.003 | 11.4.5, 0.002 |
+| Strut stress limit | α1 f′c, 8.10.3.3 | 0.85 f′c, 11.4.2.3 |
+| Ties | 8.10.4.1 | 11.4.3.1 |
+| Nodal zones CCC / CCT / CTT (× φc f′c) | α1 / 0.88 α1 / 0.76 α1, 8.10.5.1 | 0.85 / 0.75 / 0.65, 11.4.4.1 |
+| Crack control, ρmin | 0.003, ≤ 1500 mm²/m per face | 0.002, 11.4.5 |
+
+with α1 = 0.85 − 0.0015 f′c ≥ 0.67 for S6.
 
 The φ factors can be overridden (precast concrete, other edition). Clause numbers and
 factors are kept in one table (`CODES` in `app/js/csa.js`) and must be confirmed against
@@ -50,14 +52,15 @@ the edition of the standard that applies to the project.
 
 ```
 Cr  = φc · fcu · Acs,        Acs = w · b
-fcu = f′c / (0.8 + 170 ε1) ≤ 0.85 f′c
+fcu = f′c / (0.8 + 170 ε1) ≤ 0.85 f′c (A23.3) or α1 f′c (S6)
 ε1  = εs + (εs + 0.002) · cot²θs
 ```
 
 `θs` is the angle between the strut and an adjoining tie at the same node. Both ends of
 the strut are evaluated with every adjoining tie, and the lowest `fcu` governs (smallest
 angle, largest tie strain). `εs` is the tie strain `Tf / (Es · As)` or, as an option,
-`fy / Es`. With no adjoining tie at either end, `fcu = 0.85 f′c`.
+`fy / Es`. A tie in line with the strut (within 5°) does not cross it and is ignored.
+With no adjoining tie at either end, `fcu` equals the upper limit.
 
 ### Ties
 
@@ -75,9 +78,10 @@ Node type from the distinct tie directions anchored at the node (collinear ties 
 through count once): none → **CCC**, one → **CCT**, more → **CTT**.
 
 ```
-f_lim = 0.85 · φc · f′c  (CCC)
-        0.75 · φc · f′c  (CCT)
-        0.65 · φc · f′c  (CTT)
+            A23.3              S6
+f_lim = 0.85 · φc · f′c    α1 · φc · f′c        (CCC)
+        0.75 · φc · f′c    0.88 α1 · φc · f′c   (CCT)
+        0.65 · φc · f′c    0.76 α1 · φc · f′c   (CTT)
 ```
 
 Face stresses compared with `f_lim`:
@@ -90,9 +94,10 @@ Face stresses compared with `f_lim`:
 ### Crack control reinforcement
 
 Orthogonal grid near each face, ratio `ρ ≥ ρmin` in each direction, spacing ≤ 300 mm.
-The ratios entered apply to the whole model.
+For S6 the required grid is limited to 1500 mm²/m on each face, i.e.
+`ρ ≥ min(0.003, 3000 / (b · 1000))`. The ratios entered apply to the whole model.
 
-## Limits of version 0.1
+## Limits of version 0.1.1
 
 - 2D model with a constant thickness `b`; one factored load case.
 - No automatic self-weight, no automatic model generation, no stress fields.

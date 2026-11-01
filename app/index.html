@@ -5,7 +5,7 @@
   <title>QuickerStrut&amp;Tie · Strut-and-tie models</title>
   <meta name="description" content="Interactive 2D strut-and-tie models checked to CSA S6 and CSA A23.3, computed in your browser.">
   <meta property="og:title" content="QuickerStrut&amp;Tie · Strut-and-tie models"><meta property="og:description" content="Draw a 2D strut-and-tie model, drag its nodes and see forces and CSA S6 / A23.3 checks update live."><meta name="theme-color" content="#102d41">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23102d41'/%3E%3Ctext x='12' y='47' font-size='48' fill='%2356e0bb' font-family='sans-serif'%3EQ%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23102d41'/%3E%3Crect x='8' y='16' width='48' height='36' rx='3' fill='%239fc3d2' fill-opacity='.16'/%3E%3Cpath d='M32 22L15.5 45.5M32 22L48.5 45.5' stroke='%237cb4ff' stroke-width='5.5' stroke-linecap='round'/%3E%3Cpath d='M15.5 45.5H48.5' stroke='%23ffc978' stroke-width='6' stroke-linecap='round'/%3E%3Cg fill='%23e8fff8' stroke='%230b2436' stroke-width='2.2'%3E%3Ccircle cx='32' cy='22' r='5.5'/%3E%3Ccircle cx='15.5' cy='45.5' r='5.5'/%3E%3Ccircle cx='48.5' cy='45.5' r='5.5'/%3E%3C/g%3E%3Cpath d='M44 8.5h9.5V18M53 9l-7.5 7.5' fill='none' stroke='%2356e0bb' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="./css/app.css">
   <script src="./js/version.js" defer></script>
   <script src="./js/solver.js" defer></script>
@@ -48,7 +48,7 @@
     <text id="sp-c" x="388" y="300" fill="#cfe2ff" class="sp-small" text-anchor="middle" opacity="0"></text>
     <text id="sp-t" x="500" y="460" fill="#ffe2ae" class="sp-small" text-anchor="middle" opacity="0"></text>
     <g id="sp-brand" opacity="0">
-      <text x="500" y="92" text-anchor="middle" class="sp-word"><tspan fill="#fff">Quicker</tspan><tspan fill="#56e0bb">Strut&amp;Tie</tspan></text>
+      <g transform="translate(284 48) scale(.9)"><g><defs><linearGradient id="qst-tile-sp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#174560"/><stop offset="1" stop-color="#0b2436"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#qst-tile-sp)"/><rect x=".5" y=".5" width="63" height="63" rx="13.5" fill="none" stroke="#fff" stroke-opacity=".14"/><rect x="8" y="16" width="48" height="36" rx="3" fill="#9fc3d2" fill-opacity=".14"/><path d="M32 22L15.5 45.5M32 22L48.5 45.5" stroke="#7cb4ff" stroke-width="5" stroke-dasharray="6.4 3.4" stroke-linecap="round"/><path d="M15.5 45.5H48.5" stroke="#ffc978" stroke-width="5.6" stroke-linecap="round"/><g fill="#e8fff8" stroke="#0b2436" stroke-width="2.2"><circle cx="32" cy="22" r="5"/><circle cx="15.5" cy="45.5" r="5"/><circle cx="48.5" cy="45.5" r="5"/></g><path d="M44 8.5h9.5V18M53 9l-7.5 7.5" fill="none" stroke="#56e0bb" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></g></g><text x="532" y="92" text-anchor="middle" class="sp-word"><tspan fill="#fff">Quicker</tspan><tspan fill="#56e0bb">Strut&amp;Tie</tspan></text>
       <text id="sp-tagline" x="500" y="528" text-anchor="middle" class="sp-tag"></text>
     </g>
   </svg>
@@ -93,7 +93,7 @@
 </script>
 
 <header class="topbar">
-  <div class="brand"><span class="brand-mark">Q<span>↗</span></span><div>Quicker<span>Strut&amp;Tie</span></div></div>
+  <div class="brand"><svg class="brand-logo" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><defs><linearGradient id="qst-tile-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#174560"/><stop offset="1" stop-color="#0b2436"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#qst-tile-top)"/><rect x=".5" y=".5" width="63" height="63" rx="13.5" fill="none" stroke="#fff" stroke-opacity=".14"/><rect x="8" y="16" width="48" height="36" rx="3" fill="#9fc3d2" fill-opacity=".14"/><path d="M32 22L15.5 45.5M32 22L48.5 45.5" stroke="#7cb4ff" stroke-width="5" stroke-dasharray="6.4 3.4" stroke-linecap="round"/><path d="M15.5 45.5H48.5" stroke="#ffc978" stroke-width="5.6" stroke-linecap="round"/><g fill="#e8fff8" stroke="#0b2436" stroke-width="2.2"><circle cx="32" cy="22" r="5"/><circle cx="15.5" cy="45.5" r="5"/><circle cx="48.5" cy="45.5" r="5"/></g><path d="M44 8.5h9.5V18M53 9l-7.5 7.5" fill="none" stroke="#56e0bb" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg><div>Quicker<span>Strut&amp;Tie</span></div></div>
   <p class="top-warning" role="note"><span class="warning-symbol" aria-hidden="true">!</span><span data-i18n="warning"></span></p>
   <div class="header-right">
     <div class="release-info"><b id="release-version"></b><small id="release-date"></small></div>

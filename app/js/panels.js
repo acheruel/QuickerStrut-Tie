@@ -35,7 +35,8 @@
     Object.keys(chips).forEach(function (k) {
       var el = $('#toggle-' + k);
       el.setAttribute('aria-pressed', String(!!App.display[k]));
-      el.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true">' + (App.display[k] ? '<path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' : '<circle cx="8" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/>') + '</svg>' + t(chips[k]);
+      el.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true">' + (App.display[k] ? '<path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' : '<circle cx="8" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/>') + '</svg><span class="cl">' + t(chips[k]) + '</span>';
+      el.title = t(chips[k]);
     });
     $('#undo').disabled = !App.history.length;
     $('#redo').disabled = !App.future.length;
@@ -85,13 +86,13 @@
       '<label class="field"><span>φs <em>' + t('auto') + ' ' + fmt(code.phiS, 2) + '</em></span>' + numInput(mat.phiS || '', 'data-k="mat.phiS" placeholder="' + fmt(code.phiS, 2) + '"') + '</label></div>';
     h += '<label class="field"><span>' + t('epsMode') + '</span><select data-k="mat.epsMode"><option value="computed"' + (mat.epsMode !== 'yield' ? ' selected' : '') + '>' + t('epsComputed') + '</option><option value="yield"' + (mat.epsMode === 'yield' ? ' selected' : '') + '>' + t('epsYield') + '</option></select></label>';
     h += '<label class="toggle-row"><input type="checkbox" data-k="mat.tieFaces"' + (mat.tieFaces !== false ? ' checked' : '') + '>' + t('tieFaces') + '</label>';
-    h += '<div class="note">' + t('factorsNote').replace('{phiC}', fmt(F.phiC, 2)).replace('{phiS}', fmt(F.phiS, 2)).replace('{Ec}', fmt(QST.solver.concreteModulus(m.code, mat.fc), 0)) + '</div>';
+    h += '<div class="note">' + (m.code === 'S6' ? t('alphaNote').replace('{a}', fmt(QST.csa.alpha1(mat.fc), 3)) + ' ' : '') + t('factorsNote').replace('{phiC}', fmt(F.phiC, 2)).replace('{phiS}', fmt(F.phiS, 2)).replace('{Ec}', fmt(QST.solver.concreteModulus(m.code, mat.fc), 0)) + '</div>';
     h += '<div class="section-label">' + t('crackControl') + '<span style="font-weight:500;letter-spacing:0;text-transform:none">' + t('clause') + ' ' + code.clause.crack + '</span></div>';
     h += '<div class="field-row three">' +
       '<label class="field"><span>ρh</span>' + numInput(mat.rhoH, 'data-k="mat.rhoH"') + '</label>' +
       '<label class="field"><span>ρv</span>' + numInput(mat.rhoV, 'data-k="mat.rhoV"') + '</label>' +
       '<label class="field"><span>s (mm)</span>' + numInput(mat.spacing, 'data-k="mat.spacing"') + '</label></div>';
-    h += '<p class="note">' + t('crackNote').replace('{rho}', fmt(code.rhoMin, 3)).replace('{s}', fmt(code.sMax, 0)) + '</p>';
+    h += '<p class="note">' + t('crackNote').replace('{rho}', fmt(code.rhoMin, 3)).replace('{s}', fmt(code.sMax, 0)) + (code.maxFaceArea ? ' ' + t('crackCapNote').replace('{a}', fmt(code.maxFaceArea, 0)) : '') + '</p>';
     h += '<div class="section-label">' + t('outline') + '<span style="font-weight:500;letter-spacing:0;text-transform:none">' + m.outline.length + ' ' + t('vertices') + '</span></div>';
     var b = bounds(m.outline);
     h += '<div class="field-row">' + unitField(t('width'), 'rect.w', App.round(b.x1 - b.x0), 'm') + unitField(t('height'), 'rect.h', App.round(b.y1 - b.y0), 'm') + '</div>';
@@ -252,7 +253,8 @@
     h += '<div class="ins-body">';
     h += '<div class="field-row"><label class="field"><span>' + t('role') + '</span><select data-k="m.' + m.id + '.role"><option value="auto"' + (m.role === 'auto' ? ' selected' : '') + '>' + t('role_auto') + '</option><option value="strut"' + (m.role === 'strut' ? ' selected' : '') + '>' + t('kind_strut') + '</option><option value="tie"' + (m.role === 'tie' ? ' selected' : '') + '>' + t('kind_tie') + '</option></select></label>' +
       '<label class="field"><span>' + t('effWidth') + ' w (mm)</span>' + numInput(m.w, 'data-k="m.' + m.id + '.w"') + '</label></div>';
-    h += '<label class="field"><span>' + t('bars') + ' <em>As = ' + fmt(QST.csa.memberArea(m), 0) + ' mm²</em></span><span class="bars-pick" style="grid-template-columns:70px 14px 1fr">' + numInput(m.bars ? m.bars.n : 0, 'data-k="m.' + m.id + '.barsN"') + '<b>×</b><select data-k="m.' + m.id + '.barsSize">' + barOptions(m.bars ? m.bars.size : '20M') + '</select></span></label>';
+    h += '<div class="field-row bars-row"><label class="field"><span>' + t('bars') + '</span><span class="bars-pick" style="grid-template-columns:56px 12px 1fr">' + numInput(m.bars ? m.bars.n : 0, 'data-k="m.' + m.id + '.barsN"') + '<b>×</b><select data-k="m.' + m.id + '.barsSize">' + barOptions(m.bars ? m.bars.size : '20M') + '</select></span></label>' +
+      '<label class="field"><span>As (mm²)</span>' + numInput(QST.csa.memberArea(m), 'data-k="m.' + m.id + '.As"') + '</label></div>';
     if (f) {
       h += '<div class="ins-result"><div class="big"><div><small>' + (kind === 'tie' ? t('tension') : kind === 'strut' ? t('compression') : t('zeroForce')) + '</small><br><b>' + fmt(Math.abs(f.N), 1) + ' <small>kN</small></b></div>' + (c && kind !== 'zero' ? '<div style="text-align:right"><small>' + t('utilShort') + '</small><br><b style="color:' + App.utilInk(c.util) + '">' + fmt(c.util, 2) + '</b></div>' : '') + '</div>';
       if (c && kind !== 'zero') {
@@ -268,10 +270,10 @@
             var gov = e.node === c.governingEnd;
             h += '<div style="' + (gov ? '' : 'opacity:.6') + '"><b>' + t('end') + ' ' + e.node + '</b>' + (gov ? ' · ' + t('governs') : '') + '</div>';
             if (e.tie) {
-              h += '<div class="eq">ε1 = εs + (εs + 0,002) cot²θs = ' + fmt(e.epsS * 1000, 3) + '‰ + (' + fmt(e.epsS * 1000, 3) + '‰ + 2‰) · cot²(' + fmt(deg(e.theta), 1) + '°) = ' + fmt(e.eps1 * 1000, 3) + ' ‰</div>';
-              h += '<div class="eq">fcu = f′c / (0,8 + 170 ε1) = ' + fmt(mat.fc, 1) + ' / (0,8 + 170 × ' + fmt(e.eps1, 5) + ') = ' + fmt(e.fcuRaw, 2) + (e.capped ? ' → 0,85 f′c = ' + fmt(e.fcu, 2) : '') + ' MPa</div>';
+              h += '<div class="eq">ε1 = εs + (εs + ' + App.dl('0,002') + ') cot²θs = ' + fmt(e.epsS * 1000, 3) + '‰ + (' + fmt(e.epsS * 1000, 3) + '‰ + 2‰) · cot²(' + fmt(deg(e.theta), 1) + '°) = ' + fmt(e.eps1 * 1000, 3) + ' ‰</div>';
+              h += '<div class="eq">fcu = f′c / (' + App.dl('0,8') + ' + 170 ε1) = ' + fmt(mat.fc, 1) + ' / (' + App.dl('0,8') + ' + 170 × ' + fmt(e.eps1, 5) + ') = ' + fmt(e.fcuRaw, 2) + (e.capped ? ' → ' + App.capLabel() + ' = ' + fmt(e.fcu, 2) : '') + ' MPa</div>';
             } else {
-              h += '<div class="eq">' + t('noTieAtEnd') + ' → fcu = 0,85 f′c = ' + fmt(e.fcu, 2) + ' MPa</div>';
+              h += '<div class="eq">' + t('noTieAtEnd') + ' → fcu = ' + App.capLabel() + ' = ' + fmt(e.fcu, 2) + ' MPa</div>';
             }
           });
           h += '<div class="eq">Cr = φc · fcu · w · b = ' + fmt(App.checks.phiC, 2) + ' × ' + fmt(c.fcu, 2) + ' × ' + fmt(c.w, 0) + ' × ' + fmt(mat.b, 0) + ' = ' + fmt(c.capacity, 0) + ' kN</div></div>';
@@ -403,7 +405,7 @@
     var s = '<polygon points="' + m.outline.map(function (p) { return P(p[0], p[1]); }).join(' ') + '" fill="#9fc3d2" fill-opacity=".15" stroke="#88b3c6" stroke-width=".7"/>';
     var nm = {}; m.nodes.forEach(function (n) { nm[n.id] = n; });
     m.members.forEach(function (b) {
-      var A = nm[b.i], B = nm[b.j], tie = !!b.bars;
+      var A = nm[b.i], B = nm[b.j], tie = !!b.bars || b.As > 0;
       s += '<polyline points="' + P(A.x, A.y) + ' ' + P(B.x, B.y) + '" stroke="' + (tie ? '#ffc978' : '#7cb4ff') + '" stroke-width="' + (tie ? 1.4 : 1) + '"' + (tie ? '' : ' stroke-dasharray="2 1.3"') + '/>';
     });
     return s;

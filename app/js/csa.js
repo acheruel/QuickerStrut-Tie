@@ -1,10 +1,11 @@
 /* QuickerStrut&Tie — strut-and-tie verification to CSA S6 (bridges) and
  * CSA A23.3 (buildings).
  *
- * Struts : Cr = φc·fcu·Acs, fcu = f'c / (0.8 + 170·ε1) ≤ 0.85·f'c,
+ * Struts : Cr = φc·fcu·Acs, fcu = f'c / (0.8 + 170·ε1) ≤ 0.85·f'c (A23.3) or α1·f'c (S6),
  *          ε1 = εs + (εs + 0.002)·cot²θs  (θs = smallest strut–tie angle).
  * Ties   : Tr = φs·fy·Ast.
- * Nodes  : face stresses ≤ 0.85 / 0.75 / 0.65 ·φc·f'c (CCC / CCT / CTT).
+ * Nodes  : face stresses ≤ 0.85 / 0.75 / 0.65 ·φc·f'c (A23.3) or
+ *          α1 / 0.88 α1 / 0.76 α1 ·φc·f'c (S6), for CCC / CCT / CTT.
  * Crack control: orthogonal grid, ρ ≥ ρmin each way, spacing ≤ 300 mm.
  *
  * Clause numbers and factors live in CODES so they can be checked and
@@ -13,20 +14,27 @@
 (function (root) {
   'use strict';
 
+  // S6: α1 = 0.85 − 0.0015 f′c ≥ 0.67 caps the strut stress (α1 f′c) and sets the
+  // nodal limits α1, 0.88 α1 and 0.76 α1 (× φc f′c). A23.3: 0.85 f′c, 0.85/0.75/0.65.
+  function alpha1(fc) { return Math.max(0.67, 0.85 - 0.0015 * fc); }
   var CODES = {
     S6: {
       name: 'CSA S6',
       phiC: 0.75, phiS: 0.90,
-      node: { CCC: 0.85, CCT: 0.75, CTT: 0.65 },
-      rhoMin: 0.003, sMax: 300,
-      clause: { phi: '8.4.6', strut: '8.10.3', fcu: '8.10.3.3', tie: '8.10.4', node: '8.10.5.1', crack: '8.10.6' }
+      strutCap: function (fc) { return alpha1(fc); },
+      node: function (type, fc) { var a = alpha1(fc); return { CCC: a, CCT: 0.88 * a, CTT: 0.76 * a }[type]; },
+      nodeText: { CCC: 'α1', CCT: '0,88 α1', CTT: '0,76 α1' },
+      rhoMin: 0.003, sMax: 300, maxFaceArea: 1500,
+      clause: { phi: '8.4.6', strut: '8.10.3', fcu: '8.10.3.3', tie: '8.10.4.1', node: '8.10.5.1', crack: '8.10.5' }
     },
     A23: {
       name: 'CSA A23.3',
       phiC: 0.65, phiS: 0.85,
-      node: { CCC: 0.85, CCT: 0.75, CTT: 0.65 },
-      rhoMin: 0.002, sMax: 300,
-      clause: { phi: '8.4.2 / 8.4.3', strut: '11.4.2', fcu: '11.4.2.3', tie: '11.4.3', node: '11.4.4.1', crack: '11.4.5' }
+      strutCap: function () { return 0.85; },
+      node: function (type) { return { CCC: 0.85, CCT: 0.75, CTT: 0.65 }[type]; },
+      nodeText: { CCC: '0,85', CCT: '0,75', CTT: '0,65' },
+      rhoMin: 0.002, sMax: 300, maxFaceArea: null,
+      clause: { phi: '8.4.2 / 8.4.3', strut: '11.4.2', fcu: '11.4.2.3', tie: '11.4.3.1', node: '11.4.4.1', crack: '11.4.5' }
     }
   };
 
@@ -57,12 +65,14 @@
     return model;
   }
 
-  function strutFcu(fc, epsS, theta) {
-    // theta in radians, acute angle between the strut and the adjoining tie.
+  function strutFcu(fc, epsS, theta, cap) {
+    // theta in radians, acute angle between the strut and the adjoining tie;
+    // cap: limiting ratio fcu / f′c (0.85 for A23.3, α1 for S6).
+    cap = cap === undefined ? 0.85 : cap;
     var cot = 1 / Math.tan(theta);
     var eps1 = epsS + (epsS + 0.002) * cot * cot;
     var raw = fc / (0.8 + 170 * eps1);
-    return { eps1: eps1, raw: raw, fcu: Math.min(raw, 0.85 * fc), capped: raw >= 0.85 * fc };
+    return { eps1: eps1, raw: raw, fcu: Math.min(raw, cap * fc), capped: raw >= cap * fc, cap: cap };
   }
 
   function acuteAngle(fa, fb) {
@@ -74,7 +84,7 @@
     var out = { ok: false, members: [], nodes: [], crack: null, governing: null, maxUtil: 0, warnings: [] };
     if (!result || !result.ok) return out;
     var mat = model.material, fc = Number(mat.fc), fy = Number(mat.fy), Es = Number(mat.Es), b = Number(mat.b);
-    var F = factors(model), code = F.code;
+    var F = factors(model), code = F.code, cap = code.strutCap(fc);
     var byId = {}, memberById = {}, nodeById = {};
     result.forces.forEach(function (f) { byId[f.id] = f; });
     model.members.forEach(function (m) { memberById[m.id] = m; });
@@ -116,20 +126,19 @@
           if (o.id === m.id) return;
           var fo = byId[o.id];
           if (fo.kind !== 'tie') return;
+          // A tie on the strut's line (within 5°) does not cross it.
+          if (acuteAngle(f, fo) < 5 * Math.PI / 180) return;
           // Each adjoining tie is evaluated; the lowest fcu (smallest angle,
           // largest tie strain) governs.
           var th = acuteAngle(f, fo), eps = tieInfo[o.id].eps;
-          var r = th > 1e-4 ? strutFcu(fc, eps, th) : { eps1: Infinity, raw: 0, fcu: 0, capped: false };
+          var r = strutFcu(fc, eps, th, cap);
           var cand = { tie: o.id, theta: th, epsS: eps, eps1: r.eps1, fcuRaw: r.raw, fcu: r.fcu, capped: r.capped };
           if (!best || cand.fcu < best.fcu - 1e-9 || (Math.abs(cand.fcu - best.fcu) <= 1e-9 && th < best.theta)) best = cand;
         });
-        if (best && best.theta > 1e-4) {
+        if (best) {
           ends.push({ node: nid, tie: best.tie, theta: best.theta, epsS: best.epsS, eps1: best.eps1, fcuRaw: best.fcuRaw, fcu: best.fcu, capped: best.capped });
-        } else if (best) {
-          // A tie collinear with a strut: no crushing reduction can be derived.
-          ends.push({ node: nid, tie: best.tie, theta: best.theta, epsS: best.epsS, eps1: Infinity, fcuRaw: 0, fcu: 0, capped: false });
         } else {
-          ends.push({ node: nid, tie: null, theta: null, epsS: 0, eps1: 0, fcuRaw: fc / 0.8, fcu: 0.85 * fc, capped: true });
+          ends.push({ node: nid, tie: null, theta: null, epsS: 0, eps1: 0, fcuRaw: fc / 0.8, fcu: cap * fc, capped: true });
         }
       });
       var gov = ends[0].fcu <= ends[1].fcu ? ends[0] : ends[1];
@@ -181,11 +190,11 @@
         if (w > 0 && !continues && mat.tieFaces !== false) faces.push({ kind: 'tie', ref: t.m.id, force: t.f.N, width: w, stress: t.f.N * 1000 / (w * b) });
       });
       if (!faces.length) return;
-      var limit = code.node[type] * F.phiC * fc;
+      var factor = code.node(type, fc), limit = factor * F.phiC * fc;
       var maxFace = null;
       faces.forEach(function (fa) { fa.util = fa.stress / limit; if (!maxFace || fa.util > maxFace.util) maxFace = fa; });
       out.nodes.push({
-        id: n.id, kind: 'node', type: type, factor: code.node[type], limit: limit, faces: faces,
+        id: n.id, kind: 'node', type: type, factor: factor, limit: limit, faces: faces,
         util: maxFace ? maxFace.util : 0, governingFace: maxFace, ties: ties.length,
         clause: code.clause.node
       });
@@ -193,10 +202,12 @@
 
     // --- Crack control reinforcement -----------------------------------------
     var rh = Number(mat.rhoH) || 0, rv = Number(mat.rhoV) || 0, sp = Number(mat.spacing) || 0;
+    // S6: the grid need not exceed maxFaceArea mm²/m on each face (two faces).
+    var rhoReq = code.maxFaceArea ? Math.min(code.rhoMin, 2 * code.maxFaceArea / (b * 1000)) : code.rhoMin;
     out.crack = {
-      rhoMin: code.rhoMin, sMax: code.sMax, rhoH: rh, rhoV: rv, spacing: sp,
-      okH: rh >= code.rhoMin - 1e-12, okV: rv >= code.rhoMin - 1e-12, okS: sp > 0 && sp <= code.sMax,
-      util: Math.max(rh > 0 ? code.rhoMin / rh : Infinity, rv > 0 ? code.rhoMin / rv : Infinity, sp > 0 ? sp / code.sMax : Infinity),
+      rhoMin: rhoReq, rhoCode: code.rhoMin, capped: rhoReq < code.rhoMin, sMax: code.sMax, rhoH: rh, rhoV: rv, spacing: sp,
+      okH: rh >= rhoReq - 1e-12, okV: rv >= rhoReq - 1e-12, okS: sp > 0 && sp <= code.sMax,
+      util: Math.max(rh > 0 ? rhoReq / rh : Infinity, rv > 0 ? rhoReq / rv : Infinity, sp > 0 ? sp / code.sMax : Infinity),
       clause: code.clause.crack
     };
 
@@ -204,7 +215,7 @@
     var all = out.members.concat(out.nodes);
     all.forEach(function (e) { if (!out.governing || e.util > out.governing.util) out.governing = e; });
     out.maxUtil = out.governing ? out.governing.util : 0;
-    out.phiC = F.phiC; out.phiS = F.phiS; out.code = model.code;
+    out.phiC = F.phiC; out.phiS = F.phiS; out.code = model.code; out.strutCap = cap;
     out.ok = true;
     return out;
   }
@@ -251,7 +262,7 @@
   }
 
   var api = {
-    CODES: CODES, BARS: BARS, check: check, strutFcu: strutFcu, factors: factors,
+    CODES: CODES, BARS: BARS, alpha1: alpha1, check: check, strutFcu: strutFcu, factors: factors,
     memberArea: memberArea, normalize: normalize, geometryWarnings: geometryWarnings,
     pointInPolygon: pointInPolygon, acuteAngle: acuteAngle
   };

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256">
+  <title>QuickerStrut&amp;Tie</title>
+  <defs><linearGradient id="qst-tile" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#174560"/><stop offset="1" stop-color="#0b2436"/></linearGradient></defs>
+  <rect width="64" height="64" rx="14" fill="url(#qst-tile)"/>
+  <rect x=".5" y=".5" width="63" height="63" rx="13.5" fill="none" stroke="#ffffff" stroke-opacity=".1"/>
+  <rect x="8" y="16" width="48" height="36" rx="3" fill="#9fc3d2" fill-opacity=".14"/>
+  <path d="M32 22L15.5 45.5M32 22L48.5 45.5" stroke="#7cb4ff" stroke-width="5" stroke-dasharray="6.4 3.4" stroke-linecap="round"/>
+  <path d="M15.5 45.5H48.5" stroke="#ffc978" stroke-width="5.6" stroke-linecap="round"/>
+  <g fill="#e8fff8" stroke="#0b2436" stroke-width="2.2"><circle cx="32" cy="22" r="5"/><circle cx="15.5" cy="45.5" r="5"/><circle cx="48.5" cy="45.5" r="5"/></g>
+  <path d="M44 8.5h9.5V18M53 9l-7.5 7.5" fill="none" stroke="#56e0bb" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

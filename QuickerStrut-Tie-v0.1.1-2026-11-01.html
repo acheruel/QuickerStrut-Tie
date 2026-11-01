@@ -5,7 +5,7 @@
   <title>QuickerStrut&amp;Tie · Strut-and-tie models</title>
   <meta name="description" content="Interactive 2D strut-and-tie models checked to CSA S6 and CSA A23.3, computed in your browser.">
   <meta property="og:title" content="QuickerStrut&amp;Tie · Strut-and-tie models"><meta property="og:description" content="Draw a 2D strut-and-tie model, drag its nodes and see forces and CSA S6 / A23.3 checks update live."><meta name="theme-color" content="#102d41">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23102d41'/%3E%3Ctext x='12' y='47' font-size='48' fill='%2356e0bb' font-family='sans-serif'%3EQ%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23102d41'/%3E%3Crect x='8' y='16' width='48' height='36' rx='3' fill='%239fc3d2' fill-opacity='.16'/%3E%3Cpath d='M32 22L15.5 45.5M32 22L48.5 45.5' stroke='%237cb4ff' stroke-width='5.5' stroke-linecap='round'/%3E%3Cpath d='M15.5 45.5H48.5' stroke='%23ffc978' stroke-width='6' stroke-linecap='round'/%3E%3Cg fill='%23e8fff8' stroke='%230b2436' stroke-width='2.2'%3E%3Ccircle cx='32' cy='22' r='5.5'/%3E%3Ccircle cx='15.5' cy='45.5' r='5.5'/%3E%3Ccircle cx='48.5' cy='45.5' r='5.5'/%3E%3C/g%3E%3Cpath d='M44 8.5h9.5V18M53 9l-7.5 7.5' fill='none' stroke='%2356e0bb' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <style>
 @charset "UTF-8";
 /* QuickerStrut&Tie — design tokens and layout. */
@@ -40,8 +40,7 @@ kbd{font:600 .6875rem "Segoe UI",Arial,sans-serif;color:var(--axis);border:1px s
 .topbar{height:64px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px;gap:16px}
 .brand{display:flex;align-items:center;gap:12px;font-size:1.42rem;font-weight:650;letter-spacing:-.6px;white-space:nowrap}
 .brand>div>span{font-weight:350;color:#9cdfcf}
-.brand-mark{position:relative;color:#73e4c2;font-weight:800;font-size:2.3rem;line-height:1}
-.brand-mark>span{position:absolute;font-size:1.1rem;right:-6px;bottom:-4px}
+.brand-logo{display:block;flex:none;width:40px;height:40px;filter:drop-shadow(0 2px 6px #0006)}
 .top-warning{display:flex;align-items:center;gap:9px;margin:0;padding:6px 14px;border:1px solid #2f5268;border-radius:999px;color:#c9dbe4;font-size:.78rem;background:#0e2839}
 .warning-symbol{width:15px;height:15px;border:1px solid #d7b25c;border-radius:50%;text-align:center;line-height:13px;color:#e9c46a;font-weight:bold;font-size:.625rem;flex:none}
 .header-right{display:flex;gap:18px;align-items:center}
@@ -134,6 +133,7 @@ h1{font-size:1.05rem;margin:0;font-weight:650}
 .del{border:0;background:none;color:#97a9b4;font-size:1.05rem;padding:0;height:26px}
 .del:hover:not(:disabled){color:var(--bad);background:none}
 .bars-pick{display:grid;grid-template-columns:42px 10px minmax(62px,1fr);align-items:center;gap:3px}
+.bars-row{grid-template-columns:1.6fr 1fr}
 .bars-pick b{text-align:center;color:var(--axis);font-weight:400}
 .input-footer{padding:10px 18px;border-top:1px solid var(--line);color:var(--muted);font-size:.72rem;display:flex;justify-content:space-between;gap:8px}
 
@@ -300,6 +300,73 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
   .tool .k{display:none}
   .metrics{grid-template-columns:1fr 1fr}
 }
+/* ---------- Galaxy Z Fold 8 unfolded in landscape (~816 × 536 CSS px) and other
+   wide, short screens: slim header, narrow side panel that scrolls on its own,
+   vertical tool column inside the canvas, canvas sized from the screen height. */
+@media (orientation:landscape) and (max-height:620px) and (min-width:700px){
+  .topbar{height:46px;padding:0 12px;gap:10px}
+  .brand{font-size:1.08rem;gap:8px}
+  .brand-logo{width:30px;height:30px}
+  .top-warning,.release-info{display:none}
+  .header-right{gap:10px}
+  .method-open{padding:5px 9px;font-size:.75rem}
+  .method-open .lbl{display:none}
+  .language button{padding:4px 8px}
+  .github-link svg{width:20px;height:20px}
+  .workspace{grid-template-columns:250px minmax(0,1fr);gap:10px;padding:8px 10px}
+  .inputs{position:sticky;top:8px;order:0;max-height:calc(100svh - 16px)}
+  .panel-heading{padding:10px 12px 6px}
+  h1{font-size:.95rem}
+  .project-bar{padding:0 12px 8px;gap:7px}
+  .pn-label{margin-bottom:3px}
+  .pn-wrap input{min-height:34px;font-size:.9rem}
+  .menu-button{padding:5px 9px;font-size:.75rem}
+  .input-tabs{padding:0 10px;gap:10px}
+  .input-tabs button{padding:8px 1px;font-size:.78rem}
+  #input-content{padding:10px 12px}
+  .input-footer{display:none}
+  .field-row{gap:7px}
+  .row-node-1{grid-template-columns:36px 1fr 1fr 22px}
+  .row-mem-1{grid-template-columns:36px 1fr 1fr 1fr 22px}
+  .stage-top{padding:6px 8px;gap:6px;flex-wrap:nowrap}
+  .stage-right{gap:5px;flex-wrap:nowrap;margin-left:auto}
+  .toolbox{position:absolute;left:8px;top:54px;z-index:4;flex-direction:column;gap:2px;padding:3px;box-shadow:0 6px 16px #0006}
+  .tool{padding:7px;justify-content:center}
+  .tool .k{display:none}
+  .dark-seg button{padding:5px 8px;font-size:.72rem}
+  .chip{padding:5px 7px}
+  .chip .cl{display:none}
+  .icon-chip{width:30px;height:28px}
+  .canvas-wrap{height:calc(100svh - 46px - 16px - 44px);min-height:300px}
+  .hud{left:56px;bottom:6px;font-size:.66rem;gap:7px}
+  .hud .hint{display:none}
+  .legend-hud{display:none}
+  .banner{left:56px;max-width:calc(100% - 320px);font-size:.74rem;padding:6px 10px}
+  .inspector{top:8px;right:8px;width:244px;max-height:calc(100% - 16px);font-size:.92em;border-radius:10px}
+  .ins-head{padding:9px 11px 8px}
+  .ins-badge{width:30px;height:30px}
+  .ins-body{padding:9px 11px 11px}
+  .ins-result .big b{font-size:1.2rem}
+  .steps{font-size:.7rem}
+  .bars-row{grid-template-columns:1fr}
+  .metrics{margin-top:8px}
+  .metric{padding:7px 10px}
+  .metric-label{font-size:.62rem;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .metric-value{font-size:1.1rem}
+  .metric-value>span[style*="1.1rem"]{font-size:.95rem!important}
+  .chart-toolbar{margin-top:6px}
+  .view-tabs{gap:12px}
+  .view-tabs button{padding:8px 1px;font-size:.8rem}
+  .result-view{padding:8px 10px 10px}
+  dialog{max-height:calc(100svh - 12px)}
+  .dlg-body{max-height:calc(100svh - 120px)}
+}
+@media (pointer:coarse){
+  .input-tabs button,.view-tabs button{min-height:40px}
+  .dark-seg button,.tool{min-height:36px;min-width:36px}
+  .chip,.icon-chip{min-height:34px}
+  .menu-pop button{min-height:42px}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* ---------- Printed report ---------- */
@@ -362,7 +429,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
     <text id="sp-c" x="388" y="300" fill="#cfe2ff" class="sp-small" text-anchor="middle" opacity="0"></text>
     <text id="sp-t" x="500" y="460" fill="#ffe2ae" class="sp-small" text-anchor="middle" opacity="0"></text>
     <g id="sp-brand" opacity="0">
-      <text x="500" y="92" text-anchor="middle" class="sp-word"><tspan fill="#fff">Quicker</tspan><tspan fill="#56e0bb">Strut&amp;Tie</tspan></text>
+      <g transform="translate(284 48) scale(.9)"><g><defs><linearGradient id="qst-tile-sp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#174560"/><stop offset="1" stop-color="#0b2436"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#qst-tile-sp)"/><rect x=".5" y=".5" width="63" height="63" rx="13.5" fill="none" stroke="#fff" stroke-opacity=".14"/><rect x="8" y="16" width="48" height="36" rx="3" fill="#9fc3d2" fill-opacity=".14"/><path d="M32 22L15.5 45.5M32 22L48.5 45.5" stroke="#7cb4ff" stroke-width="5" stroke-dasharray="6.4 3.4" stroke-linecap="round"/><path d="M15.5 45.5H48.5" stroke="#ffc978" stroke-width="5.6" stroke-linecap="round"/><g fill="#e8fff8" stroke="#0b2436" stroke-width="2.2"><circle cx="32" cy="22" r="5"/><circle cx="15.5" cy="45.5" r="5"/><circle cx="48.5" cy="45.5" r="5"/></g><path d="M44 8.5h9.5V18M53 9l-7.5 7.5" fill="none" stroke="#56e0bb" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></g></g><text x="532" y="92" text-anchor="middle" class="sp-word"><tspan fill="#fff">Quicker</tspan><tspan fill="#56e0bb">Strut&amp;Tie</tspan></text>
       <text id="sp-tagline" x="500" y="528" text-anchor="middle" class="sp-tag"></text>
     </g>
   </svg>
@@ -407,7 +474,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 </script>
 
 <header class="topbar">
-  <div class="brand"><span class="brand-mark">Q<span>↗</span></span><div>Quicker<span>Strut&amp;Tie</span></div></div>
+  <div class="brand"><svg class="brand-logo" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><defs><linearGradient id="qst-tile-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#174560"/><stop offset="1" stop-color="#0b2436"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#qst-tile-top)"/><rect x=".5" y=".5" width="63" height="63" rx="13.5" fill="none" stroke="#fff" stroke-opacity=".14"/><rect x="8" y="16" width="48" height="36" rx="3" fill="#9fc3d2" fill-opacity=".14"/><path d="M32 22L15.5 45.5M32 22L48.5 45.5" stroke="#7cb4ff" stroke-width="5" stroke-dasharray="6.4 3.4" stroke-linecap="round"/><path d="M15.5 45.5H48.5" stroke="#ffc978" stroke-width="5.6" stroke-linecap="round"/><g fill="#e8fff8" stroke="#0b2436" stroke-width="2.2"><circle cx="32" cy="22" r="5"/><circle cx="15.5" cy="45.5" r="5"/><circle cx="48.5" cy="45.5" r="5"/></g><path d="M44 8.5h9.5V18M53 9l-7.5 7.5" fill="none" stroke="#56e0bb" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg><div>Quicker<span>Strut&amp;Tie</span></div></div>
   <p class="top-warning" role="note"><span class="warning-symbol" aria-hidden="true">!</span><span data-i18n="warning"></span></p>
   <div class="header-right">
     <div class="release-info"><b id="release-version"></b><small id="release-date"></small></div>
@@ -479,7 +546,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <div id="report"></div>
 <script>/* js/version.js */
-window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chéruel', schema: 1 };
+window.QST_META = { version: '0.1.1', date: '2026-11-01', author: 'Anthony Chéruel', schema: 1 };
 
 </script>
 <script>/* js/solver.js */
@@ -676,10 +743,11 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
 /* QuickerStrut&Tie — strut-and-tie verification to CSA S6 (bridges) and
  * CSA A23.3 (buildings).
  *
- * Struts : Cr = φc·fcu·Acs, fcu = f'c / (0.8 + 170·ε1) ≤ 0.85·f'c,
+ * Struts : Cr = φc·fcu·Acs, fcu = f'c / (0.8 + 170·ε1) ≤ 0.85·f'c (A23.3) or α1·f'c (S6),
  *          ε1 = εs + (εs + 0.002)·cot²θs  (θs = smallest strut–tie angle).
  * Ties   : Tr = φs·fy·Ast.
- * Nodes  : face stresses ≤ 0.85 / 0.75 / 0.65 ·φc·f'c (CCC / CCT / CTT).
+ * Nodes  : face stresses ≤ 0.85 / 0.75 / 0.65 ·φc·f'c (A23.3) or
+ *          α1 / 0.88 α1 / 0.76 α1 ·φc·f'c (S6), for CCC / CCT / CTT.
  * Crack control: orthogonal grid, ρ ≥ ρmin each way, spacing ≤ 300 mm.
  *
  * Clause numbers and factors live in CODES so they can be checked and
@@ -688,20 +756,27 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
 (function (root) {
   'use strict';
 
+  // S6: α1 = 0.85 − 0.0015 f′c ≥ 0.67 caps the strut stress (α1 f′c) and sets the
+  // nodal limits α1, 0.88 α1 and 0.76 α1 (× φc f′c). A23.3: 0.85 f′c, 0.85/0.75/0.65.
+  function alpha1(fc) { return Math.max(0.67, 0.85 - 0.0015 * fc); }
   var CODES = {
     S6: {
       name: 'CSA S6',
       phiC: 0.75, phiS: 0.90,
-      node: { CCC: 0.85, CCT: 0.75, CTT: 0.65 },
-      rhoMin: 0.003, sMax: 300,
-      clause: { phi: '8.4.6', strut: '8.10.3', fcu: '8.10.3.3', tie: '8.10.4', node: '8.10.5.1', crack: '8.10.6' }
+      strutCap: function (fc) { return alpha1(fc); },
+      node: function (type, fc) { var a = alpha1(fc); return { CCC: a, CCT: 0.88 * a, CTT: 0.76 * a }[type]; },
+      nodeText: { CCC: 'α1', CCT: '0,88 α1', CTT: '0,76 α1' },
+      rhoMin: 0.003, sMax: 300, maxFaceArea: 1500,
+      clause: { phi: '8.4.6', strut: '8.10.3', fcu: '8.10.3.3', tie: '8.10.4.1', node: '8.10.5.1', crack: '8.10.5' }
     },
     A23: {
       name: 'CSA A23.3',
       phiC: 0.65, phiS: 0.85,
-      node: { CCC: 0.85, CCT: 0.75, CTT: 0.65 },
-      rhoMin: 0.002, sMax: 300,
-      clause: { phi: '8.4.2 / 8.4.3', strut: '11.4.2', fcu: '11.4.2.3', tie: '11.4.3', node: '11.4.4.1', crack: '11.4.5' }
+      strutCap: function () { return 0.85; },
+      node: function (type) { return { CCC: 0.85, CCT: 0.75, CTT: 0.65 }[type]; },
+      nodeText: { CCC: '0,85', CCT: '0,75', CTT: '0,65' },
+      rhoMin: 0.002, sMax: 300, maxFaceArea: null,
+      clause: { phi: '8.4.2 / 8.4.3', strut: '11.4.2', fcu: '11.4.2.3', tie: '11.4.3.1', node: '11.4.4.1', crack: '11.4.5' }
     }
   };
 
@@ -732,12 +807,14 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
     return model;
   }
 
-  function strutFcu(fc, epsS, theta) {
-    // theta in radians, acute angle between the strut and the adjoining tie.
+  function strutFcu(fc, epsS, theta, cap) {
+    // theta in radians, acute angle between the strut and the adjoining tie;
+    // cap: limiting ratio fcu / f′c (0.85 for A23.3, α1 for S6).
+    cap = cap === undefined ? 0.85 : cap;
     var cot = 1 / Math.tan(theta);
     var eps1 = epsS + (epsS + 0.002) * cot * cot;
     var raw = fc / (0.8 + 170 * eps1);
-    return { eps1: eps1, raw: raw, fcu: Math.min(raw, 0.85 * fc), capped: raw >= 0.85 * fc };
+    return { eps1: eps1, raw: raw, fcu: Math.min(raw, cap * fc), capped: raw >= cap * fc, cap: cap };
   }
 
   function acuteAngle(fa, fb) {
@@ -749,7 +826,7 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
     var out = { ok: false, members: [], nodes: [], crack: null, governing: null, maxUtil: 0, warnings: [] };
     if (!result || !result.ok) return out;
     var mat = model.material, fc = Number(mat.fc), fy = Number(mat.fy), Es = Number(mat.Es), b = Number(mat.b);
-    var F = factors(model), code = F.code;
+    var F = factors(model), code = F.code, cap = code.strutCap(fc);
     var byId = {}, memberById = {}, nodeById = {};
     result.forces.forEach(function (f) { byId[f.id] = f; });
     model.members.forEach(function (m) { memberById[m.id] = m; });
@@ -791,20 +868,19 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
           if (o.id === m.id) return;
           var fo = byId[o.id];
           if (fo.kind !== 'tie') return;
+          // A tie on the strut's line (within 5°) does not cross it.
+          if (acuteAngle(f, fo) < 5 * Math.PI / 180) return;
           // Each adjoining tie is evaluated; the lowest fcu (smallest angle,
           // largest tie strain) governs.
           var th = acuteAngle(f, fo), eps = tieInfo[o.id].eps;
-          var r = th > 1e-4 ? strutFcu(fc, eps, th) : { eps1: Infinity, raw: 0, fcu: 0, capped: false };
+          var r = strutFcu(fc, eps, th, cap);
           var cand = { tie: o.id, theta: th, epsS: eps, eps1: r.eps1, fcuRaw: r.raw, fcu: r.fcu, capped: r.capped };
           if (!best || cand.fcu < best.fcu - 1e-9 || (Math.abs(cand.fcu - best.fcu) <= 1e-9 && th < best.theta)) best = cand;
         });
-        if (best && best.theta > 1e-4) {
+        if (best) {
           ends.push({ node: nid, tie: best.tie, theta: best.theta, epsS: best.epsS, eps1: best.eps1, fcuRaw: best.fcuRaw, fcu: best.fcu, capped: best.capped });
-        } else if (best) {
-          // A tie collinear with a strut: no crushing reduction can be derived.
-          ends.push({ node: nid, tie: best.tie, theta: best.theta, epsS: best.epsS, eps1: Infinity, fcuRaw: 0, fcu: 0, capped: false });
         } else {
-          ends.push({ node: nid, tie: null, theta: null, epsS: 0, eps1: 0, fcuRaw: fc / 0.8, fcu: 0.85 * fc, capped: true });
+          ends.push({ node: nid, tie: null, theta: null, epsS: 0, eps1: 0, fcuRaw: fc / 0.8, fcu: cap * fc, capped: true });
         }
       });
       var gov = ends[0].fcu <= ends[1].fcu ? ends[0] : ends[1];
@@ -856,11 +932,11 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
         if (w > 0 && !continues && mat.tieFaces !== false) faces.push({ kind: 'tie', ref: t.m.id, force: t.f.N, width: w, stress: t.f.N * 1000 / (w * b) });
       });
       if (!faces.length) return;
-      var limit = code.node[type] * F.phiC * fc;
+      var factor = code.node(type, fc), limit = factor * F.phiC * fc;
       var maxFace = null;
       faces.forEach(function (fa) { fa.util = fa.stress / limit; if (!maxFace || fa.util > maxFace.util) maxFace = fa; });
       out.nodes.push({
-        id: n.id, kind: 'node', type: type, factor: code.node[type], limit: limit, faces: faces,
+        id: n.id, kind: 'node', type: type, factor: factor, limit: limit, faces: faces,
         util: maxFace ? maxFace.util : 0, governingFace: maxFace, ties: ties.length,
         clause: code.clause.node
       });
@@ -868,10 +944,12 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
 
     // --- Crack control reinforcement -----------------------------------------
     var rh = Number(mat.rhoH) || 0, rv = Number(mat.rhoV) || 0, sp = Number(mat.spacing) || 0;
+    // S6: the grid need not exceed maxFaceArea mm²/m on each face (two faces).
+    var rhoReq = code.maxFaceArea ? Math.min(code.rhoMin, 2 * code.maxFaceArea / (b * 1000)) : code.rhoMin;
     out.crack = {
-      rhoMin: code.rhoMin, sMax: code.sMax, rhoH: rh, rhoV: rv, spacing: sp,
-      okH: rh >= code.rhoMin - 1e-12, okV: rv >= code.rhoMin - 1e-12, okS: sp > 0 && sp <= code.sMax,
-      util: Math.max(rh > 0 ? code.rhoMin / rh : Infinity, rv > 0 ? code.rhoMin / rv : Infinity, sp > 0 ? sp / code.sMax : Infinity),
+      rhoMin: rhoReq, rhoCode: code.rhoMin, capped: rhoReq < code.rhoMin, sMax: code.sMax, rhoH: rh, rhoV: rv, spacing: sp,
+      okH: rh >= rhoReq - 1e-12, okV: rv >= rhoReq - 1e-12, okS: sp > 0 && sp <= code.sMax,
+      util: Math.max(rh > 0 ? rhoReq / rh : Infinity, rv > 0 ? rhoReq / rv : Infinity, sp > 0 ? sp / code.sMax : Infinity),
       clause: code.clause.crack
     };
 
@@ -879,7 +957,7 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
     var all = out.members.concat(out.nodes);
     all.forEach(function (e) { if (!out.governing || e.util > out.governing.util) out.governing = e; });
     out.maxUtil = out.governing ? out.governing.util : 0;
-    out.phiC = F.phiC; out.phiS = F.phiS; out.code = model.code;
+    out.phiC = F.phiC; out.phiS = F.phiS; out.code = model.code; out.strutCap = cap;
     out.ok = true;
     return out;
   }
@@ -926,7 +1004,7 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
   }
 
   var api = {
-    CODES: CODES, BARS: BARS, check: check, strutFcu: strutFcu, factors: factors,
+    CODES: CODES, BARS: BARS, alpha1: alpha1, check: check, strutFcu: strutFcu, factors: factors,
     memberArea: memberArea, normalize: normalize, geometryWarnings: geometryWarnings,
     pointInPolygon: pointInPolygon, acuteAngle: acuteAngle
   };
@@ -952,6 +1030,8 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
   }
   function S(id, i, j, w) { return { id: id, i: i, j: j, role: 'auto', w: w, bars: null, As: 0 }; }
   function T(id, i, j, n, size, w) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: { n: n, size: size }, As: 0 }; }
+  function TA(id, i, j, As, w) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: null, As: As }; }
+  var IN = 0.0254, KIP = 4.448222;
 
   var EXAMPLES = [
     {
@@ -1041,6 +1121,61 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
       }
     },
     {
+      key: 'half-joint',
+      title: { fr: 'Appui en chaise (demi-joint)', en: 'Half-joint seat (dapped end)' },
+      sub: { fr: 'Travée suspendue sur chaise · bande de 1 m', en: 'Suspended span on a seat · 1 m strip' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 35, b: 1000 }),
+        outline: [[0, 0.6], [0.45, 0.6], [0.45, 0], [3.0, 0], [3.0, 1.2], [0, 1.2]],
+        nodes: [
+          N('N1', 0.2, 0.68, { support: 'ry', bearing: 250 }),
+          N('N2', 0.55, 1.12),
+          N('N3', 0.55, 0.08),
+          N('N4', 1.3, 0.68),
+          N('N5', 1.3, 1.12, { fy: -330, bearing: 300 }),
+          N('N6', 1.3, 0.08),
+          N('N7', 2.15, 1.12, { fy: -190, bearing: 300 }),
+          N('N8', 2.15, 0.08),
+          N('N9', 3.0, 1.12, { support: 'rx', fy: -80 }),
+          N('N10', 3.0, 0.08, { support: 'rx' })
+        ],
+        members: [
+          S('M1', 'N1', 'N2', 300), T('M2', 'N1', 'N4', 5, '20M', 150), T('M3', 'N2', 'N3', 6, '20M', 150),
+          S('M4', 'N2', 'N5', 150), S('M5', 'N3', 'N4', 250), S('M6', 'N3', 'N5', 300), T('M7', 'N3', 'N6', 6, '25M', 150),
+          S('M8', 'N5', 'N4', 150), T('M9', 'N4', 'N6', 5, '15M', 150), S('M10', 'N5', 'N7', 150), T('M11', 'N6', 'N8', 6, '25M', 150),
+          S('M12', 'N6', 'N7', 250), T('M13', 'N7', 'N8', 4, '15M', 150), S('M14', 'N7', 'N9', 150), T('M15', 'N8', 'N10', 6, '25M', 150),
+          S('M16', 'N8', 'N9', 250), T('M17', 'N9', 'N10', 4, '15M', 150)
+        ]
+      }
+    },
+    {
+      key: 'fhwa-deep-beam',
+      literature: true,
+      title: { fr: 'Poutre-cloison · manuel FHWA, ex. 1', en: 'Deep beam · FHWA manual, ex. 1' },
+      sub: { fr: 'Géométrie et efforts publiés (conversion SI)', en: 'Published geometry and forces (SI units)' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 34.5, fy: 414, b: 48 * IN * 1000 }),
+        outline: [[0, 0], [29 * 12 * IN, 0], [29 * 12 * IN, 72 * IN], [0, 72 * IN]],
+        nodes: [
+          N('A', 12 * IN, 5 * IN, { support: 'pin', bearing: 12 * IN * 1000 }),
+          N('B', 66 * IN, 5 * IN),
+          N('C', 336 * IN, 5 * IN, { support: 'ry', bearing: 12 * IN * 1000 }),
+          N('D', 66 * IN, 69 * IN),
+          N('E', 120 * IN, 69 * IN, { fy: -600 * KIP, bearing: 12 * IN * 1000 }),
+          N('F', 228 * IN, 69 * IN, { fy: -600 * KIP, bearing: 12 * IN * 1000 })
+        ],
+        members: [
+          TA('AB', 'A', 'B', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000), TA('BC', 'B', 'C', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000),
+          S('AD', 'A', 'D', 400), T('BD', 'B', 'D', 26, '20M', 0), S('BE', 'B', 'E', 400), S('CF', 'C', 'F', 287),
+          S('DE', 'D', 'E', 6 * IN * 1000), S('EF', 'E', 'F', 6 * IN * 1000),
+          // Bracing diagonal (zero force) so that the stiffness matrix is regular.
+          S('BF', 'B', 'F', 150)
+        ]
+      }
+    },
+    {
       key: 'pile-cap',
       title: { fr: 'Semelle sur deux pieux', en: 'Two-pile cap' },
       sub: { fr: 'Colonne centrée, tirant entre les pieux', en: 'Centred column, tie between piles' },
@@ -1094,21 +1229,21 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
   var METHOD_FR = [
     '<h3>Modèle</h3><p>Le modèle bielles-tirants est un treillis plan articulé : les nœuds sont reliés par des barres qui ne transmettent qu’un effort axial. Les charges pondérées (ÉLUL) sont appliquées aux nœuds. Le treillis est résolu par la méthode des rigidités directe ; N &gt; 0 est une traction (tirant), N &lt; 0 une compression (bielle). Le rôle d’une barre est déterminé automatiquement par le signe de l’effort, ou imposé.</p>',
     '<p>Rigidité axiale : bielles <i>EA = Ec·w·b</i>, tirants <i>EA = Es·As</i>. Pour un modèle isostatique les efforts n’en dépendent pas. Pour un modèle hyperstatique, les rôles sont itérés jusqu’à stabilité ; la répartition dépend alors des largeurs et des aires saisies.</p>',
-    '<h3>Bielles</h3><span class="eq">Cr = φc · fcu · Acs,&nbsp;&nbsp; Acs = w · b</span><span class="eq">fcu = f′c / (0,8 + 170 ε1) ≤ 0,85 f′c,&nbsp;&nbsp; ε1 = εs + (εs + 0,002) cot²θs</span><p>θs est le plus petit angle entre la bielle et un tirant adjacent, évalué aux deux extrémités ; la valeur de fcu la plus faible gouverne. εs est la déformation du tirant, calculée (Tf / Es·As) ou prise égale à fy / Es. Sans tirant adjacent, fcu = 0,85 f′c.</p>',
+    '<h3>Bielles</h3><span class="eq">Cr = φc · fcu · Acs,&nbsp;&nbsp; Acs = w · b</span><span class="eq">fcu = f′c / (0,8 + 170 ε1) ≤ 0,85 f′c (A23.3) ou α1 f′c (S6),&nbsp;&nbsp; ε1 = εs + (εs + 0,002) cot²θs</span><p>Pour la S6, α1 = 0,85 − 0,0015 f′c ≥ 0,67. θs est le plus petit angle entre la bielle et un tirant adjacent, évalué aux deux extrémités ; la valeur de fcu la plus faible gouverne. Un tirant dans le prolongement de la bielle (à moins de 5°) ne la traverse pas et n’est pas pris en compte. εs est la déformation du tirant, calculée (Tf / Es·As) ou prise égale à fy / Es. Sans tirant adjacent, fcu atteint la limite supérieure.</p>',
     '<h3>Tirants</h3><span class="eq">Tr = φs · fy · Ast</span><p>Les armatures sont choisies en nombre × diamètre (barres CSA G30.18). L’ancrage n’est pas vérifié : la pleine résistance doit être développée à la sortie de la zone nodale prolongée.</p>',
-    '<h3>Zones nodales</h3><p>Contrainte sur chaque face ≤ 0,85 φc f′c (CCC : bielles et appuis), 0,75 φc f′c (CCT : un tirant ancré), 0,65 φc f′c (CTT : tirants dans plus d’une direction). Faces vérifiées : bielles (C / w·b), plaques d’appui et de charge (R / lb·b) et, en option, face d’ancrage des tirants (T / w·b).</p>',
-    '<h3>Armature de contrôle de la fissuration</h3><p>Grille orthogonale près de chaque face : ρ ≥ 0,003 (S6) ou 0,002 (A23.3) dans chaque direction, espacement ≤ 300 mm.</p>',
-    '<h3>Coefficients</h3><table><tr><th></th><th>φc</th><th>φs</th><th>Articles</th></tr><tr><td>CSA S6</td><td>0,75</td><td>0,90</td><td>8.4.6, 8.10</td></tr><tr><td>CSA A23.3</td><td>0,65</td><td>0,85</td><td>8.4, 11.4</td></tr></table><p>Les coefficients peuvent être remplacés (béton préfabriqué, etc.). Les numéros d’article et facteurs sont à confirmer avec l’édition de la norme applicable au projet.</p>',
+    '<h3>Zones nodales</h3><p>Contrainte sur chaque face ≤ 0,85 / 0,75 / 0,65 φc f′c selon l’A23.3, ou α1 / 0,88 α1 / 0,76 α1 φc f′c selon la S6, pour les nœuds CCC (bielles et appuis), CCT (un tirant ancré) et CTT (tirants dans plus d’une direction). Faces vérifiées : bielles (C / w·b), plaques d’appui et de charge (R / lb·b) et, en option, face d’ancrage des tirants (T / w·b).</p>',
+    '<h3>Armature de contrôle de la fissuration</h3><p>Grille orthogonale près de chaque face : ρ ≥ 0,003 (S6) ou 0,002 (A23.3) dans chaque direction, espacement ≤ 300 mm. Selon la S6, la grille n’a pas à dépasser 1500 mm²/m par face.</p>',
+    '<h3>Coefficients</h3><table><tr><th></th><th>φc</th><th>φs</th><th>Articles</th></tr><tr><td>CSA S6</td><td>0,75</td><td>0,90</td><td>8.4.6, 8.10.3.3, 8.10.4.1, 8.10.5.1</td></tr><tr><td>CSA A23.3</td><td>0,65</td><td>0,85</td><td>8.4, 11.4.2.3, 11.4.3.1, 11.4.4.1, 11.4.5</td></tr></table><p>Les coefficients peuvent être remplacés (béton préfabriqué, etc.). Les numéros d’article et facteurs sont à confirmer avec l’édition de la norme applicable au projet.</p>',
     '<h3>Limites</h3><p>Modèle 2D, un seul cas de charge pondéré, épaisseur b constante. Pas de poids propre automatique, de génération automatique du modèle, de vérification d’ancrage ni de champs de contraintes. La géométrie du modèle (position des nœuds, largeurs) relève du jugement de l’ingénieur.</p>'
   ].join('');
   var METHOD_EN = [
     '<h3>Model</h3><p>A strut-and-tie model is a plane pin-jointed truss: nodes are linked by bars carrying axial force only. Factored (ULS) loads act at the nodes. The truss is solved with the direct stiffness method; N &gt; 0 is tension (tie), N &lt; 0 compression (strut). A bar’s role follows the sign of its force, or can be imposed.</p>',
     '<p>Axial stiffness: struts <i>EA = Ec·w·b</i>, ties <i>EA = Es·As</i>. Forces in a statically determinate model do not depend on it. For an indeterminate model the roles are iterated until stable; the force distribution then depends on the widths and areas entered.</p>',
-    '<h3>Struts</h3><span class="eq">Cr = φc · fcu · Acs,&nbsp;&nbsp; Acs = w · b</span><span class="eq">fcu = f′c / (0.8 + 170 ε1) ≤ 0.85 f′c,&nbsp;&nbsp; ε1 = εs + (εs + 0.002) cot²θs</span><p>θs is the smallest angle between the strut and an adjoining tie, evaluated at both ends; the lowest fcu governs. εs is the tie strain, computed (Tf / Es·As) or taken as fy / Es. With no adjoining tie, fcu = 0.85 f′c.</p>',
+    '<h3>Struts</h3><span class="eq">Cr = φc · fcu · Acs,&nbsp;&nbsp; Acs = w · b</span><span class="eq">fcu = f′c / (0.8 + 170 ε1) ≤ 0.85 f′c (A23.3) or α1 f′c (S6),&nbsp;&nbsp; ε1 = εs + (εs + 0.002) cot²θs</span><p>For S6, α1 = 0.85 − 0.0015 f′c ≥ 0.67. θs is the smallest angle between the strut and an adjoining tie, evaluated at both ends; the lowest fcu governs. A tie in line with the strut (within 5°) does not cross it and is ignored. εs is the tie strain, computed (Tf / Es·As) or taken as fy / Es. With no adjoining tie, fcu reaches the upper limit.</p>',
     '<h3>Ties</h3><span class="eq">Tr = φs · fy · Ast</span><p>Reinforcement is entered as number × bar size (CSA G30.18 bars). Anchorage is not checked: full strength must be developed where the tie leaves the extended nodal zone.</p>',
-    '<h3>Nodal zones</h3><p>Stress on each face ≤ 0.85 φc f′c (CCC: struts and bearings), 0.75 φc f′c (CCT: one anchored tie), 0.65 φc f′c (CTT: ties in more than one direction). Faces checked: struts (C / w·b), bearing and load plates (R / lb·b) and, optionally, the anchorage face of ties (T / w·b).</p>',
-    '<h3>Crack control reinforcement</h3><p>Orthogonal grid near each face: ρ ≥ 0.003 (S6) or 0.002 (A23.3) in each direction, spacing ≤ 300 mm.</p>',
-    '<h3>Factors</h3><table><tr><th></th><th>φc</th><th>φs</th><th>Clauses</th></tr><tr><td>CSA S6</td><td>0.75</td><td>0.90</td><td>8.4.6, 8.10</td></tr><tr><td>CSA A23.3</td><td>0.65</td><td>0.85</td><td>8.4, 11.4</td></tr></table><p>The factors can be overridden (precast concrete, etc.). Clause numbers and factors must be confirmed against the edition of the standard that applies to the project.</p>',
+    '<h3>Nodal zones</h3><p>Stress on each face ≤ 0.85 / 0.75 / 0.65 φc f′c to A23.3, or α1 / 0.88 α1 / 0.76 α1 φc f′c to S6, for CCC (struts and bearings), CCT (one anchored tie) and CTT (ties in more than one direction) nodes. Faces checked: struts (C / w·b), bearing and load plates (R / lb·b) and, optionally, the anchorage face of ties (T / w·b).</p>',
+    '<h3>Crack control reinforcement</h3><p>Orthogonal grid near each face: ρ ≥ 0.003 (S6) or 0.002 (A23.3) in each direction, spacing ≤ 300 mm. To S6, the grid need not exceed 1500 mm²/m on each face.</p>',
+    '<h3>Factors</h3><table><tr><th></th><th>φc</th><th>φs</th><th>Clauses</th></tr><tr><td>CSA S6</td><td>0.75</td><td>0.90</td><td>8.4.6, 8.10.3.3, 8.10.4.1, 8.10.5.1</td></tr><tr><td>CSA A23.3</td><td>0.65</td><td>0.85</td><td>8.4, 11.4.2.3, 11.4.3.1, 11.4.4.1, 11.4.5</td></tr></table><p>The factors can be overridden (precast concrete, etc.). Clause numbers and factors must be confirmed against the edition of the standard that applies to the project.</p>',
     '<h3>Limits</h3><p>2D model, a single factored load case, constant thickness b. No automatic self-weight, automatic model generation, anchorage check or stress fields. The model geometry (node positions, widths) is the engineer’s judgement.</p>'
   ].join('');
 
@@ -1143,7 +1278,7 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
       thickness: 'Épaisseur', auto: 'auto', epsMode: 'Déformation εs des tirants', epsComputed: 'Calculée : Tf / (Es·As)', epsYield: 'Plastification : fy / Es',
       tieFaces: 'Vérifier la face d’ancrage des tirants aux nœuds',
       factorsNote: 'Coefficients appliqués : <b>φc = {phiC}</b>, <b>φs = {phiS}</b> · Ec = {Ec} MPa. Laissez φ vide pour la valeur de la norme.',
-      crackControl: 'Contrôle de la fissuration', clause: 'Art.', crackNote: 'Grille orthogonale près de chaque face : ρ ≥ {rho} dans chaque direction, s ≤ {s} mm.',
+      crackControl: 'Contrôle de la fissuration', clause: 'Art.', crackNote: 'Grille orthogonale près de chaque face : ρ ≥ {rho} dans chaque direction, s ≤ {s} mm.', crackCapNote: 'Pas plus de {a} mm²/m par face exigés.', alphaNote: 'S6 : α1 = {a}.',
       outline: 'Contour du béton', vertices: 'sommets', width: 'Largeur', height: 'Hauteur', applyRect: 'Remplacer par un rectangle',
       outlineNote: 'Outil <b>Contour (C)</b> : glissez les sommets au canevas, cliquez les <b>+</b> pour en ajouter, clic droit pour en retirer.',
       sup_none: 'Libre', sup_null: '—', sup_pin: 'Rotule (Rx, Ry)', sup_ry: 'Rouleau (Ry)', sup_rx: 'Rouleau (Rx)',
@@ -1208,7 +1343,7 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
       thickness: 'Thickness', auto: 'auto', epsMode: 'Tie strain εs', epsComputed: 'Computed: Tf / (Es·As)', epsYield: 'Yield: fy / Es',
       tieFaces: 'Check the tie anchorage face at nodes',
       factorsNote: 'Factors used: <b>φc = {phiC}</b>, <b>φs = {phiS}</b> · Ec = {Ec} MPa. Leave φ empty for the code value.',
-      crackControl: 'Crack control', clause: 'Cl.', crackNote: 'Orthogonal grid near each face: ρ ≥ {rho} in each direction, s ≤ {s} mm.',
+      crackControl: 'Crack control', clause: 'Cl.', crackNote: 'Orthogonal grid near each face: ρ ≥ {rho} in each direction, s ≤ {s} mm.', crackCapNote: 'No more than {a} mm²/m per face required.', alphaNote: 'S6: α1 = {a}.',
       outline: 'Concrete outline', vertices: 'vertices', width: 'Width', height: 'Height', applyRect: 'Replace with a rectangle',
       outlineNote: '<b>Outline tool (C)</b>: drag the vertices on the canvas, click the <b>+</b> markers to add one, right-click to remove one.',
       sup_none: 'Free', sup_null: '—', sup_pin: 'Pin (Rx, Ry)', sup_ry: 'Roller (Ry)', sup_rx: 'Roller (Rx)',
@@ -1313,6 +1448,14 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
     function expr() { var v = term(); while (peek() === '+' || peek() === '-') { var op = s[i++], r = term(); v = op === '+' ? v + r : v - r; } return v; }
     try { var v = expr(); return i === s.length && isFinite(v) ? v : NaN; } catch (e) { return NaN; }
   };
+  // Locale-aware decimal literal for formulas ("0,85" in French, "0.85" in English).
+  App.dl = function (s) { return App.lang === 'fr' ? s : s.replace(/,/g, '.'); };
+  // Strut stress cap as text: α1 f′c (S6) or 0,85 f′c (A23.3).
+  App.capLabel = function () {
+    if (App.model.code === 'S6') return 'α1 f′c';
+    return App.dl('0,85') + ' f′c';
+  };
+  App.nodeFactorText = function (type) { return App.dl(QST.csa.CODES[App.model.code].nodeText[type]); };
   App.esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
 
   // ---------- Model helpers ----------
@@ -1813,11 +1956,11 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
       if (App.tool !== 'outline') {
         model.members.forEach(function (m) {
           var g = geo[m.id]; if (!g) return;
-          out.push('<line class="hit-member" data-member="' + m.id + '" x1="' + n2(g.a[0]) + '" y1="' + n2(g.a[1]) + '" x2="' + n2(g.b[0]) + '" y2="' + n2(g.b[1]) + '" stroke="transparent" stroke-width="14"/>');
+          out.push('<line class="hit-member" data-member="' + m.id + '" x1="' + n2(g.a[0]) + '" y1="' + n2(g.a[1]) + '" x2="' + n2(g.b[0]) + '" y2="' + n2(g.b[1]) + '" stroke="transparent" stroke-width="' + (App.coarse ? 24 : 14) + '"/>');
         });
         model.nodes.forEach(function (n) {
           var s = toScreen(v, n.x, n.y);
-          out.push('<circle class="hit-node" data-node="' + n.id + '" cx="' + n2(s[0]) + '" cy="' + n2(s[1]) + '" r="12" fill="transparent"/>');
+          out.push('<circle class="hit-node" data-node="' + n.id + '" cx="' + n2(s[0]) + '" cy="' + n2(s[1]) + '" r="' + (App.coarse ? 19 : 12) + '" fill="transparent"/>');
         });
       }
     }
@@ -2108,6 +2251,7 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" font-family="Segoe UI, Inter, Roboto, Arial, sans-serif">' + body + '</svg>';
   };
 
+  App.coarse = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
   App.initCanvas = function () {
     svg = document.getElementById('canvas');
     wrap = document.getElementById('canvas-wrap');
@@ -2183,7 +2327,8 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
     Object.keys(chips).forEach(function (k) {
       var el = $('#toggle-' + k);
       el.setAttribute('aria-pressed', String(!!App.display[k]));
-      el.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true">' + (App.display[k] ? '<path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' : '<circle cx="8" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/>') + '</svg>' + t(chips[k]);
+      el.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true">' + (App.display[k] ? '<path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' : '<circle cx="8" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/>') + '</svg><span class="cl">' + t(chips[k]) + '</span>';
+      el.title = t(chips[k]);
     });
     $('#undo').disabled = !App.history.length;
     $('#redo').disabled = !App.future.length;
@@ -2233,13 +2378,13 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
       '<label class="field"><span>φs <em>' + t('auto') + ' ' + fmt(code.phiS, 2) + '</em></span>' + numInput(mat.phiS || '', 'data-k="mat.phiS" placeholder="' + fmt(code.phiS, 2) + '"') + '</label></div>';
     h += '<label class="field"><span>' + t('epsMode') + '</span><select data-k="mat.epsMode"><option value="computed"' + (mat.epsMode !== 'yield' ? ' selected' : '') + '>' + t('epsComputed') + '</option><option value="yield"' + (mat.epsMode === 'yield' ? ' selected' : '') + '>' + t('epsYield') + '</option></select></label>';
     h += '<label class="toggle-row"><input type="checkbox" data-k="mat.tieFaces"' + (mat.tieFaces !== false ? ' checked' : '') + '>' + t('tieFaces') + '</label>';
-    h += '<div class="note">' + t('factorsNote').replace('{phiC}', fmt(F.phiC, 2)).replace('{phiS}', fmt(F.phiS, 2)).replace('{Ec}', fmt(QST.solver.concreteModulus(m.code, mat.fc), 0)) + '</div>';
+    h += '<div class="note">' + (m.code === 'S6' ? t('alphaNote').replace('{a}', fmt(QST.csa.alpha1(mat.fc), 3)) + ' ' : '') + t('factorsNote').replace('{phiC}', fmt(F.phiC, 2)).replace('{phiS}', fmt(F.phiS, 2)).replace('{Ec}', fmt(QST.solver.concreteModulus(m.code, mat.fc), 0)) + '</div>';
     h += '<div class="section-label">' + t('crackControl') + '<span style="font-weight:500;letter-spacing:0;text-transform:none">' + t('clause') + ' ' + code.clause.crack + '</span></div>';
     h += '<div class="field-row three">' +
       '<label class="field"><span>ρh</span>' + numInput(mat.rhoH, 'data-k="mat.rhoH"') + '</label>' +
       '<label class="field"><span>ρv</span>' + numInput(mat.rhoV, 'data-k="mat.rhoV"') + '</label>' +
       '<label class="field"><span>s (mm)</span>' + numInput(mat.spacing, 'data-k="mat.spacing"') + '</label></div>';
-    h += '<p class="note">' + t('crackNote').replace('{rho}', fmt(code.rhoMin, 3)).replace('{s}', fmt(code.sMax, 0)) + '</p>';
+    h += '<p class="note">' + t('crackNote').replace('{rho}', fmt(code.rhoMin, 3)).replace('{s}', fmt(code.sMax, 0)) + (code.maxFaceArea ? ' ' + t('crackCapNote').replace('{a}', fmt(code.maxFaceArea, 0)) : '') + '</p>';
     h += '<div class="section-label">' + t('outline') + '<span style="font-weight:500;letter-spacing:0;text-transform:none">' + m.outline.length + ' ' + t('vertices') + '</span></div>';
     var b = bounds(m.outline);
     h += '<div class="field-row">' + unitField(t('width'), 'rect.w', App.round(b.x1 - b.x0), 'm') + unitField(t('height'), 'rect.h', App.round(b.y1 - b.y0), 'm') + '</div>';
@@ -2400,7 +2545,8 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
     h += '<div class="ins-body">';
     h += '<div class="field-row"><label class="field"><span>' + t('role') + '</span><select data-k="m.' + m.id + '.role"><option value="auto"' + (m.role === 'auto' ? ' selected' : '') + '>' + t('role_auto') + '</option><option value="strut"' + (m.role === 'strut' ? ' selected' : '') + '>' + t('kind_strut') + '</option><option value="tie"' + (m.role === 'tie' ? ' selected' : '') + '>' + t('kind_tie') + '</option></select></label>' +
       '<label class="field"><span>' + t('effWidth') + ' w (mm)</span>' + numInput(m.w, 'data-k="m.' + m.id + '.w"') + '</label></div>';
-    h += '<label class="field"><span>' + t('bars') + ' <em>As = ' + fmt(QST.csa.memberArea(m), 0) + ' mm²</em></span><span class="bars-pick" style="grid-template-columns:70px 14px 1fr">' + numInput(m.bars ? m.bars.n : 0, 'data-k="m.' + m.id + '.barsN"') + '<b>×</b><select data-k="m.' + m.id + '.barsSize">' + barOptions(m.bars ? m.bars.size : '20M') + '</select></span></label>';
+    h += '<div class="field-row bars-row"><label class="field"><span>' + t('bars') + '</span><span class="bars-pick" style="grid-template-columns:56px 12px 1fr">' + numInput(m.bars ? m.bars.n : 0, 'data-k="m.' + m.id + '.barsN"') + '<b>×</b><select data-k="m.' + m.id + '.barsSize">' + barOptions(m.bars ? m.bars.size : '20M') + '</select></span></label>' +
+      '<label class="field"><span>As (mm²)</span>' + numInput(QST.csa.memberArea(m), 'data-k="m.' + m.id + '.As"') + '</label></div>';
     if (f) {
       h += '<div class="ins-result"><div class="big"><div><small>' + (kind === 'tie' ? t('tension') : kind === 'strut' ? t('compression') : t('zeroForce')) + '</small><br><b>' + fmt(Math.abs(f.N), 1) + ' <small>kN</small></b></div>' + (c && kind !== 'zero' ? '<div style="text-align:right"><small>' + t('utilShort') + '</small><br><b style="color:' + App.utilInk(c.util) + '">' + fmt(c.util, 2) + '</b></div>' : '') + '</div>';
       if (c && kind !== 'zero') {
@@ -2416,10 +2562,10 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
             var gov = e.node === c.governingEnd;
             h += '<div style="' + (gov ? '' : 'opacity:.6') + '"><b>' + t('end') + ' ' + e.node + '</b>' + (gov ? ' · ' + t('governs') : '') + '</div>';
             if (e.tie) {
-              h += '<div class="eq">ε1 = εs + (εs + 0,002) cot²θs = ' + fmt(e.epsS * 1000, 3) + '‰ + (' + fmt(e.epsS * 1000, 3) + '‰ + 2‰) · cot²(' + fmt(deg(e.theta), 1) + '°) = ' + fmt(e.eps1 * 1000, 3) + ' ‰</div>';
-              h += '<div class="eq">fcu = f′c / (0,8 + 170 ε1) = ' + fmt(mat.fc, 1) + ' / (0,8 + 170 × ' + fmt(e.eps1, 5) + ') = ' + fmt(e.fcuRaw, 2) + (e.capped ? ' → 0,85 f′c = ' + fmt(e.fcu, 2) : '') + ' MPa</div>';
+              h += '<div class="eq">ε1 = εs + (εs + ' + App.dl('0,002') + ') cot²θs = ' + fmt(e.epsS * 1000, 3) + '‰ + (' + fmt(e.epsS * 1000, 3) + '‰ + 2‰) · cot²(' + fmt(deg(e.theta), 1) + '°) = ' + fmt(e.eps1 * 1000, 3) + ' ‰</div>';
+              h += '<div class="eq">fcu = f′c / (' + App.dl('0,8') + ' + 170 ε1) = ' + fmt(mat.fc, 1) + ' / (' + App.dl('0,8') + ' + 170 × ' + fmt(e.eps1, 5) + ') = ' + fmt(e.fcuRaw, 2) + (e.capped ? ' → ' + App.capLabel() + ' = ' + fmt(e.fcu, 2) : '') + ' MPa</div>';
             } else {
-              h += '<div class="eq">' + t('noTieAtEnd') + ' → fcu = 0,85 f′c = ' + fmt(e.fcu, 2) + ' MPa</div>';
+              h += '<div class="eq">' + t('noTieAtEnd') + ' → fcu = ' + App.capLabel() + ' = ' + fmt(e.fcu, 2) + ' MPa</div>';
             }
           });
           h += '<div class="eq">Cr = φc · fcu · w · b = ' + fmt(App.checks.phiC, 2) + ' × ' + fmt(c.fcu, 2) + ' × ' + fmt(c.w, 0) + ' × ' + fmt(mat.b, 0) + ' = ' + fmt(c.capacity, 0) + ' kN</div></div>';
@@ -2551,7 +2697,7 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
     var s = '<polygon points="' + m.outline.map(function (p) { return P(p[0], p[1]); }).join(' ') + '" fill="#9fc3d2" fill-opacity=".15" stroke="#88b3c6" stroke-width=".7"/>';
     var nm = {}; m.nodes.forEach(function (n) { nm[n.id] = n; });
     m.members.forEach(function (b) {
-      var A = nm[b.i], B = nm[b.j], tie = !!b.bars;
+      var A = nm[b.i], B = nm[b.j], tie = !!b.bars || b.As > 0;
       s += '<polyline points="' + P(A.x, A.y) + ' ' + P(B.x, B.y) + '" stroke="' + (tie ? '#ffc978' : '#7cb4ff') + '" stroke-width="' + (tie ? 1.4 : 1) + '"' + (tie ? '' : ' stroke-dasharray="2 1.3"') + '/>';
     });
     return s;
@@ -2704,14 +2850,14 @@ window.QST_META = { version: '0.1', date: '2026-11-01', author: 'Anthony Chérue
           calc = '<span class="rp-eq">Tr = φs fy As = ' + fmt(c.phiS, 2) + ' × ' + fmt(mat.fy, 0) + ' × ' + fmt(e.As, 0) + ' = ' + fmt(e.capacity, 0) + ' kN ≥ Tf = ' + fmt(e.demand, 0) + ' kN</span> <small>(' + code.clause.tie + ')</small>';
         } else {
           var g = e.ends.filter(function (x) { return x.node === e.governingEnd; })[0];
-          calc = (g.tie ? '<span class="rp-eq">ε1 = ' + fmt(g.epsS * 1000, 3) + '‰ + (' + fmt(g.epsS * 1000, 3) + '‰ + 2‰) cot²(' + fmt(deg(g.theta), 1) + '°) = ' + fmt(g.eps1 * 1000, 3) + '‰ ; fcu = ' + fmt(mat.fc, 1) + ' / (0,8 + 170 ε1) = ' + fmt(g.fcuRaw, 2) + (g.capped ? ' → 0,85 f′c' : '') + ' = ' + fmt(g.fcu, 2) + ' MPa</span><br>' : t('noTieAtEnd') + ' → fcu = 0,85 f′c = ' + fmt(g.fcu, 2) + ' MPa<br>') +
+          calc = (g.tie ? '<span class="rp-eq">ε1 = ' + fmt(g.epsS * 1000, 3) + '‰ + (' + fmt(g.epsS * 1000, 3) + '‰ + 2‰) cot²(' + fmt(deg(g.theta), 1) + '°) = ' + fmt(g.eps1 * 1000, 3) + '‰ ; fcu = ' + fmt(mat.fc, 1) + ' / (' + App.dl('0,8') + ' + 170 ε1) = ' + fmt(g.fcuRaw, 2) + (g.capped ? ' → ' + App.capLabel() : '') + ' = ' + fmt(g.fcu, 2) + ' MPa</span><br>' : t('noTieAtEnd') + ' → fcu = ' + App.capLabel() + ' = ' + fmt(g.fcu, 2) + ' MPa<br>') +
             '<span class="rp-eq">Cr = φc fcu w b = ' + fmt(c.phiC, 2) + ' × ' + fmt(e.fcu, 2) + ' × ' + fmt(e.w, 0) + ' × ' + fmt(mat.b, 0) + ' = ' + fmt(e.capacity, 0) + ' kN ≥ Cf = ' + fmt(e.demand, 0) + ' kN</span> <small>(' + code.clause.strut + ', ' + t('end') + ' ' + e.governingEnd + ')</small>';
         }
         h += '<tr><td>' + e.id + '<br><small>' + t('kind_' + e.kind) + '</small></td><td>' + calc + '</td><td>' + ok(e.util) + '</td></tr>';
       });
       c.nodes.forEach(function (e) {
         var g = e.governingFace;
-        var calc = '<span class="rp-eq">' + e.type + ' : f<sub>lim</sub> = ' + fmt(e.factor, 2) + ' φc f′c = ' + fmt(e.limit, 2) + ' MPa' + (g ? ' ; σ = ' + fmt(g.force, 0) + ' kN / (' + fmt(g.width, 0) + ' × ' + fmt(mat.b, 0) + ') = ' + fmt(g.stress, 2) + ' MPa (' + t('face_' + g.kind) + (g.kind === 'strut' || g.kind === 'tie' ? ' ' + g.ref : '') + ')' : '') + '</span> <small>(' + code.clause.node + ')</small>';
+        var calc = '<span class="rp-eq">' + e.type + ' : f<sub>lim</sub> = ' + App.nodeFactorText(e.type) + ' φc f′c = ' + fmt(e.limit, 2) + ' MPa' + (g ? ' ; σ = ' + fmt(g.force, 0) + ' kN / (' + fmt(g.width, 0) + ' × ' + fmt(mat.b, 0) + ') = ' + fmt(g.stress, 2) + ' MPa (' + t('face_' + g.kind) + (g.kind === 'strut' || g.kind === 'tie' ? ' ' + g.ref : '') + ')' : '') + '</span> <small>(' + code.clause.node + ')</small>';
         h += '<tr><td>' + e.id + '<br><small>' + t('nodalZone') + '</small></td><td>' + calc + '</td><td>' + ok(e.util) + '</td></tr>';
       });
       var ck = c.crack;

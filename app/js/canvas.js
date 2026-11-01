@@ -301,11 +301,11 @@
       if (App.tool !== 'outline') {
         model.members.forEach(function (m) {
           var g = geo[m.id]; if (!g) return;
-          out.push('<line class="hit-member" data-member="' + m.id + '" x1="' + n2(g.a[0]) + '" y1="' + n2(g.a[1]) + '" x2="' + n2(g.b[0]) + '" y2="' + n2(g.b[1]) + '" stroke="transparent" stroke-width="14"/>');
+          out.push('<line class="hit-member" data-member="' + m.id + '" x1="' + n2(g.a[0]) + '" y1="' + n2(g.a[1]) + '" x2="' + n2(g.b[0]) + '" y2="' + n2(g.b[1]) + '" stroke="transparent" stroke-width="' + (App.coarse ? 24 : 14) + '"/>');
         });
         model.nodes.forEach(function (n) {
           var s = toScreen(v, n.x, n.y);
-          out.push('<circle class="hit-node" data-node="' + n.id + '" cx="' + n2(s[0]) + '" cy="' + n2(s[1]) + '" r="12" fill="transparent"/>');
+          out.push('<circle class="hit-node" data-node="' + n.id + '" cx="' + n2(s[0]) + '" cy="' + n2(s[1]) + '" r="' + (App.coarse ? 19 : 12) + '" fill="transparent"/>');
         });
       }
     }
@@ -596,6 +596,7 @@
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" font-family="Segoe UI, Inter, Roboto, Arial, sans-serif">' + body + '</svg>';
   };
 
+  App.coarse = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
   App.initCanvas = function () {
     svg = document.getElementById('canvas');
     wrap = document.getElementById('canvas-wrap');
