@@ -1,8 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Build the portable single-file QuickerStrut&Tie HTML from app/.
 
-    python build.py            # writes QuickerStrut-Tie-v<version>-<date>.html
-    python build.py --check    # fails if the committed portable file is stale
+    python build.py            # writes QuickerStrut-Tie-v<version>-<date>.html and index.html
+    python build.py --check    # fails if either file is stale
+
+index.html is the same page: GitHub Pages serves it at the repository address
+(https://acheruel.github.io/QuickerStrut-Tie/), which carries no version or date.
 """
 
 import argparse
@@ -51,18 +54,21 @@ def main():
     args = parser.parse_args()
     version, date = meta()
     out = ROOT / f"QuickerStrut-Tie-v{version}-{date}.html"
+    pages = ROOT / "index.html"
     html = build()
     if args.check:
-        if not out.exists() or out.read_text(encoding="utf-8") != html:
-            print(f"{out.name} is missing or stale: run python build.py", file=sys.stderr)
-            return 1
-        print(f"{out.name} is up to date ({len(html) // 1024} KiB)")
+        for f in (out, pages):
+            if not f.exists() or f.read_text(encoding="utf-8") != html:
+                print(f"{f.name} is missing or stale: run python build.py", file=sys.stderr)
+                return 1
+        print(f"{out.name} and {pages.name} are up to date ({len(html) // 1024} KiB)")
         return 0
     for old in ROOT.glob("QuickerStrut-Tie-v*.html"):
         if old != out:
             old.unlink()
-    out.write_text(html, encoding="utf-8", newline="\n")
-    print(f"wrote {out.name} ({len(html) // 1024} KiB)")
+    for f in (out, pages):
+        f.write_text(html, encoding="utf-8", newline="\n")
+    print(f"wrote {out.name} and {pages.name} ({len(html) // 1024} KiB)")
     return 0
 
 

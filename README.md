@@ -11,7 +11,7 @@ No installation, no server, no data leaves your computer.
 
 ![QuickerStrut&Tie — hammerhead pier cap, forces view](docs/screenshots/forces.png)
 
-*Version 0.2 · 2026-11-01 · Anthony Chéruel · [Version history](CHANGELOG.md) · [Français](#en-français)*
+*Version 0.2.5 · 2026-11-01 · Anthony Chéruel · [Version history](CHANGELOG.md) · [Français](#en-français)*
 
 ## What it does
 
@@ -24,7 +24,8 @@ No installation, no server, no data leaves your computer.
 - **CSA checks:** strut crushing with the ε1-based limit (≤ 0.85 f′c to A23.3, ≤ α1 f′c to
   S6), tie yielding, CCC / CCT / CTT nodal zone stresses on strut, bearing and anchorage
   faces, **tie anchorage** (available length to the extended nodal zone vs. straight-bar or
-  hook development length; plates, welded bars and closed stirrups), crack control
+  hook development length; plates, welded bars, closed stirrups, continuous or bent
+  bars), crack control
   reinforcement; CSA S6 (bridges) or CSA A23.3 (buildings) factors, overridable.
 - **Hydrostatic nodal zones drawn graphically:** the force polygon rotated by 90° gives each
   node's outline, every face perpendicular to its force and at the same stress; the
@@ -43,8 +44,10 @@ No installation, no server, no data leaves your computer.
   anchorages and pile loads, SVG drawing, CSV table, `.quickerstrut.json` projects,
   pile head loads for QuickerPile, automatic local save.
 - **Examples:** deep beams, double corbel, hammerhead pier cap, half-joint seat
-  (dapped end), two-pile cap, and a deep beam from a published design manual whose
-  member forces are reproduced exactly.
+  (dapped end), two-pile cap, **bridge pier corbel**, **integral abutment end diaphragm**
+  (deck–abutment corner), and three published examples whose member forces are
+  reproduced: FHWA deep beam, Paultre (2011) double corbel and the CAC Handbook
+  dapped-end beam (24 forces).
 - **French and English** interface; works on desktop, tablets and foldables (including a
   Galaxy Z Fold unfolded in landscape).
 
@@ -105,11 +108,15 @@ build.py              builds the portable single-file HTML
 ```bash
 node --test                 # engine and translation tests
 python3 -m http.server -d app      # serve the app at http://localhost:8000
-python3 build.py                   # rebuild QuickerStrut-Tie-v<version>-<date>.html
+python3 build.py                   # rebuild the dated portable HTML and index.html
 ```
 
-GitHub Pages publishes the `app/` folder (workflow *Publish GitHub Pages*; in
-**Settings → Pages**, choose **GitHub Actions** as the source).
+GitHub Pages serves the repository root (**Settings → Pages**: *Deploy from a branch*,
+`main`, `/ (root)`). `build.py` writes the portable page twice: the dated download
+`QuickerStrut-Tie-v<version>-<date>.html` and `index.html`, which Pages serves at
+https://acheruel.github.io/QuickerStrut-Tie/ (`.nojekyll` keeps Jekyll from rendering the
+README instead). Run `python build.py` before every commit; `python build.py --check`
+fails if either file is stale.
 
 ---
 
@@ -137,8 +144,10 @@ jour en direct. Aucune installation, aucun serveur, aucune donnée transmise.
 - **Résultats lisibles :** largeurs réelles des bielles et tirants, couleur **et** type de
   trait, étiquettes de valeurs ; inspecteur détaillant chaque étape de calcul ; tableaux.
 - **Exemples :** poutres-cloisons, corbeau double, chevêtre en porte-à-faux, **appui en
-  chaise (demi-joint)**, semelle sur deux pieux, et une poutre-cloison d’un manuel publié
-  dont les efforts sont reproduits exactement.
+  chaise (demi-joint)**, semelle sur deux pieux, **corbeau de pile de pont**, **culée
+  intégrale (diaphragme d’about)**, et trois exemples publiés dont les efforts sont
+  reproduits : poutre-cloison FHWA, console courte double de Paultre (2011) et poutre à
+  about réduit du manuel CAC (24 efforts).
 - **Sorties :** note de calcul imprimable (PDF), dessin SVG, tableau CSV, projets
   `.quickerstrut.json`, sauvegarde locale automatique.
 - **Utilisation hors ligne :** téléchargez `QuickerStrut-Tie-v<version>-<date>.html` et

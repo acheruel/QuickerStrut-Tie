@@ -60,7 +60,7 @@ kbd{font:600 .6875rem "Segoe UI",Arial,sans-serif;color:var(--axis);border:1px s
 
 /* ---------- Workspace ---------- */
 .workspace{display:grid;grid-template-columns:360px minmax(0,1fr);gap:20px;max-width:1880px;margin:0 auto;padding:18px 24px 12px}
-.inputs{align-self:start;position:sticky;top:14px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);max-height:calc(100vh - 28px);display:flex;flex-direction:column;min-width:0}
+.inputs{align-self:start;position:sticky;top:14px;z-index:20;background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);max-height:calc(100vh - 28px);display:flex;flex-direction:column;min-width:0}
 .panel-heading{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 8px}
 h1{font-size:1.05rem;margin:0;font-weight:650}
 .text-button{border:0;padding:4px 0;background:none;color:var(--muted);font-size:.75rem}
@@ -79,7 +79,7 @@ h1{font-size:1.05rem;margin:0;font-weight:650}
 .menu-button .caret{font-size:.7rem;color:var(--axis);transition:transform .15s}
 .qst-menu.open .caret{transform:rotate(180deg)}
 .mi-ico{width:18px;height:18px;flex:none}
-.menu-pop{display:none;position:absolute;z-index:60;left:0;top:calc(100% + 6px);min-width:300px;padding:6px;background:#fff;border:1px solid #d3e0e7;border-radius:11px;box-shadow:0 10px 24px #0b1e2b26}
+.menu-pop{display:none;position:absolute;z-index:60;left:0;top:calc(100% + 6px);min-width:300px;max-height:680px;overflow-y:auto;scrollbar-width:thin;padding:6px;background:#fff;border:1px solid #d3e0e7;border-radius:11px;box-shadow:0 10px 24px #0b1e2b26}
 .qst-menu.open>.menu-pop{display:block;animation:menuIn .14s ease-out}
 @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .menu-pop button{display:flex;align-items:center;gap:11px;width:100%;padding:8px 10px;border:0;border-radius:8px;background:none;color:var(--ink);text-align:left;font-size:.8125rem}
@@ -141,7 +141,7 @@ h1{font-size:1.05rem;margin:0;font-weight:650}
 
 /* ---------- Stage (canvas) ---------- */
 .results{min-width:0;display:flex;flex-direction:column}
-.stage{background:radial-gradient(120% 90% at 50% 30%,#123a52 0%,var(--navy-2) 55%,var(--navy-3) 100%);border-radius:var(--radius);color:#fff;overflow:hidden;box-shadow:0 6px 18px #0b1e2b22;position:relative}
+.stage{background:radial-gradient(120% 90% at 50% 30%,#123a52 0%,var(--navy-2) 55%,var(--navy-3) 100%);border-radius:var(--radius);color:#fff;overflow:hidden;box-shadow:0 6px 18px #0b1e2b22;position:relative;isolation:isolate}
 .stage-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid #1d4458;flex-wrap:wrap}
 .toolbox{display:flex;gap:4px;padding:3px;background:#0a2131;border:1px solid #1f4256;border-radius:10px}
 .tool{display:flex;align-items:center;gap:6px;border:0;background:transparent;color:#bcd3de;padding:6px 9px;border-radius:7px;font-size:.78rem;position:relative}
@@ -487,7 +487,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 <div id="report"></div>
 <script>/* js/version.js */
 // SPDX-License-Identifier: GPL-3.0-or-later
-window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chéruel', schema: 1 };
+window.QST_META = { version: '0.2.5', date: '2026-11-01', author: 'Anthony Chéruel', schema: 1 };
 
 </script>
 <script>/* js/solver.js */
@@ -730,6 +730,9 @@ window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chérue
     '45M': { A: 1500, d: 43.7 }, '55M': { A: 2500, d: 56.4 }
   };
 
+  // Tie anchorage types (member.anchor), in the order offered in the inspector.
+  var ANCHORS = ['straight', 'hook', 'plate', 'stirrup', 'continuous'];
+
   function factors(model) {
     var c = CODES[model.code] || CODES.S6, m = model.material;
     return {
@@ -868,10 +871,12 @@ window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chérue
       var P = Math.hypot(Number(n.fx) || 0, Number(n.fy) || 0);
       if (P > 0 && lb > 0) faces.push({ kind: 'load', ref: n.id, force: P, width: lb, stress: P * 1000 / (lb * b) });
       // Anchorage face of a tie that ends here (a tie continuing through the
-      // node on the same line is not anchored and has no bearing face).
+      // node on the same line, or across a symmetry plane where the reaction
+      // stands for it, is not anchored and has no bearing face).
       ties.forEach(function (t) {
         var w = Number(t.m.w) || 0;
-        var continues = ties.some(function (o) { return o !== t && acuteAngle(o.f, t.f) < 5 * Math.PI / 180; });
+        var continues = ties.some(function (o) { return o !== t && acuteAngle(o.f, t.f) < 5 * Math.PI / 180; }) ||
+          (R && Math.abs(R.rx * t.f.c + R.ry * t.f.s) >= 0.9 * t.f.N);
         if (w > 0 && !continues && mat.tieFaces !== false) faces.push({ kind: 'tie', ref: t.m.id, force: t.f.N, width: w, stress: t.f.N * 1000 / (w * b) });
       });
       if (!faces.length) return;
@@ -1030,12 +1035,23 @@ window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chérue
         var ray = poly.length >= 3 ? rayToOutline(n.x, n.y, -dx, -dy, poly) : 0;
         var e = isFinite(ray) ? Math.max(0, ray * 1000 - cover) : 0;
         var la = dc + e, type = m.anchor || 'straight';
+        // Continuous bars need no anchorage where they can carry on: bent into
+        // another tie (frame corner) or past the edge of the D-region (load or
+        // reaction on the node). Anywhere else they are checked as straight bars.
+        var carriesOn = false;
+        if (type === 'continuous') {
+          carriesOn = !!Rn || !!Number(n.fx) || !!Number(n.fy) || atNode[nid].some(function (o2) {
+            var g = byId[o2.id];
+            return o2.id !== m.id && g && g.kind === 'tie';
+          });
+          if (!carriesOn) type = 'straight';
+        }
         var db = m.bars && BARS[m.bars.size] ? BARS[m.bars.size].d : (Number(m.db) > 0 ? Number(m.db) : null);
         // Top bars: more than 300 mm of concrete below them (k1 = 1.3).
         var below = poly.length >= 3 ? rayToOutline(n.x, n.y, 0, -1, poly) : 0;
         var top = isFinite(below) && below > 0.3;
         var rec = { id: m.id + '@' + nid, kind: 'anchor', member: m.id, node: nid, type: type, la: la, e: e, dc: dc, db: db, top: top, clause: o.code.clause.anchor, end: [n.x - dx * e / 1000, n.y - dy * e / 1000], dir: [-dx, -dy] };
-        if (type === 'plate' || type === 'stirrup') { rec.req = 0; rec.util = 0; rec.mechanical = true; }
+        if (type === 'plate' || type === 'stirrup' || carriesOn) { rec.req = 0; rec.util = 0; rec.mechanical = true; }
         else if (!db) { rec.na = true; rec.util = 0; }
         else { rec.req = developmentLength(type, db, o.fy, o.fc, { k: Number(o.mat.ldFactor) || 0.45, top: top }); rec.util = la > 0 ? rec.req / la : Infinity; }
         out.push(rec);
@@ -1089,7 +1105,7 @@ window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chérue
     CODES: CODES, BARS: BARS, alpha1: alpha1, check: check, strutFcu: strutFcu, factors: factors,
     memberArea: memberArea, normalize: normalize, geometryWarnings: geometryWarnings,
     pointInPolygon: pointInPolygon, acuteAngle: acuteAngle, hydrostaticZone: hydrostaticZone,
-    developmentLength: developmentLength, rayToOutline: rayToOutline
+    developmentLength: developmentLength, rayToOutline: rayToOutline, ANCHORS: ANCHORS
   };
   root.QST = root.QST || {};
   root.QST.csa = api;
@@ -1230,6 +1246,125 @@ window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chérue
           S('M8', 'N5', 'N4', 150), T('M9', 'N4', 'N6', 5, '15M', 150, 'stirrup'), S('M10', 'N5', 'N7', 150), T('M11', 'N6', 'N8', 6, '25M', 150),
           S('M12', 'N6', 'N7', 250), T('M13', 'N7', 'N8', 4, '15M', 150, 'stirrup'), S('M14', 'N7', 'N9', 150), T('M15', 'N8', 'N10', 6, '25M', 150),
           S('M16', 'N8', 'N9', 250), T('M17', 'N9', 'N10', 4, '15M', 150, 'stirrup')
+        ]
+      }
+    },
+    {
+      key: 'bridge-corbel',
+      title: { fr: 'Corbeau de pile de pont', en: 'Bridge pier corbel' },
+      sub: { fr: 'Corbeau simple sous appareil d’appui, H = 0,2 V', en: 'Single corbel under a girder bearing, H = 0.2 V' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 35, b: 900 }),
+        // Column 1.0 m deep (far face at x = 0), corbel projecting 0.6 m; the
+        // column is cut 1.4 m below the corbel, where the supports stand for it.
+        outline: [[0, -2.4], [1.0, -2.4], [1.0, -0.9], [1.6, -0.5], [1.6, 0], [0, 0]],
+        nodes: [
+          N('N1', 1.3, -0.08, { fy: -1400, fx: 280, bearing: 400 }),
+          N('N2', 0.08, -0.08),
+          N('N3', 0.92, -0.95),
+          N('N4', 0.08, -0.95),
+          N('N5', 0.92, -2.3, { support: 'pin', bearing: 200 }),
+          N('N6', 0.08, -2.3, { support: 'ry' }),
+          N('N7', 0.92, -0.08)
+        ],
+        members: [
+          T('M1', 'N1', 'N7', 8, '25M', 160, 'plate'), T('M2', 'N7', 'N2', 8, '25M', 160, 'continuous'),
+          S('M3', 'N1', 'N3', 350), S('M4', 'N2', 'N3', 300), S('M5', 'N7', 'N3', 150),
+          T('M6', 'N2', 'N4', 10, '25M', 160, 'continuous'), T('M7', 'N3', 'N4', 6, '15M', 0, 'stirrup'),
+          S('M8', 'N3', 'N5', 250), T('M9', 'N4', 'N6', 10, '25M', 160, 'continuous'), S('M10', 'N4', 'N5', 250),
+          S('M11', 'N5', 'N6', 200)
+        ]
+      }
+    },
+    {
+      key: 'integral-abutment',
+      title: { fr: 'Culée intégrale · diaphragme d’about', en: 'Integral abutment · end diaphragm' },
+      sub: { fr: 'Coin tablier–culée sous moment négatif · bande de 1 m', en: 'Deck–abutment corner under hogging moment · 1 m strip' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 35, b: 1000 }),
+        // Longitudinal section: abutment 1.0 m thick (backfill side at x = 0),
+        // superstructure 1.8 m deep cut 1.8 m from the abutment face, abutment
+        // wall cut 1.5 m below the soffit. Cut forces from the frame analysis:
+        // M = 200 kN·m/m and V = 300 kN/m at the deck cut, earth pressure on
+        // the back face.
+        outline: [[0, 0], [1.0, 0], [1.0, 1.5], [2.8, 1.5], [2.8, 3.3], [0, 3.3]],
+        nodes: [
+          N('D1', 2.8, 3.2, { fx: 127, fy: -300 }),
+          N('D2', 2.8, 1.62, { fx: -127 }),
+          N('K1', 0.1, 3.2, { fx: 30 }),
+          N('K2', 0.88, 1.62),
+          N('B3', 0.1, 1.1, { fx: 120 }),
+          N('B1', 0.1, 0.12, { support: 'ry' }),
+          N('B2', 0.88, 0.12, { support: 'pin', bearing: 240 })
+        ],
+        members: [
+          T('M1', 'D1', 'K1', 8, '20M', 200, 'continuous'), S('M2', 'D2', 'K2', 240), S('M3', 'D1', 'K2', 300),
+          S('M4', 'D1', 'D2', 200), S('M5', 'K1', 'K2', 300),
+          T('M6', 'K1', 'B3', 8, '25M', 200, 'continuous'), T('M7', 'B3', 'B1', 8, '25M', 200, 'continuous'),
+          S('M8', 'K2', 'B2', 240), S('M9', 'B1', 'B2', 200), S('M10', 'K1', 'B2', 250), S('M11', 'B3', 'B2', 250)
+        ]
+      }
+    },
+    {
+      key: 'paultre-corbel',
+      literature: true,
+      title: { fr: 'Console courte double · Paultre, ex. 13.2', en: 'Double corbel · Paultre, ex. 13.2' },
+      sub: { fr: 'Efforts et contraintes publiés (A23.3)', en: 'Published forces and stresses (A23.3)' },
+      model: {
+        code: 'A23',
+        material: material({ fc: 40, fy: 400, b: 350 }),
+        // Column 350 mm, corbels 200 mm (200 mm square + 200 mm sloped). Tie
+        // 28 mm under the top, node C at hc / 2 = 15.5 mm above the corbel base.
+        // AC width 76 mm = A_b at A (26 587 mm²) / b.
+        outline: [[-0.175, -0.3], [0.175, -0.3], [0.175, 0], [0.375, 0.2], [0.375, 0.4], [0.175, 0.4], [0.175, 0.7],
+          [-0.175, 0.7], [-0.175, 0.4], [-0.375, 0.4], [-0.375, 0.2], [-0.175, 0]],
+        nodes: [
+          N('A', -0.33, 0.372, { fx: -70, fy: -350, bearing: 100 }),
+          N('A2', 0.33, 0.372, { fx: 70, fy: -350, bearing: 100 }),
+          N('C', -0.0875, 0.0155, { support: 'pin', bearing: 175 }),
+          N('C2', 0.0875, 0.0155, { support: 'ry', bearing: 175 })
+        ],
+        members: [
+          T('AB', 'A', 'A2', 5, '15M', 56, 'plate'), S('AC', 'A', 'C', 76), S('A2C2', 'A2', 'C2', 76), S('CC2', 'C', 'C2', 31),
+          // Bracing diagonal (zero force under the symmetric loads).
+          S('AC2', 'A', 'C2', 100)
+        ]
+      }
+    },
+    {
+      key: 'cac-dapped-end',
+      literature: true,
+      title: { fr: 'Poutre à about réduit · CAC, ex. 4.10', en: 'Dapped-end beam · CAC Handbook, ex. 4.10' },
+      sub: { fr: '24 efforts publiés reproduits · demi-poutre', en: '24 published forces reproduced · half beam' },
+      model: {
+        code: 'A23',
+        // Precast plant: φc = 0.70 as in the handbook.
+        material: material({ fc: 40, fy: 400, b: 400, phiC: 0.70 }),
+        // Beam 700 mm, nib 400 mm over a 300 mm dap; bearing A 25 mm above the
+        // nib soffit; chords 63 mm and 60 mm from the faces; midspan at x = 3.15 m.
+        outline: [[-0.1, 0.3], [0.15, 0.3], [0.15, 0], [3.15, 0], [3.15, 0.7], [-0.1, 0.7]],
+        nodes: [
+          N('A', 0, 0.325, { support: 'ry', fx: -80, bearing: 100 }),
+          N('B', 0.25, 0.637, { fy: -61 }), N('C', 0.25, 0.06), N('D', 0.461, 0.325),
+          N('E', 0.71, 0.637, { fy: -71 }), N('F', 0.71, 0.06),
+          N('G', 1.37, 0.637, { fy: -84 }), N('H', 1.37, 0.06),
+          N('I', 2.03, 0.637, { fy: -84 }), N('J', 2.03, 0.06),
+          N('K', 2.69, 0.637, { fy: -71 }), N('L', 2.69, 0.06),
+          N('M', 3.15, 0.637, { fy: -29, support: 'rx' }), N('N', 3.15, 0.06, { support: 'rx' })
+        ],
+        members: [
+          S('AB', 'A', 'B', 150), S('DB', 'D', 'B', 150), T('AD', 'A', 'D', 5, '20M', 100, 'plate'),
+          T('CB', 'C', 'B', 10, '15M', 215, 'stirrup'), S('CD', 'C', 'D', 200), S('DE', 'D', 'E', 150),
+          S('BE', 'B', 'E', 125), T('CF', 'C', 'F', 5, '30M', 120, 'straight'), T('EF', 'E', 'F', 8, '10M', 0, 'stirrup'),
+          S('EG', 'E', 'G', 125), S('FG', 'F', 'G', 150), T('FH', 'F', 'H', 5, '30M', 120, 'straight'),
+          T('GH', 'G', 'H', 6, '10M', 0, 'stirrup'), S('GI', 'G', 'I', 125), S('HI', 'H', 'I', 150),
+          T('HJ', 'H', 'J', 5, '30M', 120, 'straight'), T('IJ', 'I', 'J', 4, '10M', 0, 'stirrup'), S('IK', 'I', 'K', 125),
+          S('JK', 'J', 'K', 150), T('JL', 'J', 'L', 5, '30M', 120, 'straight'), T('KL', 'K', 'L', 4, '10M', 0, 'stirrup'),
+          S('KM', 'K', 'M', 125), S('LM', 'L', 'M', 150), T('LN', 'L', 'N', 5, '30M', 120, 'straight'),
+          // Zero-force post that holds N vertically (symmetry plane).
+          S('MN', 'M', 'N', 100)
         ]
       }
     },
@@ -1581,7 +1716,7 @@ window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chérue
     '<h3>Tirants</h3><span class="eq">Tr = φs · fy · Ast</span><p>Les armatures sont choisies en nombre × diamètre (barres CSA G30.18). L’ancrage n’est pas vérifié : la pleine résistance doit être développée à la sortie de la zone nodale prolongée.</p>',
     '<h3>Zones nodales</h3><p>Contrainte sur chaque face ≤ 0,85 / 0,75 / 0,65 φc f′c selon l’A23.3, ou α1 / 0,88 α1 / 0,76 α1 φc f′c selon la S6, pour les nœuds CCC (bielles et appuis), CCT (un tirant ancré) et CTT (tirants dans plus d’une direction). Faces vérifiées : bielles (C / w·b), plaques d’appui et de charge (R / lb·b) et, en option, face d’ancrage des tirants (T / w·b).</p>',
     '<h3>Zones nodales hydrostatiques</h3><p>Chaque force sur le nœud est une poussée sur une face : bielles de leur côté, tirants sur la face arrière (force nette des tirants alignés), charges et réactions sur leur plaque. Le polygone des forces fermé, tourné de 90° et mis à l’échelle 1 / (σh·b), donne la zone nodale : chaque face est perpendiculaire à sa force et toutes portent la même contrainte σh. σh est la plus forte contrainte des faces de largeur saisie ; la zone est tracée au canevas et un avertissement signale un dépassement du contour.</p>',
-    '<h3>Ancrage des tirants</h3><p>À chaque nœud où un tirant se termine (sauf plan de symétrie), l<sub>a</sub> = distance à la section critique (bord de la bielle ou de la zone hydrostatique sur l’axe du tirant) + prolongement des barres jusqu’à la face du béton − enrobage. Exigé : l<sub>d</sub> = k·k1·k4·fy/√f′c·db ≥ 300 mm (barre droite, k = 0,45 ou 0,6, k1 = 1,3 barres supérieures, k4 = 0,8 jusqu’au 20M) ou l<sub>dh</sub> = 100·db/√f′c·fy/400 ≥ 8db, 150 mm (crochet), selon l’A23.3 12.2.3 et 12.5 (méthode simplifiée, aussi utilisée avec la S6 : à confirmer avec la S6 8.15). Plaques, barres soudées et étriers fermés sont considérés ancrés mécaniquement.</p>',
+    '<h3>Ancrage des tirants</h3><p>À chaque nœud où un tirant se termine (sauf plan de symétrie), l<sub>a</sub> = distance à la section critique (bord de la bielle ou de la zone hydrostatique sur l’axe du tirant) + prolongement des barres jusqu’à la face du béton − enrobage. Exigé : l<sub>d</sub> = k·k1·k4·fy/√f′c·db ≥ 300 mm (barre droite, k = 0,45 ou 0,6, k1 = 1,3 barres supérieures, k4 = 0,8 jusqu’au 20M) ou l<sub>dh</sub> = 100·db/√f′c·fy/400 ≥ 8db, 150 mm (crochet), selon l’A23.3 12.2.3 et 12.5 (méthode simplifiée, aussi utilisée avec la S6 : à confirmer avec la S6 8.15). Plaques, barres soudées et étriers fermés sont considérés ancrés mécaniquement. Une « barre continue ou pliée » n’a pas à être ancrée là où elle se poursuit : pliée dans un autre tirant (coin de portique) ou prolongée au-delà de la région D (nœud chargé ou appuyé) ; ailleurs, elle est vérifiée comme barre droite.</p>',
     '<h3>Armature de contrôle de la fissuration</h3><p>Grille orthogonale près de chaque face : ρ ≥ 0,003 (S6) ou 0,002 (A23.3) dans chaque direction, espacement ≤ 300 mm. Selon la S6, la grille n’a pas à dépasser 1500 mm²/m par face.</p>',
     '<h3>Coefficients</h3><table><tr><th></th><th>φc</th><th>φs</th><th>Articles</th></tr><tr><td>CSA S6</td><td>0,75</td><td>0,90</td><td>8.4.6, 8.10.3.3, 8.10.4.1, 8.10.5.1</td></tr><tr><td>CSA A23.3</td><td>0,65</td><td>0,85</td><td>8.4, 11.4.2.3, 11.4.3.1, 11.4.4.1, 11.4.5</td></tr></table><p>Les coefficients peuvent être remplacés (béton préfabriqué, etc.). Les numéros d’article et facteurs sont à confirmer avec l’édition de la norme applicable au projet.</p>',
     '<h3>Limites</h3><p>Modèle 2D, un seul cas de charge pondéré, épaisseur b constante. Pas de poids propre automatique, de génération automatique du modèle ni de champs de contraintes. La géométrie du modèle (position des nœuds, largeurs) relève du jugement de l’ingénieur.</p>'
@@ -1593,7 +1728,7 @@ window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chérue
     '<h3>Ties</h3><span class="eq">Tr = φs · fy · Ast</span><p>Reinforcement is entered as number × bar size (CSA G30.18 bars). Anchorage is not checked: full strength must be developed where the tie leaves the extended nodal zone.</p>',
     '<h3>Nodal zones</h3><p>Stress on each face ≤ 0.85 / 0.75 / 0.65 φc f′c to A23.3, or α1 / 0.88 α1 / 0.76 α1 φc f′c to S6, for CCC (struts and bearings), CCT (one anchored tie) and CTT (ties in more than one direction) nodes. Faces checked: struts (C / w·b), bearing and load plates (R / lb·b) and, optionally, the anchorage face of ties (T / w·b).</p>',
     '<h3>Hydrostatic nodal zones</h3><p>Each force on the node is a push on one face: struts on their own side, ties on the back face (net force of collinear ties), loads and reactions on their plate. The closed force polygon, rotated by 90° and scaled by 1 / (σh·b), is the nodal zone: every face is perpendicular to its force and all carry the same stress σh. σh is the highest stress on a face with an entered width; the zone is drawn on the canvas and a warning flags a zone outside the outline.</p>',
-    '<h3>Tie anchorage</h3><p>At every node where a tie ends (except a symmetry plane), l<sub>a</sub> = distance to the critical section (strut or hydrostatic zone edge on the tie axis) + bar extension to the concrete face − cover. Required: l<sub>d</sub> = k·k1·k4·fy/√f′c·db ≥ 300 mm (straight, k = 0.45 or 0.6, k1 = 1.3 top bars, k4 = 0.8 up to 20M) or l<sub>dh</sub> = 100·db/√f′c·fy/400 ≥ 8db, 150 mm (hook), to A23.3 12.2.3 and 12.5 (simplified, also used with S6: to be confirmed with S6 8.15). Plates, welded bars and closed stirrups are taken as mechanically anchored.</p>',
+    '<h3>Tie anchorage</h3><p>At every node where a tie ends (except a symmetry plane), l<sub>a</sub> = distance to the critical section (strut or hydrostatic zone edge on the tie axis) + bar extension to the concrete face − cover. Required: l<sub>d</sub> = k·k1·k4·fy/√f′c·db ≥ 300 mm (straight, k = 0.45 or 0.6, k1 = 1.3 top bars, k4 = 0.8 up to 20M) or l<sub>dh</sub> = 100·db/√f′c·fy/400 ≥ 8db, 150 mm (hook), to A23.3 12.2.3 and 12.5 (simplified, also used with S6: to be confirmed with S6 8.15). Plates, welded bars and closed stirrups are taken as mechanically anchored. A “continuous or bent bar” needs no anchorage where it carries on: bent into another tie (frame corner) or extended past the D-region (loaded or supported node); elsewhere it is checked as a straight bar.</p>',
     '<h3>Crack control reinforcement</h3><p>Orthogonal grid near each face: ρ ≥ 0.003 (S6) or 0.002 (A23.3) in each direction, spacing ≤ 300 mm. To S6, the grid need not exceed 1500 mm²/m on each face.</p>',
     '<h3>Factors</h3><table><tr><th></th><th>φc</th><th>φs</th><th>Clauses</th></tr><tr><td>CSA S6</td><td>0.75</td><td>0.90</td><td>8.4.6, 8.10.3.3, 8.10.4.1, 8.10.5.1</td></tr><tr><td>CSA A23.3</td><td>0.65</td><td>0.85</td><td>8.4, 11.4.2.3, 11.4.3.1, 11.4.4.1, 11.4.5</td></tr></table><p>The factors can be overridden (precast concrete, etc.). Clause numbers and factors must be confirmed against the edition of the standard that applies to the project.</p>',
     '<h3>Limits</h3><p>2D model, a single factored load case, constant thickness b. No automatic self-weight, automatic model generation or stress fields. The model geometry (node positions, widths) is the engineer’s judgement.</p>'
@@ -1609,8 +1744,8 @@ window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chérue
       hydroNoteFace: 'Polygone des forces tourné de 90° : chaque face est perpendiculaire à sa force et toutes les faces portent la même contrainte σh, égale à la plus forte contrainte des faces de largeur saisie (w<sub>h</sub> ≤ w).',
       hydroNoteLimit: 'Aucune largeur saisie : zone minimale dimensionnée à la contrainte limite du nœud.',
       zoneOutside: 'La zone nodale hydrostatique dépasse le contour du béton.',
-      anchorType: 'Ancrage du tirant', anchor_straight: 'Barre droite', anchor_hook: 'Crochet normalisé', anchor_plate: 'Plaque / barre soudée', anchor_stirrup: 'Étriers fermés',
-      anchorSteps: 'l<sub>a</sub> = section critique + prolongement − enrobage ≥ l<sub>d</sub>.', dbUnknown: 'diamètre inconnu (As direct)', mechanicalNote: 'ancrage mécanique, vérifier la face arrière',
+      anchorType: 'Ancrage du tirant', anchor_straight: 'Barre droite', anchor_hook: 'Crochet normalisé', anchor_plate: 'Plaque / barre soudée', anchor_stirrup: 'Étriers fermés', anchor_continuous: 'Barre continue ou pliée',
+      anchorSteps: 'l<sub>a</sub> = section critique + prolongement − enrobage ≥ l<sub>d</sub>.', dbUnknown: 'diamètre inconnu (As direct)', mechanicalNote: 'ancrage mécanique, vérifier la face arrière', continuousNote: 'barres prolongées ou pliées dans le tirant voisin : vérifier le diamètre de pliage et les chevauchements',
       pile: 'Pieu', pileNote: 'Charges pondérées en tête de pieu : N &gt; 0 en compression, H selon x, M = 0 (tête articulée dans le modèle).', tie3D: 'Semelle 3D : chaque tirant réel porte {f} × le tirant du modèle 2D.',
       exportPile: 'Exporter vers QuickerPile', exportPileSub: 'Charges en tête de pieu (.json)', noPiles: 'Aucun appui : rien à exporter', pileExported: '{n} pieux exportés', pileLoadsTitle: 'Charges en tête de pieu',
       templatesMenu: 'Gabarits', templatesSub: 'Modèles paramétriques de ponts, prédimensionnés', tplCreate: 'Créer le modèle', tplCreated: 'Modèle créé à partir du gabarit',
@@ -1698,8 +1833,8 @@ window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chérue
       hydroNoteFace: 'Force polygon rotated by 90°: each face is perpendicular to its force and all faces carry the same stress σh, equal to the highest stress on a face with an entered width (w<sub>h</sub> ≤ w).',
       hydroNoteLimit: 'No width entered: smallest zone sized at the node stress limit.',
       zoneOutside: 'The hydrostatic nodal zone extends beyond the concrete outline.',
-      anchorType: 'Tie anchorage', anchor_straight: 'Straight bar', anchor_hook: 'Standard hook', anchor_plate: 'Plate / welded bar', anchor_stirrup: 'Closed stirrups',
-      anchorSteps: 'l<sub>a</sub> = critical section + extension − cover ≥ l<sub>d</sub>.', dbUnknown: 'bar size unknown (direct As)', mechanicalNote: 'mechanical anchorage, check the back face',
+      anchorType: 'Tie anchorage', anchor_straight: 'Straight bar', anchor_hook: 'Standard hook', anchor_plate: 'Plate / welded bar', anchor_stirrup: 'Closed stirrups', anchor_continuous: 'Continuous or bent bar',
+      anchorSteps: 'l<sub>a</sub> = critical section + extension − cover ≥ l<sub>d</sub>.', dbUnknown: 'bar size unknown (direct As)', mechanicalNote: 'mechanical anchorage, check the back face', continuousNote: 'bars carried on or bent into the adjoining tie: check the bend diameter and the laps',
       pile: 'Pile', pileNote: 'Factored pile head loads: N &gt; 0 compression, H along x, M = 0 (pinned head in the model).', tie3D: '3D cap: each real tie carries {f} × the 2D model tie.',
       exportPile: 'Export to QuickerPile', exportPileSub: 'Pile head loads (.json)', noPiles: 'No supports: nothing to export', pileExported: '{n} piles exported', pileLoadsTitle: 'Pile head loads',
       templatesMenu: 'Templates', templatesSub: 'Parametric bridge models, pre-sized', tplCreate: 'Create model', tplCreated: 'Model created from the template',
@@ -2005,7 +2140,7 @@ window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chérue
       mids[id] = 1;
       var bars = b.bars && b.bars.n > 0 && QST.csa.BARS[b.bars.size] ? { n: Math.round(+b.bars.n), size: b.bars.size } : null;
       out.members.push({ id: id, i: b.i, j: b.j, role: ['auto', 'strut', 'tie'].indexOf(b.role) >= 0 ? b.role : 'auto', w: Math.max(0, +b.w || 0), bars: bars, As: Math.max(0, +b.As || 0),
-        anchor: ['straight', 'hook', 'plate', 'stirrup'].indexOf(b.anchor) >= 0 ? b.anchor : 'hook', db: Math.max(0, +b.db || 0) });
+        anchor: QST.csa.ANCHORS.indexOf(b.anchor) >= 0 ? b.anchor : 'hook', db: Math.max(0, +b.db || 0) });
     });
     if (out.outline.length < 3) out.outline = base.outline;
     if (m.meta && typeof m.meta === 'object') { try { out.meta = JSON.parse(JSON.stringify(m.meta)); } catch (e) {} }
@@ -3035,7 +3170,7 @@ window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chérue
       }
       h += '</div>';
     }
-    h += '<label class="field" style="margin-top:10px"><span>' + t('anchorType') + '</span><select data-k="m.' + m.id + '.anchor">' + ['straight', 'hook', 'plate', 'stirrup'].map(function (a) { return '<option value="' + a + '"' + ((m.anchor || 'hook') === a ? ' selected' : '') + '>' + t('anchor_' + a) + '</option>'; }).join('') + '</select></label>';
+    h += '<label class="field" style="margin-top:10px"><span>' + t('anchorType') + '</span><select data-k="m.' + m.id + '.anchor">' + QST.csa.ANCHORS.map(function (a) { return '<option value="' + a + '"' + ((m.anchor || 'hook') === a ? ' selected' : '') + '>' + t('anchor_' + a) + '</option>'; }).join('') + '</select></label>';
     var ans = App.checks && App.checks.ok ? App.checks.anchors.filter(function (a) { return a.member === m.id; }) : [];
     if (ans.length) {
       h += '<div class="ins-result"><div class="kv">';
@@ -3130,7 +3265,7 @@ window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chérue
       });
       if (c.anchors.length) h += '<tr class="group"><td colspan="7">' + t('anchorages') + ' · l<sub>a</sub> ≥ l<sub>d</sub></td></tr>';
       c.anchors.forEach(function (a) {
-        h += '<tr data-target="member:' + a.member + '"' + isSel('member', a.member) + '><td>' + a.member + ' · ' + a.node + '</td><td class="l">' + t('anchor_' + a.type) + '</td><td>' + (a.mechanical || a.na ? '—' : fmt(a.req, 0) + ' mm') + '</td><td>' + fmt(a.la, 0) + ' mm</td><td>' + (a.na ? t('dbUnknown') : a.mechanical ? t('mechanicalNote') : 'd<sub>b</sub> ' + fmt(a.db, 1) + (a.top ? ' · k1 1,3' : '')) + '</td><td class="l">' + (a.mechanical || a.na ? '<span class="status ' + (a.na ? 'na' : 'ok') + '">' + (a.na ? '?' : '✓') + '</span>' : cellU(a.util)) + '</td><td class="l">' + a.clause.split(' · ')[0] + '</td></tr>';
+        h += '<tr data-target="member:' + a.member + '"' + isSel('member', a.member) + '><td>' + a.member + ' · ' + a.node + '</td><td class="l">' + t('anchor_' + a.type) + '</td><td>' + (a.mechanical || a.na ? '—' : fmt(a.req, 0) + ' mm') + '</td><td>' + fmt(a.la, 0) + ' mm</td><td>' + (a.na ? t('dbUnknown') : a.mechanical ? t(a.type === 'continuous' ? 'continuousNote' : 'mechanicalNote') : 'd<sub>b</sub> ' + fmt(a.db, 1) + (a.top ? ' · k1 1,3' : '')) + '</td><td class="l">' + (a.mechanical || a.na ? '<span class="status ' + (a.na ? 'na' : 'ok') + '">' + (a.na ? '?' : '✓') + '</span>' : cellU(a.util)) + '</td><td class="l">' + a.clause.split(' · ')[0] + '</td></tr>';
       });
       var ck = c.crack;
       h += '<tr class="group"><td colspan="7">' + t('crackControl') + '</td></tr>';
@@ -3356,7 +3491,7 @@ window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chérue
         h += '<tr><td>' + e.id + '<br><small>' + t('nodalZone') + '</small></td><td>' + calc + '</td><td>' + ok(e.util) + '</td></tr>';
       });
       c.anchors.forEach(function (a) {
-        var calc = a.mechanical ? t('anchor_' + a.type) + ' — ' + t('mechanicalNote') : a.na ? t('dbUnknown') :
+        var calc = a.mechanical ? t('anchor_' + a.type) + ' — ' + t(a.type === 'continuous' ? 'continuousNote' : 'mechanicalNote') : a.na ? t('dbUnknown') :
           '<span class="rp-eq">l<sub>a</sub> = ' + fmt(a.dc, 0) + ' + ' + fmt(a.e, 0) + ' = ' + fmt(a.la, 0) + ' mm ≥ ' + (a.type === 'hook' ? 'l<sub>dh</sub>' : 'l<sub>d</sub>') + ' = ' + fmt(a.req, 0) + ' mm (d<sub>b</sub> = ' + fmt(a.db, 1) + ' mm' + (a.top ? ', k1 = 1,3' : '') + ')</span>';
         h += '<tr><td>' + a.member + ' · ' + a.node + '<br><small>' + t('anchorage') + '</small></td><td>' + calc + ' <small>(' + a.clause + ')</small></td><td>' + (a.mechanical || a.na ? '—' : ok(a.util)) + '</td></tr>';
       });
@@ -3547,6 +3682,9 @@ window.QST_META = { version: '0.2', date: '2026-11-01', author: 'Anthony Chérue
         e.stopPropagation();
         var menu = b.closest('.qst-menu'), open = !menu.classList.contains('open');
         closeMenus(menu); menu.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open));
+        // Keep the whole list reachable on short screens: the pop-up scrolls instead of leaving the viewport.
+        var pop = menu.querySelector('.menu-pop');
+        if (open && pop) pop.style.maxHeight = Math.max(160, window.innerHeight - pop.getBoundingClientRect().top - 12) + 'px';
       });
     });
     document.addEventListener('click', function (e) { if (!e.target.closest('.qst-menu')) closeMenus(); });

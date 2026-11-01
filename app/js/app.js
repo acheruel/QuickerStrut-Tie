@@ -208,7 +208,7 @@
       mids[id] = 1;
       var bars = b.bars && b.bars.n > 0 && QST.csa.BARS[b.bars.size] ? { n: Math.round(+b.bars.n), size: b.bars.size } : null;
       out.members.push({ id: id, i: b.i, j: b.j, role: ['auto', 'strut', 'tie'].indexOf(b.role) >= 0 ? b.role : 'auto', w: Math.max(0, +b.w || 0), bars: bars, As: Math.max(0, +b.As || 0),
-        anchor: ['straight', 'hook', 'plate', 'stirrup'].indexOf(b.anchor) >= 0 ? b.anchor : 'hook', db: Math.max(0, +b.db || 0) });
+        anchor: QST.csa.ANCHORS.indexOf(b.anchor) >= 0 ? b.anchor : 'hook', db: Math.max(0, +b.db || 0) });
     });
     if (out.outline.length < 3) out.outline = base.outline;
     if (m.meta && typeof m.meta === 'object') { try { out.meta = JSON.parse(JSON.stringify(m.meta)); } catch (e) {} }

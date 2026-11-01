@@ -134,6 +134,125 @@
       }
     },
     {
+      key: 'bridge-corbel',
+      title: { fr: 'Corbeau de pile de pont', en: 'Bridge pier corbel' },
+      sub: { fr: 'Corbeau simple sous appareil d’appui, H = 0,2 V', en: 'Single corbel under a girder bearing, H = 0.2 V' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 35, b: 900 }),
+        // Column 1.0 m deep (far face at x = 0), corbel projecting 0.6 m; the
+        // column is cut 1.4 m below the corbel, where the supports stand for it.
+        outline: [[0, -2.4], [1.0, -2.4], [1.0, -0.9], [1.6, -0.5], [1.6, 0], [0, 0]],
+        nodes: [
+          N('N1', 1.3, -0.08, { fy: -1400, fx: 280, bearing: 400 }),
+          N('N2', 0.08, -0.08),
+          N('N3', 0.92, -0.95),
+          N('N4', 0.08, -0.95),
+          N('N5', 0.92, -2.3, { support: 'pin', bearing: 200 }),
+          N('N6', 0.08, -2.3, { support: 'ry' }),
+          N('N7', 0.92, -0.08)
+        ],
+        members: [
+          T('M1', 'N1', 'N7', 8, '25M', 160, 'plate'), T('M2', 'N7', 'N2', 8, '25M', 160, 'continuous'),
+          S('M3', 'N1', 'N3', 350), S('M4', 'N2', 'N3', 300), S('M5', 'N7', 'N3', 150),
+          T('M6', 'N2', 'N4', 10, '25M', 160, 'continuous'), T('M7', 'N3', 'N4', 6, '15M', 0, 'stirrup'),
+          S('M8', 'N3', 'N5', 250), T('M9', 'N4', 'N6', 10, '25M', 160, 'continuous'), S('M10', 'N4', 'N5', 250),
+          S('M11', 'N5', 'N6', 200)
+        ]
+      }
+    },
+    {
+      key: 'integral-abutment',
+      title: { fr: 'Culée intégrale · diaphragme d’about', en: 'Integral abutment · end diaphragm' },
+      sub: { fr: 'Coin tablier–culée sous moment négatif · bande de 1 m', en: 'Deck–abutment corner under hogging moment · 1 m strip' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 35, b: 1000 }),
+        // Longitudinal section: abutment 1.0 m thick (backfill side at x = 0),
+        // superstructure 1.8 m deep cut 1.8 m from the abutment face, abutment
+        // wall cut 1.5 m below the soffit. Cut forces from the frame analysis:
+        // M = 200 kN·m/m and V = 300 kN/m at the deck cut, earth pressure on
+        // the back face.
+        outline: [[0, 0], [1.0, 0], [1.0, 1.5], [2.8, 1.5], [2.8, 3.3], [0, 3.3]],
+        nodes: [
+          N('D1', 2.8, 3.2, { fx: 127, fy: -300 }),
+          N('D2', 2.8, 1.62, { fx: -127 }),
+          N('K1', 0.1, 3.2, { fx: 30 }),
+          N('K2', 0.88, 1.62),
+          N('B3', 0.1, 1.1, { fx: 120 }),
+          N('B1', 0.1, 0.12, { support: 'ry' }),
+          N('B2', 0.88, 0.12, { support: 'pin', bearing: 240 })
+        ],
+        members: [
+          T('M1', 'D1', 'K1', 8, '20M', 200, 'continuous'), S('M2', 'D2', 'K2', 240), S('M3', 'D1', 'K2', 300),
+          S('M4', 'D1', 'D2', 200), S('M5', 'K1', 'K2', 300),
+          T('M6', 'K1', 'B3', 8, '25M', 200, 'continuous'), T('M7', 'B3', 'B1', 8, '25M', 200, 'continuous'),
+          S('M8', 'K2', 'B2', 240), S('M9', 'B1', 'B2', 200), S('M10', 'K1', 'B2', 250), S('M11', 'B3', 'B2', 250)
+        ]
+      }
+    },
+    {
+      key: 'paultre-corbel',
+      literature: true,
+      title: { fr: 'Console courte double · Paultre, ex. 13.2', en: 'Double corbel · Paultre, ex. 13.2' },
+      sub: { fr: 'Efforts et contraintes publiés (A23.3)', en: 'Published forces and stresses (A23.3)' },
+      model: {
+        code: 'A23',
+        material: material({ fc: 40, fy: 400, b: 350 }),
+        // Column 350 mm, corbels 200 mm (200 mm square + 200 mm sloped). Tie
+        // 28 mm under the top, node C at hc / 2 = 15.5 mm above the corbel base.
+        // AC width 76 mm = A_b at A (26 587 mm²) / b.
+        outline: [[-0.175, -0.3], [0.175, -0.3], [0.175, 0], [0.375, 0.2], [0.375, 0.4], [0.175, 0.4], [0.175, 0.7],
+          [-0.175, 0.7], [-0.175, 0.4], [-0.375, 0.4], [-0.375, 0.2], [-0.175, 0]],
+        nodes: [
+          N('A', -0.33, 0.372, { fx: -70, fy: -350, bearing: 100 }),
+          N('A2', 0.33, 0.372, { fx: 70, fy: -350, bearing: 100 }),
+          N('C', -0.0875, 0.0155, { support: 'pin', bearing: 175 }),
+          N('C2', 0.0875, 0.0155, { support: 'ry', bearing: 175 })
+        ],
+        members: [
+          T('AB', 'A', 'A2', 5, '15M', 56, 'plate'), S('AC', 'A', 'C', 76), S('A2C2', 'A2', 'C2', 76), S('CC2', 'C', 'C2', 31),
+          // Bracing diagonal (zero force under the symmetric loads).
+          S('AC2', 'A', 'C2', 100)
+        ]
+      }
+    },
+    {
+      key: 'cac-dapped-end',
+      literature: true,
+      title: { fr: 'Poutre à about réduit · CAC, ex. 4.10', en: 'Dapped-end beam · CAC Handbook, ex. 4.10' },
+      sub: { fr: '24 efforts publiés reproduits · demi-poutre', en: '24 published forces reproduced · half beam' },
+      model: {
+        code: 'A23',
+        // Precast plant: φc = 0.70 as in the handbook.
+        material: material({ fc: 40, fy: 400, b: 400, phiC: 0.70 }),
+        // Beam 700 mm, nib 400 mm over a 300 mm dap; bearing A 25 mm above the
+        // nib soffit; chords 63 mm and 60 mm from the faces; midspan at x = 3.15 m.
+        outline: [[-0.1, 0.3], [0.15, 0.3], [0.15, 0], [3.15, 0], [3.15, 0.7], [-0.1, 0.7]],
+        nodes: [
+          N('A', 0, 0.325, { support: 'ry', fx: -80, bearing: 100 }),
+          N('B', 0.25, 0.637, { fy: -61 }), N('C', 0.25, 0.06), N('D', 0.461, 0.325),
+          N('E', 0.71, 0.637, { fy: -71 }), N('F', 0.71, 0.06),
+          N('G', 1.37, 0.637, { fy: -84 }), N('H', 1.37, 0.06),
+          N('I', 2.03, 0.637, { fy: -84 }), N('J', 2.03, 0.06),
+          N('K', 2.69, 0.637, { fy: -71 }), N('L', 2.69, 0.06),
+          N('M', 3.15, 0.637, { fy: -29, support: 'rx' }), N('N', 3.15, 0.06, { support: 'rx' })
+        ],
+        members: [
+          S('AB', 'A', 'B', 150), S('DB', 'D', 'B', 150), T('AD', 'A', 'D', 5, '20M', 100, 'plate'),
+          T('CB', 'C', 'B', 10, '15M', 215, 'stirrup'), S('CD', 'C', 'D', 200), S('DE', 'D', 'E', 150),
+          S('BE', 'B', 'E', 125), T('CF', 'C', 'F', 5, '30M', 120, 'straight'), T('EF', 'E', 'F', 8, '10M', 0, 'stirrup'),
+          S('EG', 'E', 'G', 125), S('FG', 'F', 'G', 150), T('FH', 'F', 'H', 5, '30M', 120, 'straight'),
+          T('GH', 'G', 'H', 6, '10M', 0, 'stirrup'), S('GI', 'G', 'I', 125), S('HI', 'H', 'I', 150),
+          T('HJ', 'H', 'J', 5, '30M', 120, 'straight'), T('IJ', 'I', 'J', 4, '10M', 0, 'stirrup'), S('IK', 'I', 'K', 125),
+          S('JK', 'J', 'K', 150), T('JL', 'J', 'L', 5, '30M', 120, 'straight'), T('KL', 'K', 'L', 4, '10M', 0, 'stirrup'),
+          S('KM', 'K', 'M', 125), S('LM', 'L', 'M', 150), T('LN', 'L', 'N', 5, '30M', 120, 'straight'),
+          // Zero-force post that holds N vertically (symmetry plane).
+          S('MN', 'M', 'N', 100)
+        ]
+      }
+    },
+    {
       key: 'fhwa-deep-beam',
       literature: true,
       title: { fr: 'Poutre-cloison · manuel FHWA, ex. 1', en: 'Deep beam · FHWA manual, ex. 1' },

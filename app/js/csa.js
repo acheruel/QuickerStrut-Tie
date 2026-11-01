@@ -46,6 +46,9 @@
     '45M': { A: 1500, d: 43.7 }, '55M': { A: 2500, d: 56.4 }
   };
 
+  // Tie anchorage types (member.anchor), in the order offered in the inspector.
+  var ANCHORS = ['straight', 'hook', 'plate', 'stirrup', 'continuous'];
+
   function factors(model) {
     var c = CODES[model.code] || CODES.S6, m = model.material;
     return {
@@ -184,10 +187,12 @@
       var P = Math.hypot(Number(n.fx) || 0, Number(n.fy) || 0);
       if (P > 0 && lb > 0) faces.push({ kind: 'load', ref: n.id, force: P, width: lb, stress: P * 1000 / (lb * b) });
       // Anchorage face of a tie that ends here (a tie continuing through the
-      // node on the same line is not anchored and has no bearing face).
+      // node on the same line, or across a symmetry plane where the reaction
+      // stands for it, is not anchored and has no bearing face).
       ties.forEach(function (t) {
         var w = Number(t.m.w) || 0;
-        var continues = ties.some(function (o) { return o !== t && acuteAngle(o.f, t.f) < 5 * Math.PI / 180; });
+        var continues = ties.some(function (o) { return o !== t && acuteAngle(o.f, t.f) < 5 * Math.PI / 180; }) ||
+          (R && Math.abs(R.rx * t.f.c + R.ry * t.f.s) >= 0.9 * t.f.N);
         if (w > 0 && !continues && mat.tieFaces !== false) faces.push({ kind: 'tie', ref: t.m.id, force: t.f.N, width: w, stress: t.f.N * 1000 / (w * b) });
       });
       if (!faces.length) return;
@@ -346,12 +351,23 @@
         var ray = poly.length >= 3 ? rayToOutline(n.x, n.y, -dx, -dy, poly) : 0;
         var e = isFinite(ray) ? Math.max(0, ray * 1000 - cover) : 0;
         var la = dc + e, type = m.anchor || 'straight';
+        // Continuous bars need no anchorage where they can carry on: bent into
+        // another tie (frame corner) or past the edge of the D-region (load or
+        // reaction on the node). Anywhere else they are checked as straight bars.
+        var carriesOn = false;
+        if (type === 'continuous') {
+          carriesOn = !!Rn || !!Number(n.fx) || !!Number(n.fy) || atNode[nid].some(function (o2) {
+            var g = byId[o2.id];
+            return o2.id !== m.id && g && g.kind === 'tie';
+          });
+          if (!carriesOn) type = 'straight';
+        }
         var db = m.bars && BARS[m.bars.size] ? BARS[m.bars.size].d : (Number(m.db) > 0 ? Number(m.db) : null);
         // Top bars: more than 300 mm of concrete below them (k1 = 1.3).
         var below = poly.length >= 3 ? rayToOutline(n.x, n.y, 0, -1, poly) : 0;
         var top = isFinite(below) && below > 0.3;
         var rec = { id: m.id + '@' + nid, kind: 'anchor', member: m.id, node: nid, type: type, la: la, e: e, dc: dc, db: db, top: top, clause: o.code.clause.anchor, end: [n.x - dx * e / 1000, n.y - dy * e / 1000], dir: [-dx, -dy] };
-        if (type === 'plate' || type === 'stirrup') { rec.req = 0; rec.util = 0; rec.mechanical = true; }
+        if (type === 'plate' || type === 'stirrup' || carriesOn) { rec.req = 0; rec.util = 0; rec.mechanical = true; }
         else if (!db) { rec.na = true; rec.util = 0; }
         else { rec.req = developmentLength(type, db, o.fy, o.fc, { k: Number(o.mat.ldFactor) || 0.45, top: top }); rec.util = la > 0 ? rec.req / la : Infinity; }
         out.push(rec);
@@ -405,7 +421,7 @@
     CODES: CODES, BARS: BARS, alpha1: alpha1, check: check, strutFcu: strutFcu, factors: factors,
     memberArea: memberArea, normalize: normalize, geometryWarnings: geometryWarnings,
     pointInPolygon: pointInPolygon, acuteAngle: acuteAngle, hydrostaticZone: hydrostaticZone,
-    developmentLength: developmentLength, rayToOutline: rayToOutline
+    developmentLength: developmentLength, rayToOutline: rayToOutline, ANCHORS: ANCHORS
   };
   root.QST = root.QST || {};
   root.QST.csa = api;

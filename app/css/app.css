@@ -50,7 +50,7 @@ kbd{font:600 .6875rem "Segoe UI",Arial,sans-serif;color:var(--axis);border:1px s
 
 /* ---------- Workspace ---------- */
 .workspace{display:grid;grid-template-columns:360px minmax(0,1fr);gap:20px;max-width:1880px;margin:0 auto;padding:18px 24px 12px}
-.inputs{align-self:start;position:sticky;top:14px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);max-height:calc(100vh - 28px);display:flex;flex-direction:column;min-width:0}
+.inputs{align-self:start;position:sticky;top:14px;z-index:20;background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);max-height:calc(100vh - 28px);display:flex;flex-direction:column;min-width:0}
 .panel-heading{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 8px}
 h1{font-size:1.05rem;margin:0;font-weight:650}
 .text-button{border:0;padding:4px 0;background:none;color:var(--muted);font-size:.75rem}
@@ -69,7 +69,7 @@ h1{font-size:1.05rem;margin:0;font-weight:650}
 .menu-button .caret{font-size:.7rem;color:var(--axis);transition:transform .15s}
 .qst-menu.open .caret{transform:rotate(180deg)}
 .mi-ico{width:18px;height:18px;flex:none}
-.menu-pop{display:none;position:absolute;z-index:60;left:0;top:calc(100% + 6px);min-width:300px;padding:6px;background:#fff;border:1px solid #d3e0e7;border-radius:11px;box-shadow:0 10px 24px #0b1e2b26}
+.menu-pop{display:none;position:absolute;z-index:60;left:0;top:calc(100% + 6px);min-width:300px;max-height:680px;overflow-y:auto;scrollbar-width:thin;padding:6px;background:#fff;border:1px solid #d3e0e7;border-radius:11px;box-shadow:0 10px 24px #0b1e2b26}
 .qst-menu.open>.menu-pop{display:block;animation:menuIn .14s ease-out}
 @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .menu-pop button{display:flex;align-items:center;gap:11px;width:100%;padding:8px 10px;border:0;border-radius:8px;background:none;color:var(--ink);text-align:left;font-size:.8125rem}
@@ -131,7 +131,7 @@ h1{font-size:1.05rem;margin:0;font-weight:650}
 
 /* ---------- Stage (canvas) ---------- */
 .results{min-width:0;display:flex;flex-direction:column}
-.stage{background:radial-gradient(120% 90% at 50% 30%,#123a52 0%,var(--navy-2) 55%,var(--navy-3) 100%);border-radius:var(--radius);color:#fff;overflow:hidden;box-shadow:0 6px 18px #0b1e2b22;position:relative}
+.stage{background:radial-gradient(120% 90% at 50% 30%,#123a52 0%,var(--navy-2) 55%,var(--navy-3) 100%);border-radius:var(--radius);color:#fff;overflow:hidden;box-shadow:0 6px 18px #0b1e2b22;position:relative;isolation:isolate}
 .stage-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid #1d4458;flex-wrap:wrap}
 .toolbox{display:flex;gap:4px;padding:3px;background:#0a2131;border:1px solid #1f4256;border-radius:10px}
 .tool{display:flex;align-items:center;gap:6px;border:0;background:transparent;color:#bcd3de;padding:6px 9px;border-radius:7px;font-size:.78rem;position:relative}

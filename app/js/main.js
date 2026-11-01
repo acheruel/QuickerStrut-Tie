@@ -134,6 +134,9 @@
         e.stopPropagation();
         var menu = b.closest('.qst-menu'), open = !menu.classList.contains('open');
         closeMenus(menu); menu.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open));
+        // Keep the whole list reachable on short screens: the pop-up scrolls instead of leaving the viewport.
+        var pop = menu.querySelector('.menu-pop');
+        if (open && pop) pop.style.maxHeight = Math.max(160, window.innerHeight - pop.getBoundingClientRect().top - 12) + 'px';
       });
     });
     document.addEventListener('click', function (e) { if (!e.target.closest('.qst-menu')) closeMenus(); });

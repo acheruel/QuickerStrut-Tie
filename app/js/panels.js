@@ -297,7 +297,7 @@
       }
       h += '</div>';
     }
-    h += '<label class="field" style="margin-top:10px"><span>' + t('anchorType') + '</span><select data-k="m.' + m.id + '.anchor">' + ['straight', 'hook', 'plate', 'stirrup'].map(function (a) { return '<option value="' + a + '"' + ((m.anchor || 'hook') === a ? ' selected' : '') + '>' + t('anchor_' + a) + '</option>'; }).join('') + '</select></label>';
+    h += '<label class="field" style="margin-top:10px"><span>' + t('anchorType') + '</span><select data-k="m.' + m.id + '.anchor">' + QST.csa.ANCHORS.map(function (a) { return '<option value="' + a + '"' + ((m.anchor || 'hook') === a ? ' selected' : '') + '>' + t('anchor_' + a) + '</option>'; }).join('') + '</select></label>';
     var ans = App.checks && App.checks.ok ? App.checks.anchors.filter(function (a) { return a.member === m.id; }) : [];
     if (ans.length) {
       h += '<div class="ins-result"><div class="kv">';
@@ -392,7 +392,7 @@
       });
       if (c.anchors.length) h += '<tr class="group"><td colspan="7">' + t('anchorages') + ' · l<sub>a</sub> ≥ l<sub>d</sub></td></tr>';
       c.anchors.forEach(function (a) {
-        h += '<tr data-target="member:' + a.member + '"' + isSel('member', a.member) + '><td>' + a.member + ' · ' + a.node + '</td><td class="l">' + t('anchor_' + a.type) + '</td><td>' + (a.mechanical || a.na ? '—' : fmt(a.req, 0) + ' mm') + '</td><td>' + fmt(a.la, 0) + ' mm</td><td>' + (a.na ? t('dbUnknown') : a.mechanical ? t('mechanicalNote') : 'd<sub>b</sub> ' + fmt(a.db, 1) + (a.top ? ' · k1 1,3' : '')) + '</td><td class="l">' + (a.mechanical || a.na ? '<span class="status ' + (a.na ? 'na' : 'ok') + '">' + (a.na ? '?' : '✓') + '</span>' : cellU(a.util)) + '</td><td class="l">' + a.clause.split(' · ')[0] + '</td></tr>';
+        h += '<tr data-target="member:' + a.member + '"' + isSel('member', a.member) + '><td>' + a.member + ' · ' + a.node + '</td><td class="l">' + t('anchor_' + a.type) + '</td><td>' + (a.mechanical || a.na ? '—' : fmt(a.req, 0) + ' mm') + '</td><td>' + fmt(a.la, 0) + ' mm</td><td>' + (a.na ? t('dbUnknown') : a.mechanical ? t(a.type === 'continuous' ? 'continuousNote' : 'mechanicalNote') : 'd<sub>b</sub> ' + fmt(a.db, 1) + (a.top ? ' · k1 1,3' : '')) + '</td><td class="l">' + (a.mechanical || a.na ? '<span class="status ' + (a.na ? 'na' : 'ok') + '">' + (a.na ? '?' : '✓') + '</span>' : cellU(a.util)) + '</td><td class="l">' + a.clause.split(' · ')[0] + '</td></tr>';
       });
       var ck = c.crack;
       h += '<tr class="group"><td colspan="7">' + t('crackControl') + '</td></tr>';

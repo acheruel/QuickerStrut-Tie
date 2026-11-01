@@ -1,6 +1,6 @@
 # Validation
 
-*QuickerStrut&Tie v0.2 · 2026-11-01*
+*QuickerStrut&Tie v0.2.5 · 2026-11-01*
 
 The engine (`app/js/solver.js`, `app/js/csa.js`) is checked against hand calculations by
 the automated tests in `tests/engine.test.js` (`node --test`). The cases below are
@@ -121,6 +121,77 @@ example **Half-joint seat (dapped end)**: 1 m strip, h = 1.2 m, nib 0.6 m deep a
 | Top chord at the dap | R cot α = 477.3 kN | 477.3 kN |
 
 Hanger 6-20M: Tr = 0.90 × 400 × 1800 = 648 kN (0.93); nib tie 5-20M: 540 kN (0.88).
+
+### 4.4 Paultre (2011), *Structures en béton armé*, example 13.2 — double corbel (CSA A23.3)
+
+Column 350 mm, corbels 200 + 200 mm deep, b = 350 mm, f′c = 40 MPa, fy = 400 MPa,
+Vf = 1.25 × 100 + 1.5 × 150 = 350 kN, Nf = 0.2 Vf = 70 kN per corbel. Full double corbel
+(the book draws half of it): A at 330 mm from the axis and 28 mm under the top, C at
+350 / 4 = 87.5 mm from the axis and hc / 2 = 15.5 mm above the corbel base. Strut AC width
+76 mm = A_b at A (26 587 mm²) / b; CC strut width hc = 31 mm; 5-15M welded to the angle.
+
+| Quantity | Paultre | App |
+| --- | --- | --- |
+| θ | tan θ = 1.47 → 55.8° | 55.8° |
+| Strut AC | 350 / sin 55.8° = 423 kN | 423.3 kN |
+| Tie AB | 423 cos 55.8° + 70 = 308 kN | 308.1 kN |
+| Strut CC (hc = 31 mm) | 0.85 × 0.65 × 40 × 350 × 31 = 240 kN | 238.1 kN, 0.99 |
+| As required | 308e3 / (0.85 × 400) = 906 mm² | 906 mm² (5-15M: 0.91) |
+| f_c at A (CCT) | 423e3 / 26 587 = 15.9 ≤ 0.75 × 0.65 × 40 = 19.5 MPa | 15.9 / 19.5 = 0.82 |
+| Bearing at C (CCC) | 350e3 / (350 × 175) = 5.7 ≤ 22.1 MPa | 5.71 MPa |
+| fcu of AC (course note: εs = εy) | 0.687 f′c = 27.5 MPa | 29.8 MPa (εs = 1.54 ‰ computed) |
+
+The node at A uses b = 350 mm where the book takes the 270 mm angle length: the app is
+slightly less conservative on that face.
+
+### 4.5 CAC *Concrete Design Handbook*, 4th ed., example 4.10 — beam with dapped end (CSA A23.3)
+
+Beam 700 × 400 mm, span 6.3 m, wf = 127 kN/m, Nf = 80 kN (tension), f′c = 40 MPa,
+fy = 400 MPa, precast plant φc = 0.70. Half beam with the published truss: bearing A
+25 mm above the nib soffit (325 mm), chords at 637 and 60 mm, B–C hanger 250 mm from A,
+D at 461 mm (from the 56° and 51° angles), panels 460 / 660 / 660 / 660 / 460 mm, top
+loads 61, 71, 84, 84, 71 and 29 kN, symmetry at midspan.
+
+| Member | Handbook (kN) | App (kN) | Member | Handbook (kN) | App (kN) |
+| --- | --- | --- | --- | --- | --- |
+| AB | −513 | −512.6 | GH | 184 | 184.0 |
+| DB | −328 | −328.9 | GI | −713 | −713.4 |
+| AD | 401 | 400.5 | HI | −280 | −279.6 |
+| CB | 611 | 611.4 | HJ | 1004 | 1003.8 |
+| CD | −781 | −781.6 | IJ | 100 | 100.0 |
+| DE | −434 | −433.7 | IK | −924 | −923.8 |
+| BE | −137 | −136.3 | JK | −152 | −151.9 |
+| CF | 487 | 486.8 | JL | 1118 | 1118.2 |
+| EF | 268 | 268.0 | KL | 29 | 29.0 |
+| EG | −407 | −406.8 | KM | −1038 | −1038.2 |
+| FG | −407 | −407.2 | LM | −37 | −37.1 |
+| FH | 794 | 793.4 | LN | 1141 | 1141.4 |
+
+All 24 forces within 1 kN (the handbook rounds its geometry). Further results:
+
+| Quantity | Handbook / course correction | App |
+| --- | --- | --- |
+| As AD, CB, CF | 1179, 1797, 1432 mm² | 1178, 1798, 1432 mm² |
+| Back face of C (CTT), 2 × 60 mm | Pnr = 0.65 × 0.70 × 40 × 48 000 = 873.6 kN ≥ 487 kN | 487 / 873.6 = 0.557 |
+| Anchorage of CF at C, straight 30M | ld = 854 mm, 215 mm available → 300 kN < 487 kN | ld = 851 mm, la = 178 mm → 4.79 |
+
+The anchorage of CF at node C governs, as in the handbook, which adds two 15M U-bars;
+the course correction notes that these U-bars are not fully anchored either and checks
+the back face of the node instead. The example keeps the straight 30M bars so that the
+problem is visible.
+
+### 4.6 Bridge examples (statics)
+
+- **Bridge pier corbel** (CSA S6): Vf = 1400 kN, Hf = 0.2 Vf = 280 kN on a 400 mm bearing,
+  column 1.0 m cut 1.4 m below the corbel. Reactions balance the loads (ΣRy = 1400 kN,
+  ΣRx = −280 kN); the corbel tie carries the same force from the load to the column face
+  and to the far face (891.5 kN), where it is bent down into the far-face column bars
+  (continuous anchorage, 923 kN).
+- **Integral abutment end diaphragm** (CSA S6): deck cut 1.8 m from the abutment face with
+  M = 200 kN·m/m (hogging) and V = 300 kN/m, earth pressure 30 + 120 kN/m on the back
+  face, abutment wall cut 1.5 m below the soffit. Closing frame corner: deck top bars
+  (492 kN/m) bent down into the back-face bars (1114 kN/m), corner diagonal strut
+  (1110 kN/m); ΣRy = 300 kN/m, ΣRx = −150 kN/m.
 
 ## 5. Other automated checks
 

@@ -1,6 +1,6 @@
 # Method and assumptions · Méthode et hypothèses
 
-*QuickerStrut&Tie v0.2 · 2026-11-01*
+*QuickerStrut&Tie v0.2.5 · 2026-11-01*
 
 ## Units and sign convention
 
@@ -89,7 +89,8 @@ Face stresses compared with `f_lim`:
 - each strut: `C / (w · b)`;
 - bearing plate of a support: `|R| / (lb · b)`;
 - load plate: `|F| / (lb · b)`;
-- optionally, the anchorage face of a tie that ends at the node: `T / (w · b)`.
+- optionally, the anchorage face of a tie that ends at the node: `T / (w · b)` (not at a
+  symmetry plane, where the reaction in line with the tie stands for its continuation).
 
 ### Hydrostatic nodal zones (graphical construction)
 
@@ -127,6 +128,11 @@ hook:     ldh = 100 · db / √f′c · fy / 400 ≥ max(8 db, 150 mm)          
 Anchor plates, welded transverse bars and closed stirrups are taken as mechanical
 anchorages (the tie back-face stress is then checked in the nodal zone).
 
+A **continuous or bent bar** needs no anchorage at a node where it carries on: bent into
+another tie (frame corner, corbel bars turned down into the column) or extended past the
+edge of the D-region (node with a load or a reaction standing for the cut). At any other
+node it is checked as a straight bar. The bend diameter and the laps remain to be checked.
+
 ### Crack control reinforcement
 
 Orthogonal grid near each face, ratio `ρ ≥ ρmin` in each direction, spacing ≤ 300 mm.
@@ -154,7 +160,7 @@ For S6 the required grid is limited to 1500 mm²/m on each face, i.e.
 m), and per pile `id`, `node`, `x`, `N` (> 0 compression), `H` (along x), `M` (0, pinned
 head). For the pile cap templates the 2D reactions are expanded to the real piles.
 
-## Limits of version 0.2
+## Limits of version 0.2.5
 
 - 2D model with a constant thickness `b`; one factored load case.
 - No automatic self-weight, no automatic model generation, no stress fields.

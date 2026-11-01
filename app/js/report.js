@@ -64,7 +64,7 @@
         h += '<tr><td>' + e.id + '<br><small>' + t('nodalZone') + '</small></td><td>' + calc + '</td><td>' + ok(e.util) + '</td></tr>';
       });
       c.anchors.forEach(function (a) {
-        var calc = a.mechanical ? t('anchor_' + a.type) + ' — ' + t('mechanicalNote') : a.na ? t('dbUnknown') :
+        var calc = a.mechanical ? t('anchor_' + a.type) + ' — ' + t(a.type === 'continuous' ? 'continuousNote' : 'mechanicalNote') : a.na ? t('dbUnknown') :
           '<span class="rp-eq">l<sub>a</sub> = ' + fmt(a.dc, 0) + ' + ' + fmt(a.e, 0) + ' = ' + fmt(a.la, 0) + ' mm ≥ ' + (a.type === 'hook' ? 'l<sub>dh</sub>' : 'l<sub>d</sub>') + ' = ' + fmt(a.req, 0) + ' mm (d<sub>b</sub> = ' + fmt(a.db, 1) + ' mm' + (a.top ? ', k1 = 1,3' : '') + ')</span>';
         h += '<tr><td>' + a.member + ' · ' + a.node + '<br><small>' + t('anchorage') + '</small></td><td>' + calc + ' <small>(' + a.clause + ')</small></td><td>' + (a.mechanical || a.na ? '—' : ok(a.util)) + '</td></tr>';
       });

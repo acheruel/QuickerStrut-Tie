@@ -191,6 +191,35 @@ test('NCHRP 20-07/217 deep beam: forces for αs = 37.376° and T1 = 288.9 kips',
   close(-byId(r.forces, 'M2').N / 4.448222, 288.9, 0.2, 'C2');
 });
 
+test('Paultre (2011) ex. 13.2, double corbel: published forces, stresses and steel area', () => {
+  const { r, c } = run('paultre-corbel');
+  close(byId(r.forces, 'AB').N, 308, 1, 'tie AB');
+  close(-byId(r.forces, 'AC').N, 423, 1, 'strut AC');
+  // Horizontal strut between the two C nodes: 0.85 φc f'c b hc with hc = 31 mm.
+  close(-byId(r.forces, 'CC2').N, 0.85 * 0.65 * 40 * 350 * 31 / 1000, 2, 'strut CC');
+  close(byId(c.members, 'AB').asReq, 906, 1, 'As required');
+  const A = byId(c.nodes, 'A'), C = byId(c.nodes, 'C');
+  assert.equal(A.type, 'CCT'); assert.equal(C.type, 'CCC');
+  close(A.faces.find((f) => f.ref === 'AC').stress, 15.9, 0.05, 'f_c at A');
+  close(A.limit, 19.5, 0.05, 'CCT limit');
+  close(C.faces.find((f) => f.kind === 'support').stress, 5.7, 0.05, 'bearing stress at C');
+});
+
+test('CAC Concrete Design Handbook ex. 4.10, dapped-end beam: the 24 published forces', () => {
+  const { r, c } = run('cac-dapped-end');
+  const pub = { AB: -513, DB: -328, AD: 401, CB: 611, CD: -781, DE: -434, BE: -137, CF: 487, EF: 268, EG: -407, FG: -407, FH: 794,
+    GH: 184, GI: -713, HI: -280, HJ: 1004, IJ: 100, IK: -924, JK: -152, JL: 1118, KL: 29, KM: -1038, LM: -37, LN: 1141 };
+  for (const [id, N] of Object.entries(pub)) close(byId(r.forces, id).N, N, 1, id);
+  close(r.reactions.find((x) => x.node === 'M').rx, -1061, 1, 'top chord at midspan');
+  // Back face of node C (CTT, φc = 0.70): Pnr = 0.65 × 0.70 × 40 × (2 × 60) × 400 = 873.6 kN.
+  const C = byId(c.nodes, 'C');
+  assert.equal(C.type, 'CTT');
+  close(C.faces.find((f) => f.ref === 'CF').util, 487 / 873.6, 0.002, 'back face of C');
+  // Straight 30M bars at C: la ≈ 180 mm against ld ≈ 854 mm, as in the handbook (U-bars added there).
+  const an = c.anchors.find((x) => x.id === 'CF@C');
+  close(an.req, 854, 5, 'ld'); assert.ok(an.util > 1);
+});
+
 test('half-joint seat: classical relations (hanger = R, nib tie = R cot α, strut = R / sin α)', () => {
   const { r, c } = run('half-joint');
   const R = r.reactions.find((x) => x.node === 'N1').ry;
@@ -281,6 +310,44 @@ test('anchorage: available length = critical section + extension − cover', () 
   const hj = run('half-joint').c;
   assert.ok(!hj.anchors.some((x) => x.node === 'N10'));
   assert.ok(!run('deep-beam-2').c.anchors.some((x) => x.node === 'N5' || x.node === 'N6'));
+});
+
+test('continuous bars: no anchorage where they bend into another tie or leave the D-region, straight bar elsewhere', () => {
+  const ia = run('integral-abutment').c;
+  for (const id of ['M1@D1', 'M1@K1', 'M6@K1']) {
+    const a = ia.anchors.find((x) => x.id === id);
+    assert.ok(a && a.mechanical && a.type === 'continuous', id);
+  }
+  // Corbel column ties M7: N4 has the far-face bars to continue into, N3 (free,
+  // unloaded, struts only) has nothing, so the bars are checked as straight bars there.
+  const m = csa.normalize(examples.build('bridge-corbel', 'fr'));
+  m.members.find((x) => x.id === 'M7').anchor = 'continuous';
+  const c = csa.check(m, solver.solve(m));
+  assert.ok(c.anchors.find((x) => x.id === 'M7@N4').mechanical, 'bent into the far-face bars');
+  const a = c.anchors.find((x) => x.id === 'M7@N3');
+  assert.equal(a.type, 'straight'); assert.ok(!a.mechanical && a.req >= 300);
+});
+
+test('every anchorage type used by the examples is a known type (the loader resets unknown ones)', () => {
+  for (const ex of examples.EXAMPLES) for (const m of ex.model.members) if (m.anchor) assert.ok(csa.ANCHORS.includes(m.anchor), ex.key + ' ' + m.id);
+});
+
+test('a tie crossing a symmetry plane has no anchorage face at the plane', () => {
+  const c = run('cac-dapped-end').c;
+  assert.ok(!c.nodes.some((n) => n.id === 'N' && n.faces.some((f) => f.kind === 'tie')));
+});
+
+test('bridge examples: corbel and integral abutment balance their loads', () => {
+  const co = run('bridge-corbel');
+  close(co.r.reactions.reduce((s, R) => s + R.ry, 0), 1400, 1e-6);
+  close(co.r.reactions.reduce((s, R) => s + R.rx, 0), -280, 1e-6);
+  // The corbel tie carries the same force from the load to the column face and on to the far face.
+  close(byId(co.r.forces, 'M1').N, byId(co.r.forces, 'M2').N, 1e-6);
+  const ia = run('integral-abutment');
+  close(ia.r.reactions.reduce((s, R) => s + R.ry, 0), 300, 1e-6);
+  close(ia.r.reactions.reduce((s, R) => s + R.rx, 0), -(30 + 120), 1e-6);
+  // Closing corner: deck top bars and back-face bars in tension, corner diagonal in compression.
+  assert.ok(byId(ia.r.forces, 'M1').N > 0 && byId(ia.r.forces, 'M6').N > 0 && byId(ia.r.forces, 'M5').N < 0);
 });
 
 // ------------------------------------------------------------ templates

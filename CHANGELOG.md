@@ -1,5 +1,24 @@
 # Version history
 
+## 0.2.5 — 2026-11-01
+
+- **GitHub Pages fixed**: the repository address https://acheruel.github.io/QuickerStrut-Tie/
+  showed the README. `build.py` now also writes `index.html` (same page as the dated
+  portable file) and `.nojekyll` is added, so Pages serves the application at an address
+  without version or date.
+- **Menus no longer hidden**: the side panel now stacks above the canvas, so the
+  *Examples* and *File* menus are no longer covered by the drawing, the inspector or the
+  banner; long menus scroll within the screen height (Galaxy Z Fold).
+- **New examples**: bridge pier corbel (CSA S6) and integral abutment end diaphragm
+  (deck–abutment corner under hogging moment, CSA S6); published examples **Paultre (2011)
+  ex. 13.2** double corbel and **CAC Handbook ex. 4.10** dapped-end beam (24 forces,
+  required steel areas, back face of node C and anchorage of CF reproduced).
+- **Continuous or bent bar** anchorage type: no anchorage needed where the bars bend into
+  another tie (frame corners) or leave the D-region; checked as a straight bar elsewhere.
+- **Correction**: a tie crossing a symmetry plane no longer gets an anchorage face in the
+  nodal zone check at that plane (it already had no anchorage check there).
+- Concise `CLAUDE.md` for contributors.
+
 ## 0.2 — 2026-11-01
 
 - **Hydrostatic nodal zones**, built graphically from the force polygon rotated by 90°:
