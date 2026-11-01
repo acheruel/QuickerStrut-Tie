@@ -1,5 +1,17 @@
 # Version history
 
+## 0.2.6 — 2026-11-01
+
+- **Loads and reactions drawn straight**: each component is its own vertical or horizontal
+  arrow on the node's axis, labelled with its own value, instead of one inclined arrow
+  (loads) or an arrow shifted beside the support (reactions). A small horizontal load
+  component gets a proportionally shorter arrow; a component whose side is taken by a
+  member is drawn leaving the node instead of pointing at it. The view leaves room below
+  the supports for the reaction arrows.
+- **New logo**: a deep-beam panel with two bottle-shaped struts, a tie anchored by end
+  plates, a bearing plate and three nodes (no arrow); header, favicon and `docs/logo.svg`.
+- Listed on https://acheruel.github.io with the other tools.
+
 ## 0.2.5 — 2026-11-01
 
 - **GitHub Pages fixed**: the repository address https://acheruel.github.io/QuickerStrut-Tie/

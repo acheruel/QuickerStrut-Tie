@@ -11,7 +11,7 @@ No installation, no server, no data leaves your computer.
 
 ![QuickerStrut&Tie — hammerhead pier cap, forces view](docs/screenshots/forces.png)
 
-*Version 0.2.5 · 2026-11-01 · Anthony Chéruel · [Version history](CHANGELOG.md) · [Français](#en-français)*
+*Version 0.2.6 · 2026-11-01 · Anthony Chéruel · [Version history](CHANGELOG.md) · [Français](#en-français)*
 
 ## What it does
 

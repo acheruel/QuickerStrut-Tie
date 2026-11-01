@@ -1,6 +1,6 @@
 # Validation
 
-*QuickerStrut&Tie v0.2.5 · 2026-11-01*
+*QuickerStrut&Tie v0.2.6 · 2026-11-01*
 
 The engine (`app/js/solver.js`, `app/js/csa.js`) is checked against hand calculations by
 the automated tests in `tests/engine.test.js` (`node --test`). The cases below are

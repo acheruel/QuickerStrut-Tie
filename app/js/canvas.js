@@ -231,38 +231,74 @@
       out.push(supportGlyph(s[0], s[1], n.support, pal));
     });
 
-    // Reactions
+    // Reactions and loads are drawn as straight components on the node axes:
+    // vertical arrows on the node's vertical, horizontal ones on its horizontal,
+    // each labelled with its own value.
+    // True when a member leaves node n within 25° of the screen direction (dx, dy).
+    function occupied(n, dx, dy) {
+      return model.members.some(function (m) {
+        if (m.i !== n.id && m.j !== n.id) return false;
+        var o = nm[m.i === n.id ? m.j : m.i]; if (!o) return false;
+        var ex = o.x - n.x, ey = -(o.y - n.y), L = Math.hypot(ex, ey) || 1;
+        return (ex * dx + ey * dy) / L > Math.cos(25 * Math.PI / 180);
+      });
+    }
+    function arrowText(x, y, text, color, anchor) {
+      return '<text x="' + n2(x) + '" y="' + n2(y) + '" text-anchor="' + (anchor || 'middle') + '" font-size="11" font-weight="650" fill="' + color + '">' + text + '</text>';
+    }
+    // Reactions: on the support side (below the glyph, or beside it for an x
+    // roller), pointing the way the reaction acts on the structure.
     if (ok && mode !== 'geometry') {
       result.reactions.forEach(function (R) {
         var n = nm[R.node]; if (!n) return;
-        var s = toScreen(v, n.x, n.y);
+        var s = toScreen(v, n.x, n.y), len = 44;
         if (R.fixedY && Math.abs(R.ry) > 0.05) {
-          var up = R.ry > 0, off = n.support === 'rx' ? 12 : 40, len = 46;
-          var y1 = up ? s[1] + off + len : s[1] - off - len, y2 = up ? s[1] + off : s[1] - off;
-          var xr = n.support === 'pin' || n.support === 'ry' ? s[0] + 24 : s[0];
-          out.push(arrow(xr, y1, xr, y2, pal.react, 2.2));
-          out.push('<text x="' + n2(xr + 6) + '" y="' + n2((y1 + y2) / 2 + 4) + '" font-size="11" font-weight="650" fill="' + pal.react + '">' + App.fmt(Math.abs(R.ry), 0) + '</text>');
+          var base = s[1] + (n.support === 'rx' ? 12 : n.support === 'pin' ? 30 : 38);
+          var up = R.ry > 0, ya = up ? base + len : base, yb = up ? base : base + len;
+          out.push(arrow(s[0], ya, s[0], yb, pal.react, 2.2));
+          out.push(arrowText(s[0] + 7, base + len / 2 + 4, App.fmt(Math.abs(R.ry), 0), pal.react, 'start'));
         }
         if (R.fixedX && Math.abs(R.rx) > 0.05) {
-          var right = R.rx > 0, offx = n.support === 'rx' ? 40 : 14, lenx = 46;
-          var x1 = right ? s[0] - offx - lenx : s[0] + offx + lenx, x2 = right ? s[0] - offx : s[0] + offx;
-          var yr = n.support === 'rx' ? s[1] - 22 : s[1] + 34;
-          out.push(arrow(x1, yr, x2, yr, pal.react, 2.2));
-          out.push('<text x="' + n2((x1 + x2) / 2) + '" y="' + n2(yr - 6) + '" text-anchor="middle" font-size="11" font-weight="650" fill="' + pal.react + '">' + App.fmt(Math.abs(R.rx), 0) + '</text>');
+          var right = R.rx > 0, xa, xb, ly = s[1] - 7;
+          if (n.support === 'rx') {
+            // Glyph on the left of the node: the arrow sits beyond it.
+            var edge = s[0] - 38;
+            xa = right ? edge - len : edge; xb = right ? edge : edge - len;
+          } else {
+            // Pointing at the node from the free side, or leaving it when a
+            // member already occupies that side.
+            var gap = 12, push = !occupied(n, right ? -1 : 1, 0);
+            var sd = push ? (right ? -1 : 1) : (right ? 1 : -1);
+            var near = s[0] + sd * gap, far = s[0] + sd * (gap + len);
+            xa = push ? far : near; xb = push ? near : far;
+          }
+          out.push(arrow(xa, s[1], xb, s[1], pal.react, 2.2));
+          out.push(arrowText((xa + xb) / 2, ly, App.fmt(Math.abs(R.rx), 0), pal.react));
         }
       });
     }
 
-    // Loads
+    // Loads: each component points at the node from the outside; a small
+    // horizontal component gets a proportionally shorter arrow (≥ 26 px).
     model.nodes.forEach(function (n) {
-      var fx = Number(n.fx) || 0, fy = Number(n.fy) || 0, P = Math.hypot(fx, fy);
-      if (!(P > 0)) return;
-      var s = toScreen(v, n.x, n.y), ux = fx / P, uy = -fy / P, len = 56, gap = 9;
-      var tx = s[0] - ux * (len + gap), ty = s[1] - uy * (len + gap);
-      out.push(arrow(tx, ty, s[0] - ux * gap, s[1] - uy * gap, pal.load, 2.6));
-      var lx = tx - ux * 8 + (Math.abs(uy) > 0.7 ? 0 : 0), ly = ty - uy * 8;
-      var anchor = Math.abs(ux) > 0.7 ? (ux > 0 ? 'end' : 'start') : 'middle';
-      out.push('<text x="' + n2(lx) + '" y="' + n2(ly + (uy > 0.7 ? -2 : uy < -0.7 ? 11 : 4)) + '" text-anchor="' + anchor + '" font-size="11.5" font-weight="700" fill="' + pal.load + '">' + App.fmt(P, 0) + ' kN</text>');
+      var fx = Number(n.fx) || 0, fy = Number(n.fy) || 0;
+      if (!fx && !fy) return;
+      var s = toScreen(v, n.x, n.y), len = 56, gap = 9;
+      // sd: side of the node where the arrow sits (screen axis sign); the
+      // arrow points at the node (push) unless a member occupies that side.
+      if (fy) {
+        var dirY = fy < 0 ? 1 : -1, pushY = !occupied(n, 0, -dirY), sy = pushY ? -dirY : dirY;
+        var nearY = s[1] + sy * gap, farY = s[1] + sy * (gap + len);
+        out.push(arrow(s[0], pushY ? farY : nearY, s[0], pushY ? nearY : farY, pal.load, 2.6));
+        out.push('<text x="' + n2(s[0]) + '" y="' + n2(sy < 0 ? farY - 6 : farY + 15) + '" text-anchor="middle" font-size="11.5" font-weight="700" fill="' + pal.load + '">' + App.fmt(Math.abs(fy), 0) + ' kN</text>');
+      }
+      if (fx) {
+        var lh = fy ? Math.max(26, Math.min(len, len * Math.abs(fx) / Math.abs(fy))) : len;
+        var dirX = fx > 0 ? 1 : -1, pushX = !occupied(n, -dirX, 0), sx = pushX ? -dirX : dirX;
+        var nearX = s[0] + sx * gap, farX = s[0] + sx * (gap + lh);
+        out.push(arrow(pushX ? farX : nearX, s[1], pushX ? nearX : farX, s[1], pal.load, 2.4));
+        out.push('<text x="' + n2(farX + sx * 5) + '" y="' + n2(s[1] + 4) + '" text-anchor="' + (sx < 0 ? 'end' : 'start') + '" font-size="11.5" font-weight="700" fill="' + pal.load + '">' + App.fmt(Math.abs(fx), 0) + ' kN</text>');
+      }
     });
 
     // Nodes
@@ -607,7 +643,7 @@
     if (!App.model) return;
     var ins = document.getElementById('inspector');
     var right = ins && !ins.classList.contains('hidden') && W > 900 ? 340 : 70;
-    var v = fitView(App.model, W, H, { l: 70, r: right, t: 90, b: 70 });
+    var v = fitView(App.model, W, H, { l: 90, r: right, t: 95, b: 120 });
     view.ox = v.ox; view.oy = v.oy; view.k = v.k;
     render();
   };
@@ -634,7 +670,7 @@
     var w = opts.width || 1000;
     var b = bbox(model), bw = Math.max(b.x1 - b.x0, 0.2), bh = Math.max(b.y1 - b.y0, 0.2);
     var h = opts.height || Math.round(Math.max(340, Math.min(720, (w - 140) * bh / bw + 150)));
-    var pad = opts.pad || { l: 70, r: 70, t: 80, b: 70 };
+    var pad = opts.pad || { l: 90, r: 90, t: 85, b: 110 };
     var v = fitView(model, w, h, pad);
     var body = draw(model, result, checks, { view: v, w: w, h: h, palette: opts.palette || 'light', mode: opts.mode || 'forces', bands: true, ids: opts.ids !== false, zones: opts.zones !== false, grid: opts.grid !== false, interactive: false });
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" font-family="Segoe UI, Inter, Roboto, Arial, sans-serif">' + body + '</svg>';

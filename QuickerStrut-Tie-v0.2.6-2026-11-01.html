@@ -6,7 +6,7 @@
   <title>QuickerStrut&amp;Tie · Strut-and-tie models</title>
   <meta name="description" content="Interactive 2D strut-and-tie models checked to CSA S6 and CSA A23.3, computed in your browser.">
   <meta property="og:title" content="QuickerStrut&amp;Tie · Strut-and-tie models"><meta property="og:description" content="Draw a 2D strut-and-tie model, drag its nodes and see forces and CSA S6 / A23.3 checks update live."><meta name="theme-color" content="#102d41">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23102d41'/%3E%3Crect x='8' y='16' width='48' height='36' rx='3' fill='%239fc3d2' fill-opacity='.16'/%3E%3Cpath d='M32 22L15.5 45.5M32 22L48.5 45.5' stroke='%237cb4ff' stroke-width='5.5' stroke-linecap='round'/%3E%3Cpath d='M15.5 45.5H48.5' stroke='%23ffc978' stroke-width='6' stroke-linecap='round'/%3E%3Cg fill='%23e8fff8' stroke='%230b2436' stroke-width='2.2'%3E%3Ccircle cx='32' cy='22' r='5.5'/%3E%3Ccircle cx='15.5' cy='45.5' r='5.5'/%3E%3Ccircle cx='48.5' cy='45.5' r='5.5'/%3E%3C/g%3E%3Cpath d='M44 8.5h9.5V18M53 9l-7.5 7.5' fill='none' stroke='%2356e0bb' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Cdefs%3E%3ClinearGradient id=%22t%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23174560%22/%3E%3Cstop offset=%221%22 stop-color=%22%230a2233%22/%3E%3C/linearGradient%3E%3ClinearGradient id=%22s%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%238cc6ff%22 stop-opacity=%22.75%22/%3E%3Cstop offset=%221%22 stop-color=%22%234f8fe6%22 stop-opacity=%22.55%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22url(%23t)%22/%3E%3Crect x=%22.5%22 y=%22.5%22 width=%2263%22 height=%2263%22 rx=%2213.5%22 fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.12%22/%3E%3Crect x=%228%22 y=%2213%22 width=%2248%22 height=%2238%22 rx=%223.5%22 fill=%22%23cfe3ec%22 fill-opacity=%22.1%22 stroke=%22%23cfe3ec%22 stroke-opacity=%22.32%22 stroke-width=%221.2%22/%3E%3Cpath d=%22M33.9 23.4Q29.9 36.1 18.9 43.4L15.1 40.6Q19.1 27.9 30.1 20.6ZM30.1 23.4Q34.1 36.1 45.1 43.4L48.9 40.6Q44.9 27.9 33.9 20.6Z%22 fill=%22url(%23s)%22/%3E%3Cpath d=%22M32 22L17 42M32 22L47 42%22 stroke=%22%23d6ecff%22 stroke-width=%221.8%22 stroke-dasharray=%223.2 2.2%22 stroke-linecap=%22round%22/%3E%3Crect x=%2227%22 y=%2214.8%22 width=%2210%22 height=%222.6%22 rx=%22.9%22 fill=%22%23e8fff8%22 fill-opacity=%22.9%22/%3E%3Crect x=%2211.5%22 y=%2240%22 width=%2241%22 height=%224%22 rx=%221.3%22 fill=%22%23ffc978%22/%3E%3Crect x=%229.4%22 y=%2237.4%22 width=%222.6%22 height=%229.2%22 rx=%22.8%22 fill=%22%23ffe3ad%22/%3E%3Crect x=%2252%22 y=%2237.4%22 width=%222.6%22 height=%229.2%22 rx=%22.8%22 fill=%22%23ffe3ad%22/%3E%3Cg fill=%22%23f2fffb%22 stroke=%22%230b2436%22 stroke-width=%221.8%22%3E%3Ccircle cx=%2232%22 cy=%2222%22 r=%223.7%22/%3E%3Ccircle cx=%2217%22 cy=%2242%22 r=%223.7%22/%3E%3Ccircle cx=%2247%22 cy=%2242%22 r=%223.7%22/%3E%3C/g%3E%3C/svg%3E">
   <style>
 @charset "UTF-8";
 /* SPDX-License-Identifier: GPL-3.0-or-later */
@@ -408,7 +408,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 </head>
 <body>
 <header class="topbar">
-  <div class="brand"><svg class="brand-logo" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><defs><linearGradient id="qst-tile-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#174560"/><stop offset="1" stop-color="#0b2436"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#qst-tile-top)"/><rect x=".5" y=".5" width="63" height="63" rx="13.5" fill="none" stroke="#fff" stroke-opacity=".14"/><rect x="8" y="16" width="48" height="36" rx="3" fill="#9fc3d2" fill-opacity=".14"/><path d="M32 22L15.5 45.5M32 22L48.5 45.5" stroke="#7cb4ff" stroke-width="5" stroke-dasharray="6.4 3.4" stroke-linecap="round"/><path d="M15.5 45.5H48.5" stroke="#ffc978" stroke-width="5.6" stroke-linecap="round"/><g fill="#e8fff8" stroke="#0b2436" stroke-width="2.2"><circle cx="32" cy="22" r="5"/><circle cx="15.5" cy="45.5" r="5"/><circle cx="48.5" cy="45.5" r="5"/></g><path d="M44 8.5h9.5V18M53 9l-7.5 7.5" fill="none" stroke="#56e0bb" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg><div>Quicker<span>Strut&amp;Tie</span></div></div>
+  <div class="brand"><svg class="brand-logo" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><defs><linearGradient id="qst-tile-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#174560"/><stop offset="1" stop-color="#0a2233"/></linearGradient><linearGradient id="qst-strut-top" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8cc6ff" stop-opacity=".75"/><stop offset="1" stop-color="#4f8fe6" stop-opacity=".55"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#qst-tile-top)"/><rect x=".5" y=".5" width="63" height="63" rx="13.5" fill="none" stroke="#fff" stroke-opacity=".12"/><rect x="8" y="13" width="48" height="38" rx="3.5" fill="#cfe3ec" fill-opacity=".1" stroke="#cfe3ec" stroke-opacity=".32" stroke-width="1.2"/><path d="M33.9 23.4Q29.9 36.1 18.9 43.4L15.1 40.6Q19.1 27.9 30.1 20.6ZM30.1 23.4Q34.1 36.1 45.1 43.4L48.9 40.6Q44.9 27.9 33.9 20.6Z" fill="url(#qst-strut-top)"/><path d="M32 22L17 42M32 22L47 42" stroke="#d6ecff" stroke-width="1.8" stroke-dasharray="3.2 2.2" stroke-linecap="round"/><rect x="27" y="14.8" width="10" height="2.6" rx=".9" fill="#e8fff8" fill-opacity=".9"/><rect x="11.5" y="40" width="41" height="4" rx="1.3" fill="#ffc978"/><rect x="9.4" y="37.4" width="2.6" height="9.2" rx=".8" fill="#ffe3ad"/><rect x="52" y="37.4" width="2.6" height="9.2" rx=".8" fill="#ffe3ad"/><g fill="#f2fffb" stroke="#0b2436" stroke-width="1.8"><circle cx="32" cy="22" r="3.7"/><circle cx="17" cy="42" r="3.7"/><circle cx="47" cy="42" r="3.7"/></g></svg><div>Quicker<span>Strut&amp;Tie</span></div></div>
   <p class="top-warning" role="note"><span class="warning-symbol" aria-hidden="true">!</span><span data-i18n="warning"></span></p>
   <div class="header-right">
     <div class="release-info"><b id="release-version"></b><small id="release-date"></small></div>
@@ -487,7 +487,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 <div id="report"></div>
 <script>/* js/version.js */
 // SPDX-License-Identifier: GPL-3.0-or-later
-window.QST_META = { version: '0.2.5', date: '2026-11-01', author: 'Anthony Chéruel', schema: 1 };
+window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chéruel', schema: 1 };
 
 </script>
 <script>/* js/solver.js */
@@ -2424,38 +2424,74 @@ window.QST_META = { version: '0.2.5', date: '2026-11-01', author: 'Anthony Chér
       out.push(supportGlyph(s[0], s[1], n.support, pal));
     });
 
-    // Reactions
+    // Reactions and loads are drawn as straight components on the node axes:
+    // vertical arrows on the node's vertical, horizontal ones on its horizontal,
+    // each labelled with its own value.
+    // True when a member leaves node n within 25° of the screen direction (dx, dy).
+    function occupied(n, dx, dy) {
+      return model.members.some(function (m) {
+        if (m.i !== n.id && m.j !== n.id) return false;
+        var o = nm[m.i === n.id ? m.j : m.i]; if (!o) return false;
+        var ex = o.x - n.x, ey = -(o.y - n.y), L = Math.hypot(ex, ey) || 1;
+        return (ex * dx + ey * dy) / L > Math.cos(25 * Math.PI / 180);
+      });
+    }
+    function arrowText(x, y, text, color, anchor) {
+      return '<text x="' + n2(x) + '" y="' + n2(y) + '" text-anchor="' + (anchor || 'middle') + '" font-size="11" font-weight="650" fill="' + color + '">' + text + '</text>';
+    }
+    // Reactions: on the support side (below the glyph, or beside it for an x
+    // roller), pointing the way the reaction acts on the structure.
     if (ok && mode !== 'geometry') {
       result.reactions.forEach(function (R) {
         var n = nm[R.node]; if (!n) return;
-        var s = toScreen(v, n.x, n.y);
+        var s = toScreen(v, n.x, n.y), len = 44;
         if (R.fixedY && Math.abs(R.ry) > 0.05) {
-          var up = R.ry > 0, off = n.support === 'rx' ? 12 : 40, len = 46;
-          var y1 = up ? s[1] + off + len : s[1] - off - len, y2 = up ? s[1] + off : s[1] - off;
-          var xr = n.support === 'pin' || n.support === 'ry' ? s[0] + 24 : s[0];
-          out.push(arrow(xr, y1, xr, y2, pal.react, 2.2));
-          out.push('<text x="' + n2(xr + 6) + '" y="' + n2((y1 + y2) / 2 + 4) + '" font-size="11" font-weight="650" fill="' + pal.react + '">' + App.fmt(Math.abs(R.ry), 0) + '</text>');
+          var base = s[1] + (n.support === 'rx' ? 12 : n.support === 'pin' ? 30 : 38);
+          var up = R.ry > 0, ya = up ? base + len : base, yb = up ? base : base + len;
+          out.push(arrow(s[0], ya, s[0], yb, pal.react, 2.2));
+          out.push(arrowText(s[0] + 7, base + len / 2 + 4, App.fmt(Math.abs(R.ry), 0), pal.react, 'start'));
         }
         if (R.fixedX && Math.abs(R.rx) > 0.05) {
-          var right = R.rx > 0, offx = n.support === 'rx' ? 40 : 14, lenx = 46;
-          var x1 = right ? s[0] - offx - lenx : s[0] + offx + lenx, x2 = right ? s[0] - offx : s[0] + offx;
-          var yr = n.support === 'rx' ? s[1] - 22 : s[1] + 34;
-          out.push(arrow(x1, yr, x2, yr, pal.react, 2.2));
-          out.push('<text x="' + n2((x1 + x2) / 2) + '" y="' + n2(yr - 6) + '" text-anchor="middle" font-size="11" font-weight="650" fill="' + pal.react + '">' + App.fmt(Math.abs(R.rx), 0) + '</text>');
+          var right = R.rx > 0, xa, xb, ly = s[1] - 7;
+          if (n.support === 'rx') {
+            // Glyph on the left of the node: the arrow sits beyond it.
+            var edge = s[0] - 38;
+            xa = right ? edge - len : edge; xb = right ? edge : edge - len;
+          } else {
+            // Pointing at the node from the free side, or leaving it when a
+            // member already occupies that side.
+            var gap = 12, push = !occupied(n, right ? -1 : 1, 0);
+            var sd = push ? (right ? -1 : 1) : (right ? 1 : -1);
+            var near = s[0] + sd * gap, far = s[0] + sd * (gap + len);
+            xa = push ? far : near; xb = push ? near : far;
+          }
+          out.push(arrow(xa, s[1], xb, s[1], pal.react, 2.2));
+          out.push(arrowText((xa + xb) / 2, ly, App.fmt(Math.abs(R.rx), 0), pal.react));
         }
       });
     }
 
-    // Loads
+    // Loads: each component points at the node from the outside; a small
+    // horizontal component gets a proportionally shorter arrow (≥ 26 px).
     model.nodes.forEach(function (n) {
-      var fx = Number(n.fx) || 0, fy = Number(n.fy) || 0, P = Math.hypot(fx, fy);
-      if (!(P > 0)) return;
-      var s = toScreen(v, n.x, n.y), ux = fx / P, uy = -fy / P, len = 56, gap = 9;
-      var tx = s[0] - ux * (len + gap), ty = s[1] - uy * (len + gap);
-      out.push(arrow(tx, ty, s[0] - ux * gap, s[1] - uy * gap, pal.load, 2.6));
-      var lx = tx - ux * 8 + (Math.abs(uy) > 0.7 ? 0 : 0), ly = ty - uy * 8;
-      var anchor = Math.abs(ux) > 0.7 ? (ux > 0 ? 'end' : 'start') : 'middle';
-      out.push('<text x="' + n2(lx) + '" y="' + n2(ly + (uy > 0.7 ? -2 : uy < -0.7 ? 11 : 4)) + '" text-anchor="' + anchor + '" font-size="11.5" font-weight="700" fill="' + pal.load + '">' + App.fmt(P, 0) + ' kN</text>');
+      var fx = Number(n.fx) || 0, fy = Number(n.fy) || 0;
+      if (!fx && !fy) return;
+      var s = toScreen(v, n.x, n.y), len = 56, gap = 9;
+      // sd: side of the node where the arrow sits (screen axis sign); the
+      // arrow points at the node (push) unless a member occupies that side.
+      if (fy) {
+        var dirY = fy < 0 ? 1 : -1, pushY = !occupied(n, 0, -dirY), sy = pushY ? -dirY : dirY;
+        var nearY = s[1] + sy * gap, farY = s[1] + sy * (gap + len);
+        out.push(arrow(s[0], pushY ? farY : nearY, s[0], pushY ? nearY : farY, pal.load, 2.6));
+        out.push('<text x="' + n2(s[0]) + '" y="' + n2(sy < 0 ? farY - 6 : farY + 15) + '" text-anchor="middle" font-size="11.5" font-weight="700" fill="' + pal.load + '">' + App.fmt(Math.abs(fy), 0) + ' kN</text>');
+      }
+      if (fx) {
+        var lh = fy ? Math.max(26, Math.min(len, len * Math.abs(fx) / Math.abs(fy))) : len;
+        var dirX = fx > 0 ? 1 : -1, pushX = !occupied(n, -dirX, 0), sx = pushX ? -dirX : dirX;
+        var nearX = s[0] + sx * gap, farX = s[0] + sx * (gap + lh);
+        out.push(arrow(pushX ? farX : nearX, s[1], pushX ? nearX : farX, s[1], pal.load, 2.4));
+        out.push('<text x="' + n2(farX + sx * 5) + '" y="' + n2(s[1] + 4) + '" text-anchor="' + (sx < 0 ? 'end' : 'start') + '" font-size="11.5" font-weight="700" fill="' + pal.load + '">' + App.fmt(Math.abs(fx), 0) + ' kN</text>');
+      }
     });
 
     // Nodes
@@ -2800,7 +2836,7 @@ window.QST_META = { version: '0.2.5', date: '2026-11-01', author: 'Anthony Chér
     if (!App.model) return;
     var ins = document.getElementById('inspector');
     var right = ins && !ins.classList.contains('hidden') && W > 900 ? 340 : 70;
-    var v = fitView(App.model, W, H, { l: 70, r: right, t: 90, b: 70 });
+    var v = fitView(App.model, W, H, { l: 90, r: right, t: 95, b: 120 });
     view.ox = v.ox; view.oy = v.oy; view.k = v.k;
     render();
   };
@@ -2827,7 +2863,7 @@ window.QST_META = { version: '0.2.5', date: '2026-11-01', author: 'Anthony Chér
     var w = opts.width || 1000;
     var b = bbox(model), bw = Math.max(b.x1 - b.x0, 0.2), bh = Math.max(b.y1 - b.y0, 0.2);
     var h = opts.height || Math.round(Math.max(340, Math.min(720, (w - 140) * bh / bw + 150)));
-    var pad = opts.pad || { l: 70, r: 70, t: 80, b: 70 };
+    var pad = opts.pad || { l: 90, r: 90, t: 85, b: 110 };
     var v = fitView(model, w, h, pad);
     var body = draw(model, result, checks, { view: v, w: w, h: h, palette: opts.palette || 'light', mode: opts.mode || 'forces', bands: true, ids: opts.ids !== false, zones: opts.zones !== false, grid: opts.grid !== false, interactive: false });
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" font-family="Segoe UI, Inter, Roboto, Arial, sans-serif">' + body + '</svg>';

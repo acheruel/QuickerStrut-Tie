@@ -1,6 +1,6 @@
 # Method and assumptions · Méthode et hypothèses
 
-*QuickerStrut&Tie v0.2.5 · 2026-11-01*
+*QuickerStrut&Tie v0.2.6 · 2026-11-01*
 
 ## Units and sign convention
 
@@ -160,7 +160,7 @@ For S6 the required grid is limited to 1500 mm²/m on each face, i.e.
 m), and per pile `id`, `node`, `x`, `N` (> 0 compression), `H` (along x), `M` (0, pinned
 head). For the pile cap templates the 2D reactions are expanded to the real piles.
 
-## Limits of version 0.2.5
+## Limits of version 0.2.6
 
 - 2D model with a constant thickness `b`; one factored load case.
 - No automatic self-weight, no automatic model generation, no stress fields.
