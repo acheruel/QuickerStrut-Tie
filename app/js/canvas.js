@@ -4,22 +4,17 @@
   'use strict';
   var QST = window.QST, App = QST.App;
 
+  // One light palette for the screen, the printed report and the SVG export:
+  // struts blue and dashed, ties red and solid, loads in ink, reactions green.
   var PAL = {
-    dark: {
-      bg: null, gridMinor: '#163a4f', gridMajor: '#215069', axis: '#3d7896', gridText: '#6f98ab',
-      concrete: '#9fc3d2', concreteOp: 0.085, concreteStroke: '#88b3c6',
-      strut: '#7cb4ff', tie: '#ffc978', zero: '#6f8a99', neutral: '#cfe6ef',
-      nodeFill: '#e8fff8', nodeStroke: '#0b2436', load: '#ff9b85', react: '#56e0bb', support: '#cfe6ef', ground: '#6f98ab',
-      pill: '#0a2131', pillOp: 0.86, pillText: '#e6f3f7', idText: '#9fc3d2', sel: '#56e0bb', bandOp: 0.17, tieBandOp: 0.2, warn: '#ff7a6b'
-    },
-    light: {
-      bg: '#ffffff', gridMinor: '#f1f5f7', gridMajor: '#e1e9ee', axis: '#c5d3db', gridText: '#8aa0ad',
-      concrete: '#c9d8e1', concreteOp: 0.45, concreteStroke: '#6f8c9c',
-      strut: '#2f64b0', tie: '#b66c16', zero: '#9aa9b2', neutral: '#5d7684',
-      nodeFill: '#ffffff', nodeStroke: '#17374b', load: '#c4513a', react: '#007f78', support: '#5d7684', ground: '#8aa0ad',
-      pill: '#ffffff', pillOp: 0.92, pillText: '#17374b', idText: '#566e7c', sel: '#007f78', bandOp: 0.16, tieBandOp: 0.22, warn: '#b23a2a'
-    }
+    bg: '#ffffff', gridMinor: '#f0f3f6', gridMajor: '#dfe6eb', axis: '#b3c2cc', gridText: '#7f95a3',
+    concrete: '#e6ecf0', concreteOp: 0.75, concreteStroke: '#3f5868',
+    strut: '#1f5fbf', tie: '#c8322b', zero: '#8c9aa3', neutral: '#4b6474', strutInk: '#17498f', tieInk: '#9c231c',
+    nodeFill: '#ffffff', nodeStroke: '#17374b', load: '#1b2b36', react: '#0a7d5a', support: '#4b6474', ground: '#7f95a3',
+    pill: '#ffffff', pillOp: 0.94, pillText: '#17374b', idText: '#5a7180', sel: '#0a9f8f', bandOp: 0.16, tieBandOp: 0.2, warn: '#e8590c',
+    zoneFill: '#cfdae2', zoneStroke: '#4b6474'
   };
+  App.palette = PAL;
 
   var svg, wrap, W = 0, H = 0;
   var view = { ox: 0, oy: 0, k: 120 };
@@ -27,6 +22,8 @@
   var cursorRaw = null;
   var pending = null;       // first node of a member being drawn
   var drag = null;          // current drag operation
+  var guides = null;        // alignment guides shown while dragging: {x, y} in world coordinates
+  var clipSeq = 0;          // unique clip-path ids for the static drawings
   var pointers = {};        // active pointers (pinch zoom)
   var spaceDown = false;
   var raf = 0;
@@ -88,7 +85,7 @@
 
   // ---------------------------------------------------------------- draw ---
   function draw(model, result, checks, o) {
-    var pal = PAL[o.palette || 'dark'], v = o.view, mode = o.mode || 'forces';
+    var pal = PAL, v = o.view, mode = o.mode || 'forces';
     var nm = nodeMap(model), ok = result && result.ok;
     var forces = {}, mchk = {}, nchk = {}, react = {};
     if (ok) result.forces.forEach(function (f) { forces[f.id] = f; });
@@ -98,7 +95,10 @@
     (o.warnings || []).forEach(function (w) { warnIds[w.id] = 1; });
     var sel = o.sel || null, hov = o.hover || null;
     var out = [];
-    var clipId = 'clip-' + (o.palette || 'dark');
+    var clipId = 'qst-clip-' + (o.interactive ? 'canvas' : ++clipSeq);
+    // Forces view: the line thickness follows the force (thickest = largest force).
+    var nMax = 0;
+    if (ok) result.forces.forEach(function (f) { nMax = Math.max(nMax, Math.abs(f.N)); });
 
     // Outline path
     var poly = (model.outline || []).map(function (p) { var s = toScreen(v, p[0], p[1]); return n2(s[0]) + ',' + n2(s[1]); }).join(' ');
@@ -164,7 +164,7 @@
         if (wpx < 1) return;
         var nx = -g.uy * wpx / 2, ny = g.ux * wpx / 2, c = colorOf(m);
         var op = kind === 'tie' ? pal.tieBandOp : pal.bandOp;
-        if (mode === 'util') op = (o.palette === 'light' ? 0.42 : 0.26);
+        if (mode === 'util') op = 0.42;
         bands.push('<path d="M' + n2(g.a[0] + nx) + ' ' + n2(g.a[1] + ny) + 'L' + n2(g.b[0] + nx) + ' ' + n2(g.b[1] + ny) + 'L' + n2(g.b[0] - nx) + ' ' + n2(g.b[1] - ny) + 'L' + n2(g.a[0] - nx) + ' ' + n2(g.a[1] - ny) + 'Z" fill="' + c + '" fill-opacity="' + op + '"/>');
       });
       out.push('<g clip-path="url(#' + clipId + ')">' + bands.join('') + '</g>');
@@ -180,6 +180,7 @@
       var dash = kind === 'strut' ? ' stroke-dasharray="9 5"' : kind === 'zero' ? ' stroke-dasharray="2 4"' : '';
       if (mode === 'geometry') dash = m.role === 'tie' ? '' : m.role === 'strut' ? ' stroke-dasharray="9 5"' : ' stroke-dasharray="5 3"';
       var sw = kind === 'tie' ? 3.2 : kind === 'strut' ? 2.4 : 1.4;
+      if (mode === 'forces' && kind !== 'zero' && nMax > 0) sw = 2 + 4.5 * Math.abs(forces[m.id].N) / nMax;
       out.push('<line x1="' + n2(g.a[0]) + '" y1="' + n2(g.a[1]) + '" x2="' + n2(g.b[0]) + '" y2="' + n2(g.b[1]) + '" stroke="' + c + '" stroke-width="' + sw + '"' + dash + ' stroke-linecap="round"/>');
     });
 
@@ -189,8 +190,8 @@
       checks.nodes.forEach(function (nc) {
         var z = nc.zone; if (!z) return;
         var pts = z.poly.map(function (q) { var sp = toScreen(v, q[0], q[1]); return n2(sp[0]) + ',' + n2(sp[1]); }).join(' ');
-        var fillZ = mode === 'util' ? App.utilColor(z.util) : (o.palette === 'light' ? '#dfe9ef' : '#e8fff8');
-        zs.push('<polygon points="' + pts + '" fill="' + fillZ + '" fill-opacity="' + (mode === 'util' ? 0.45 : (o.palette === 'light' ? 0.7 : 0.16)) + '" stroke="' + (z.outside ? pal.warn : (o.palette === 'light' ? '#5d7684' : '#cfe6ef')) + '" stroke-width="1.2" stroke-linejoin="round"' + (z.outside ? ' stroke-dasharray="3 2"' : '') + '/>');
+        var fillZ = mode === 'util' ? App.utilColor(z.util) : pal.zoneFill;
+        zs.push('<polygon points="' + pts + '" fill="' + fillZ + '" fill-opacity="' + (mode === 'util' ? 0.45 : 0.75) + '" stroke="' + (z.outside ? pal.warn : pal.zoneStroke) + '" stroke-width="1.2" stroke-linejoin="round"' + (z.outside ? ' stroke-dasharray="3 2"' : '') + '/>');
         z.faces.forEach(function (fa) {
           var A = toScreen(v, fa.a[0], fa.a[1]), Bp = toScreen(v, fa.b[0], fa.b[1]);
           var col = fa.kind === 'strut' ? pal.strut : fa.kind === 'tie' ? pal.tie : fa.kind === 'load' ? pal.load : pal.react;
@@ -324,12 +325,12 @@
         opt.small = true;
       } else if (mode === 'forces' && f) {
         text = f.kind === 'zero' ? '0' : (f.kind === 'strut' ? 'C ' : 'T ') + App.fmt(Math.abs(f.N), 0);
-        opt.color = f.kind === 'strut' ? (o.palette === 'light' ? '#244f8e' : '#cfe2ff') : f.kind === 'tie' ? (o.palette === 'light' ? '#7a4a0c' : '#ffe2ae') : pal.idText;
+        opt.color = f.kind === 'strut' ? pal.strutInk : f.kind === 'tie' ? pal.tieInk : pal.idText;
         opt.stroke = f.kind === 'zero' ? null : colorOf(m);
         opt.small = f.kind === 'zero';
       } else if (mode === 'util' && c && f && f.kind !== 'zero') {
         text = App.fmt(c.util, 2);
-        opt.color = o.palette === 'light' ? App.utilInk(c.util) : App.utilColor(c.util);
+        opt.color = App.utilInk(c.util);
         opt.stroke = App.utilColor(c.util);
       }
       if (text) out.push(label(mx, my, g.ang, text, pal, opt));
@@ -345,7 +346,7 @@
       if (o.ids !== false) parts.push(n.id);
       if (mode === 'util' && nc) parts.push(nc.type + ' ' + App.fmt(nc.util, 2));
       if (!parts.length) return;
-      out.push('<text x="' + n2(s[0] - 10) + '" y="' + n2(s[1] - 10) + '" text-anchor="end" font-size="10.5" font-weight="650" fill="' + (mode === 'util' && nc ? (o.palette === 'light' ? App.utilInk(nc.util) : App.utilColor(nc.util)) : pal.idText) + '">' + parts.join(' · ') + '</text>');
+      out.push('<text x="' + n2(s[0] - 10) + '" y="' + n2(s[1] - 10) + '" text-anchor="end" font-size="10.5" font-weight="650" fill="' + (mode === 'util' && nc ? App.utilInk(nc.util) : pal.idText) + '">' + parts.join(' · ') + '</text>');
     });
 
     // Interactive overlays: outline handles, preview, hit areas
@@ -355,11 +356,11 @@
         pts.forEach(function (p, k) {
           var s = toScreen(v, p[0], p[1]), q = pts[(k + 1) % pts.length], t = toScreen(v, q[0], q[1]);
           var mx = (s[0] + t[0]) / 2, my = (s[1] + t[1]) / 2;
-          out.push('<g class="hit-edge" data-edge="' + k + '" style="cursor:copy"><circle cx="' + n2(mx) + '" cy="' + n2(my) + '" r="9" fill="transparent"/><circle cx="' + n2(mx) + '" cy="' + n2(my) + '" r="4.5" fill="#0a2131" stroke="' + pal.sel + '" stroke-width="1.3"/><path d="M' + n2(mx - 2.5) + ' ' + n2(my) + 'h5M' + n2(mx) + ' ' + n2(my - 2.5) + 'v5" stroke="' + pal.sel + '" stroke-width="1.2"/></g>');
+          out.push('<g class="hit-edge" data-edge="' + k + '" style="cursor:copy"><circle cx="' + n2(mx) + '" cy="' + n2(my) + '" r="9" fill="transparent"/><circle cx="' + n2(mx) + '" cy="' + n2(my) + '" r="4.5" fill="#ffffff" stroke="' + pal.sel + '" stroke-width="1.3"/><path d="M' + n2(mx - 2.5) + ' ' + n2(my) + 'h5M' + n2(mx) + ' ' + n2(my - 2.5) + 'v5" stroke="' + pal.sel + '" stroke-width="1.2"/></g>');
         });
         pts.forEach(function (p, k) {
           var s = toScreen(v, p[0], p[1]), isS = sel && sel.type === 'vertex' && sel.index === k;
-          out.push('<g class="hit-vertex" data-vertex="' + k + '" style="cursor:move"><rect x="' + n2(s[0] - 10) + '" y="' + n2(s[1] - 10) + '" width="20" height="20" fill="transparent"/><rect x="' + n2(s[0] - 5) + '" y="' + n2(s[1] - 5) + '" width="10" height="10" rx="2" fill="' + (isS ? pal.sel : '#e8fff8') + '" stroke="#0b2436" stroke-width="1.5"/></g>');
+          out.push('<g class="hit-vertex" data-vertex="' + k + '" style="cursor:move"><rect x="' + n2(s[0] - 10) + '" y="' + n2(s[1] - 10) + '" width="20" height="20" fill="transparent"/><rect x="' + n2(s[0] - 5) + '" y="' + n2(s[1] - 5) + '" width="10" height="10" rx="2" fill="' + (isS ? pal.sel : '#ffffff') + '" stroke="' + pal.nodeStroke + '" stroke-width="1.5"/></g>');
         });
       }
       if (App.tool === 'member' && pending && cursor) {
@@ -375,6 +376,21 @@
       if ((App.tool === 'node' || App.tool === 'member') && cursor && !(hov && hov.type === 'node')) {
         var c2 = toScreen(v, cursor[0], cursor[1]);
         out.push('<g pointer-events="none"><circle cx="' + n2(c2[0]) + '" cy="' + n2(c2[1]) + '" r="5" fill="none" stroke="' + pal.sel + '" stroke-width="1.5"/><path d="M' + n2(c2[0] - 11) + ' ' + n2(c2[1]) + 'h7M' + n2(c2[0] + 4) + ' ' + n2(c2[1]) + 'h7M' + n2(c2[0]) + ' ' + n2(c2[1] - 11) + 'v7M' + n2(c2[0]) + ' ' + n2(c2[1] + 4) + 'v7" stroke="' + pal.sel + '" stroke-width="1.2"/></g>');
+      }
+      if (guides) {
+        var gs = toScreen(v, guides.x === null ? 0 : guides.x, guides.y === null ? 0 : guides.y);
+        out.push('<path d="' + (guides.x === null ? '' : 'M' + n2(gs[0]) + ' 0V' + o.h) + (guides.y === null ? '' : 'M0 ' + n2(gs[1]) + 'H' + o.w) + '" stroke="' + pal.sel + '" stroke-width="1" stroke-dasharray="5 4" fill="none" pointer-events="none"/>');
+      }
+      if (drag && drag.moved && drag.kind === 'node') {
+        var dn = nm[drag.id], mt = drag.merge ? nm[drag.merge] : null;
+        if (mt) {
+          var ms = toScreen(v, mt.x, mt.y);
+          out.push('<circle cx="' + n2(ms[0]) + '" cy="' + n2(ms[1]) + '" r="15" fill="' + pal.sel + '" fill-opacity=".18" stroke="' + pal.sel + '" stroke-width="2" stroke-dasharray="4 3" pointer-events="none"/>');
+          out.push(label(ms[0], ms[1] - 26, 0, App.t('mergeHere') + ' ' + mt.id, pal, { small: true, color: pal.sel, stroke: pal.sel }));
+        } else if (dn) {
+          var ds = toScreen(v, dn.x, dn.y);
+          out.push(label(ds[0], ds[1] - 24, 0, App.fmt(dn.x, 3) + ' ; ' + App.fmt(dn.y, 3) + ' m', pal, { small: true, stroke: pal.sel }));
+        }
       }
       if (App.tool !== 'outline') {
         model.members.forEach(function (m) {
@@ -399,7 +415,7 @@
       svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
       svg.setAttribute('class', 'tool-' + App.tool + (drag && drag.kind === 'pan' ? ' panning' : '') + (drag && drag.moved && drag.kind !== 'pan' ? ' dragging' : ''));
       svg.innerHTML = draw(App.model, App.result, App.checks, {
-        view: view, w: W, h: H, palette: 'dark', mode: App.display.mode, bands: App.display.bands, ids: App.display.ids, zones: App.display.zones,
+        view: view, w: W, h: H, mode: App.display.mode, bands: App.display.bands, ids: App.display.ids, zones: App.display.zones,
         interactive: true, sel: App.sel, hover: App.hover, warnings: App.warnings
       });
       hud();
@@ -411,7 +427,7 @@
     var parts = [];
     if (cursorRaw) parts.push('<span>x <b>' + App.fmt(cursorRaw[0], 3) + '</b> · y <b>' + App.fmt(cursorRaw[1], 3) + '</b> m</span>');
     parts.push('<span class="sep"></span><span>' + App.t('grid') + ' <b>' + App.fmt(niceStep(view.k) * 1000, 0) + '</b> mm</span>');
-    parts.push('<span class="sep"></span><span class="hint">' + App.t('hint_' + App.tool) + (pending ? ' · ' + App.t('hintChain') : '') + '</span>');
+    parts.push('<span class="sep"></span><span class="hint">' + (drag && drag.moved && drag.kind !== 'pan' ? App.t('hintDrag') : App.t('hint_' + App.tool) + (pending ? ' · ' + App.t('hintChain') : '')) + '</span>');
     el.innerHTML = parts.join('');
   }
 
@@ -422,6 +438,17 @@
     if (!App.display.snap || (e && e.altKey)) return [App.round(w[0]), App.round(w[1])];
     var s = niceStep(view.k);
     return [App.round(Math.round(w[0] / s) * s), App.round(Math.round(w[1] / s) * s)];
+  }
+  // Snap one coordinate while dragging. Alignment with one of `others` (within
+  // 7 px) wins over the grid, so a point stays on its own line until it is
+  // really moved away and lines up with its neighbours; Alt disables both.
+  function snapAxis(val, others, e) {
+    if (!App.display.snap || e.altKey) return { v: App.round(val), guide: false };
+    var tol = 7 / view.k, best = null;
+    others.forEach(function (o) { if (Math.abs(o - val) <= tol && (best === null || Math.abs(o - val) < Math.abs(best - val))) best = o; });
+    if (best !== null) return { v: best, guide: true };
+    var s = niceStep(view.k);
+    return { v: App.round(Math.round(val / s) * s), guide: false };
   }
   function hitOf(e) {
     var t = e.target && e.target.closest ? e.target.closest('[data-node],[data-member],[data-vertex],[data-edge]') : null;
@@ -436,6 +463,18 @@
   App.emitSelection = function () { App.listeners.forEach(function (fn) { fn({ selection: true }); }); };
   function changed(opts) { App.update(opts || {}); }
   App.cancelPending = function () { if (pending) { pending = null; render(); } };
+  // Esc while dragging: puts everything back where it was. Returns true when a drag was cancelled.
+  App.cancelDrag = function () {
+    if (!drag || drag.kind === 'pan') return false;
+    var before = drag.before;
+    drag = null; guides = null;
+    if (before !== undefined) {
+      App.model = JSON.parse(before);
+      App.validateSel();
+      changed({ inputs: true });
+    } else render();
+    return true;
+  };
 
   function projectOnMember(m, w) {
     var A = App.node(m.i), B = App.node(m.j);
@@ -451,7 +490,8 @@
     var p = localPoint(e);
     pointers[e.pointerId] = p;
     hideTooltip();
-    if (Object.keys(pointers).length === 2) { startPinch(); return; }
+    var count = Object.keys(pointers).length;
+    if (count >= 2) { if (count === 2) startPinch(); return; }
     var hit = hitOf(e), w = snapWorld(p, e);
     if (e.button === 1 || spaceDown) { drag = { kind: 'pan', start: p, view: { ox: view.ox, oy: view.oy }, moved: false }; render(); return; }
     var tool = App.tool;
@@ -468,8 +508,8 @@
         drag = { kind: 'pan', start: p, view: { ox: view.ox, oy: view.oy }, moved: false, clear: true };
       }
     } else if (tool === 'node') {
+      if (hit && hit.type === 'node') { select({ type: 'node', id: hit.id }); return; }
       App.commit();
-      if (hit && hit.type === 'node') { select({ type: 'node', id: hit.id }); App.history.pop(); return; }
       var id;
       if (hit && hit.type === 'member') { var pr = projectOnMember(App.member(hit.id), w); id = App.splitMember(hit.id, pr[0], pr[1]); }
       else id = App.addNode(w[0], w[1]);
@@ -497,6 +537,7 @@
       }
     } else if (tool === 'load') {
       if (hit && hit.type === 'node') {
+        e.preventDefault();
         var nl = App.node(hit.id);
         if (!nl.fx && !nl.fy) { App.commit(); nl.fy = -100; }
         App.sel = { type: 'node', id: hit.id };
@@ -508,11 +549,11 @@
         select({ type: 'vertex', index: hit.index });
         drag = { kind: 'vertex', index: hit.index, start: p, orig: [pt[0], pt[1]], moved: false };
       } else if (hit && hit.type === 'edge') {
-        App.commit();
+        var before = App.snapshot();
         App.model.outline.splice(hit.index + 1, 0, [w[0], w[1]]);
         select({ type: 'vertex', index: hit.index + 1 });
-        drag = { kind: 'vertex', index: hit.index + 1, start: p, orig: [w[0], w[1]], moved: true, committed: true };
-        changed({ inputs: true });
+        drag = { kind: 'vertex', index: hit.index + 1, start: p, orig: [w[0], w[1]], moved: true, before: before };
+        changed({ drag: true });
       } else {
         drag = { kind: 'pan', start: p, view: { ox: view.ox, oy: view.oy }, moved: false, clear: true };
       }
@@ -533,32 +574,51 @@
   function onMove(e) {
     var p = localPoint(e);
     if (pointers[e.pointerId]) pointers[e.pointerId] = p;
-    if (pinch && Object.keys(pointers).length === 2) { movePinch(); return; }
+    if (pinch) { if (Object.keys(pointers).length === 2) movePinch(); return; }
     cursorRaw = toWorld(p[0], p[1]);
     cursor = snapWorld(p, e);
     var hit = hitOf(e);
     if (drag) {
       var dx = p[0] - drag.start[0], dy = p[1] - drag.start[1];
-      if (!drag.moved && Math.hypot(dx, dy) < 3) return;
+      // A click is not a drag: fingers and bars (easily caught by accident) need a longer move.
+      var slop = e.pointerType === 'touch' ? 8 : drag.kind === 'member' ? 6 : 3;
+      if (!drag.moved && Math.hypot(dx, dy) < slop) return;
       if (drag.kind === 'pan') {
         drag.moved = true;
         view.ox = drag.view.ox + dx; view.oy = drag.view.oy + dy; render(); return;
       }
-      if (!drag.committed) { App.commit(); drag.committed = true; }
+      if (drag.before === undefined) drag.before = App.snapshot();
       drag.moved = true;
-      var s = App.display.snap && !e.altKey ? niceStep(view.k) : 0;
-      var snap = function (v) { return s ? App.round(Math.round(v / s) * s) : App.round(v); };
       var dwx = dx / view.k, dwy = -dy / view.k;
       if (drag.kind === 'node') {
-        var n = App.node(drag.id);
-        n.x = snap(drag.orig[0] + dwx); n.y = snap(drag.orig[1] + dwy);
+        var n = App.node(drag.id), tx = drag.orig[0] + dwx, ty = drag.orig[1] + dwy;
+        var xs = [drag.orig[0]], ys = [drag.orig[1]], near = null, reach = (e.pointerType === 'touch' ? 16 : 10) / view.k;
+        App.model.nodes.forEach(function (o) {
+          if (o.id === n.id) return;
+          xs.push(o.x); ys.push(o.y);
+          var d = Math.hypot(o.x - tx, o.y - ty);
+          if (App.display.snap && !e.altKey && d < reach && App.canMergeNodes(n.id, o.id)) { reach = d; near = o; }
+        });
+        drag.merge = near ? near.id : null;
+        if (near) {
+          // Dropping here merges the two nodes: preview only, the model is solved on release.
+          guides = null;
+          render(); return;
+        }
+        var sx = snapAxis(tx, xs, e), sy = snapAxis(ty, ys, e);
+        n.x = sx.v; n.y = sy.v;
+        guides = sx.guide || sy.guide ? { x: sx.guide ? sx.v : null, y: sy.guide ? sy.v : null } : null;
       } else if (drag.kind === 'member') {
         var m = App.member(drag.id), A = App.node(m.i), B = App.node(m.j);
-        var ddx = snap(drag.origA[0] + dwx) - drag.origA[0], ddy = snap(drag.origA[1] + dwy) - drag.origA[1];
+        var ddx = snapAxis(drag.origA[0] + dwx, [drag.origA[0]], e).v - drag.origA[0], ddy = snapAxis(drag.origA[1] + dwy, [drag.origA[1]], e).v - drag.origA[1];
         A.x = App.round(drag.origA[0] + ddx); A.y = App.round(drag.origA[1] + ddy);
         B.x = App.round(drag.origB[0] + ddx); B.y = App.round(drag.origB[1] + ddy);
       } else if (drag.kind === 'vertex') {
-        App.model.outline[drag.index] = [snap(drag.orig[0] + dwx), snap(drag.orig[1] + dwy)];
+        var vx = [drag.orig[0]], vy = [drag.orig[1]];
+        App.model.outline.forEach(function (q, k) { if (k !== drag.index) { vx.push(q[0]); vy.push(q[1]); } });
+        var px = snapAxis(drag.orig[0] + dwx, vx, e), py = snapAxis(drag.orig[1] + dwy, vy, e);
+        App.model.outline[drag.index] = [px.v, py.v];
+        guides = px.guide || py.guide ? { x: px.guide ? px.v : null, y: py.guide ? py.v : null } : null;
       }
       changed({ drag: true });
       return;
@@ -572,13 +632,33 @@
   }
 
   function onUp(e) {
+    if (!pointers[e.pointerId]) return;
     delete pointers[e.pointerId];
-    if (pinch) { if (Object.keys(pointers).length < 2) pinch = null; return; }
+    if (pinch) { if (Object.keys(pointers).length === 2) startPinch(); else if (Object.keys(pointers).length < 2) pinch = null; return; }
     if (!drag) return;
-    var d = drag; drag = null;
+    var d = drag; drag = null; guides = null;
     if (d.kind === 'pan' && !d.moved && d.clear) { pending = null; select(null); }
-    if (d.kind !== 'pan' && d.moved) changed({ inputs: true });
+    if (d.kind === 'node' && d.merge && App.mergeNodes(d.id, d.merge)) {
+      App.sel = { type: 'node', id: d.merge };
+      App.toast(App.t('nodesMerged'));
+    }
+    if (d.before !== undefined && d.before !== App.snapshot()) {
+      App.commit(d.before);
+      changed({ inputs: true });
+    }
     render();
+  }
+
+  function onCancel(e) {
+    if (!pointers[e.pointerId]) return;
+    if (!pinch && !App.cancelDrag()) drag = null;
+    onUp(e);
+    render();
+  }
+
+  function onWindowMove(e) {
+    if (pointers[e.pointerId] && !e.buttons && e.pointerType === 'mouse') onCancel(e);
+    if (pointers[e.pointerId] || svg.contains(e.target)) onMove(e);
   }
 
   function onWheel(e) {
@@ -597,6 +677,7 @@
   var pinch = null;
   function startPinch() {
     var ids = Object.keys(pointers), a = pointers[ids[0]], b = pointers[ids[1]];
+    App.cancelDrag();
     drag = null;
     pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), m: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2] };
   }
@@ -648,6 +729,7 @@
     render();
   };
   App.setTool = function (t) {
+    App.cancelDrag();
     App.tool = t; pending = null;
     if (t !== 'outline' && App.sel && App.sel.type === 'vertex') App.sel = null;
     App.listeners.forEach(function (fn) { fn({ tool: true }); });
@@ -672,13 +754,14 @@
     var h = opts.height || Math.round(Math.max(340, Math.min(720, (w - 140) * bh / bw + 150)));
     var pad = opts.pad || { l: 90, r: 90, t: 85, b: 110 };
     var v = fitView(model, w, h, pad);
-    var body = draw(model, result, checks, { view: v, w: w, h: h, palette: opts.palette || 'light', mode: opts.mode || 'forces', bands: true, ids: opts.ids !== false, zones: opts.zones !== false, grid: opts.grid !== false, interactive: false });
+    var body = draw(model, result, checks, { view: v, w: w, h: h, mode: opts.mode || 'forces', bands: true, ids: opts.ids !== false, zones: opts.zones !== false, grid: opts.grid !== false, interactive: false });
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" font-family="Segoe UI, Inter, Roboto, Arial, sans-serif">' + body + '</svg>';
   };
 
   App.initCanvas = function () {
     svg = document.getElementById('canvas');
     wrap = document.getElementById('canvas-wrap');
+    App.coarse = !!(window.matchMedia && window.matchMedia('(pointer:coarse)').matches);
     var first = true;
     var ro = new ResizeObserver(function () {
       var r = wrap.getBoundingClientRect();
@@ -690,9 +773,14 @@
     });
     ro.observe(wrap);
     svg.addEventListener('pointerdown', onDown);
-    svg.addEventListener('pointermove', onMove);
-    svg.addEventListener('pointerup', onUp);
-    svg.addEventListener('pointercancel', onUp);
+    // The SVG is redrawn during selection and dragging. Chrome can release
+    // pointer capture when the original hit element is replaced.
+    window.addEventListener('pointermove', onWindowMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onCancel);
+    window.addEventListener('blur', function () {
+      App.cancelDrag(); drag = null; pinch = null; pointers = {}; spaceDown = false; render();
+    });
     svg.addEventListener('pointerleave', function () { cursor = null; cursorRaw = null; if (App.hover) { App.hover = null; render(); } hideTooltip(); hud(); });
     svg.addEventListener('wheel', onWheel, { passive: false });
     svg.addEventListener('dblclick', function (e) { if (!hitOf(e) && App.tool === 'select') App.fit(); });
@@ -706,7 +794,10 @@
     });
     window.addEventListener('keydown', function (e) { if (e.code === 'Space' && !/INPUT|SELECT|TEXTAREA|BUTTON/.test(document.activeElement.tagName)) { spaceDown = true; e.preventDefault(); } });
     window.addEventListener('keyup', function (e) { if (e.code === 'Space') spaceDown = false; });
-    App.on(function (o) { if (o.fit) App.fit(); else render(); });
+    App.on(function (o) {
+      if (o.fit) { drag = null; guides = null; pending = null; App.fit(); }
+      else render();
+    });
   };
   App.renderCanvas = render;
   App.canvasView = function () { return view; };

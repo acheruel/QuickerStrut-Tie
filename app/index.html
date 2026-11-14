@@ -18,6 +18,7 @@
   <script src="./js/canvas.js" defer></script>
   <script src="./js/panels.js" defer></script>
   <script src="./js/report.js" defer></script>
+  <script src="./js/guide.js" defer></script>
   <script src="./js/main.js" defer></script>
 </head>
 <body>
@@ -26,6 +27,7 @@
   <p class="top-warning" role="note"><span class="warning-symbol" aria-hidden="true">!</span><span data-i18n="warning"></span></p>
   <div class="header-right">
     <div class="release-info"><b id="release-version"></b><small id="release-date"></small></div>
+    <button id="guide-open" class="method-open guide-open" type="button" data-i18n-title="guideOpen"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 7.5L10 4l7.5 3.5L10 11z M5.5 9.2v3.6c1.2 1.3 2.7 1.9 4.5 1.9s3.3-.6 4.5-1.9V9.2 M17.5 7.5v4.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg><span class="lbl" data-i18n="guideOpen"></span></button>
     <button id="method-open" class="method-open" type="button"><span class="lbl" data-i18n="methodOpen"></span><span aria-hidden="true"> ⓘ</span></button>
     <div class="language" role="group" aria-label="Language / Langue"><button id="lang-en" type="button">EN</button><button id="lang-fr" type="button">FR</button></div>
     <a class="github-link" href="https://github.com/acheruel/QuickerStrut-Tie" target="_blank" rel="noopener noreferrer" title="GitHub · acheruel/QuickerStrut-Tie" aria-label="GitHub · acheruel/QuickerStrut-Tie"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
@@ -61,11 +63,12 @@
   </aside>
 
   <section class="results" aria-label="Results">
+    <div id="coach" class="coach hidden" aria-live="polite"></div>
     <div class="stage">
       <div class="stage-top">
         <div class="toolbox" role="toolbar" id="toolbox"></div>
         <div class="stage-right">
-          <div class="dark-seg" id="display-mode" role="group"></div>
+          <div class="mode-seg" id="display-mode" role="group"></div>
           <button type="button" class="chip" id="toggle-bands" aria-pressed="true"></button>
           <button type="button" class="chip" id="toggle-zones" aria-pressed="true"></button>
           <button type="button" class="chip" id="toggle-ids" aria-pressed="true"></button>
@@ -88,11 +91,14 @@
     <div class="metrics" id="metrics"></div>
     <div class="chart-toolbar"><div class="view-tabs" role="tablist" id="view-tabs"><button type="button" class="active" data-view="checks" data-i18n="viewChecks"></button><button type="button" data-view="forces" data-i18n="viewForces"></button><button type="button" data-view="reactions" data-i18n="viewReactions"></button></div></div>
     <div class="result-view" id="result-view"></div>
-    <div class="result-footer"><span data-i18n="footerNote"></span><span id="footer-version"></span></div>
+    <div class="result-footer"><span data-i18n="footerNote"></span><span><span data-i18n="seeAlso"></span> <a href="https://awatif.co/examples/strut/" target="_blank" rel="noopener noreferrer">Where does the load flow? · Awatif</a></span><span id="footer-version"></span></div>
   </section>
 </main>
 
 <dialog id="method-dialog"><div class="dlg-head"><span class="ins-badge">i</span><div><b data-i18n="methodOpen"></b><small data-i18n="methodSub"></small></div><button type="button" class="ins-close" data-close aria-label="Close">×</button></div><div class="dlg-body" id="method-body"></div></dialog>
+<dialog id="guide-dialog" aria-labelledby="guide-title"><div class="dlg-head"><span class="ins-badge" aria-hidden="true">?</span><div><b id="guide-title" data-i18n="guideOpen"></b><small data-i18n="guideSub"></small></div><button type="button" class="ins-close" data-close data-i18n-title="close">×</button></div>
+  <div class="guide-start"><div><b data-i18n="tutTitle"></b><small data-i18n="tutLead"></small></div><button type="button" class="primary" id="tut-start" data-i18n="tutStart"></button></div>
+  <div class="dlg-body guide-body" id="guide-body"></div></dialog>
 <dialog id="tpl-dialog" class="tpl-dialog"><div class="dlg-head"><span class="ins-badge">⌂</span><div><b data-i18n="templatesMenu"></b><small data-i18n="templatesSub"></small></div><button type="button" class="ins-close" data-close aria-label="Close">×</button></div>
   <div class="tpl-body"><div class="tpl-side"><div class="tpl-kinds" id="tpl-kinds"></div><div id="tpl-form" class="tpl-form"></div></div><div class="tpl-preview"><div id="tpl-svg" class="tpl-svg"></div><div id="tpl-info" class="tpl-info"></div></div></div>
   <div class="dlg-actions"><button type="button" data-close data-i18n="cancel"></button><button type="button" class="primary" id="tpl-create" data-i18n="tplCreate"></button></div></dialog>

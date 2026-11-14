@@ -17,6 +17,7 @@
     $('#release-date').textContent = App.t('released') + ' ' + meta.date;
     $('#footer-version').textContent = 'QuickerStrut&Tie v' + meta.version + ' · ' + meta.date;
     $('#method-body').innerHTML = App.t('methodHtml');
+    App.renderGuide();
     $('#project-name').placeholder = App.t('untitled');
     $('#autosave-state').textContent = App.t('autosaved');
     App.renderAllText();
@@ -36,10 +37,12 @@
       d.showModal();
     });
   }
-  function guard(action) {
+  function guard() {
     if (!App.dirty) return Promise.resolve(true);
     return confirmDialog(App.t('unsavedTitle'), App.t('unsavedBody'), App.t('discard'));
   }
+
+  App.guard = guard;
 
   function saveProject() {
     var data = { app: 'QuickerStrut&Tie', version: (window.QST_META || {}).version, schema: 1, savedAt: new Date().toISOString(), model: App.model };
@@ -98,7 +101,7 @@
     var h = '';
     if (g.errors.length) h += '<div class="bad">⚠ ' + g.errors.map(function (e) { return t('tplErr_' + e); }).join(' · ') + '</div>';
     if (!g.result.ok) h += '<div class="bad">' + t('mechanism') + '</div>';
-    else h += '<div><b>' + t('mUtil') + ' ' + fmt(g.checks.maxUtil, 2) + '</b> · ' + (g.result.indeterminacy === 0 ? t('determinate') : t('indeterminate') + ' (r = ' + g.result.indeterminacy + ')') + ' · ' + g.model.nodes.length + ' ' + t('nodesLc') + ' · ' + g.model.members.length + ' ' + t('membersLc') + '</div>';
+    else h += '<div><b>' + t('mUtil') + ' ' + fmt(g.checks.maxUtil, 2) + '</b> · ' + App.statText(g.result) + ' · ' + g.model.nodes.length + ' ' + t('nodesLc') + ' · ' + g.model.members.length + ' ' + t('membersLc') + '</div>';
     h += '<div>' + t('tplNote_' + tplState.kind) + '</div><div>' + t('tplAutoNote') + '</div>';
     $('#tpl-info').innerHTML = h;
   }
@@ -173,6 +176,7 @@
       var tag = document.activeElement && document.activeElement.tagName;
       var typing = /INPUT|SELECT|TEXTAREA/.test(tag) || document.querySelector('dialog[open]');
       var mod = e.ctrlKey || e.metaKey;
+      if (e.key === 'Escape' && App.cancelDrag()) return;
       if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); saveProject(); return; }
       if (mod && e.key.toLowerCase() === 'o') { e.preventDefault(); $('#open-project').click(); return; }
       if (mod && e.key.toLowerCase() === 'p') { e.preventDefault(); App.printReport(); return; }
@@ -184,9 +188,9 @@
       var k = e.key.toLowerCase();
       if (tools[k]) { App.setTool(tools[k]); return; }
       if (k === 'f') { App.fit(); return; }
-      if (k === '1') { App.display.mode = 'geometry'; App.saveUi(); App.update(); return; }
-      if (k === '2') { App.display.mode = 'forces'; App.saveUi(); App.update(); return; }
-      if (k === '3') { App.display.mode = 'util'; App.saveUi(); App.update(); return; }
+      if (k === '1') { App.setMode('geometry'); return; }
+      if (k === '2') { App.setMode('forces'); return; }
+      if (k === '3') { App.setMode('util'); return; }
       if (k === '+' || k === '=') { App.zoom(1.2); return; }
       if (k === '-') { App.zoom(1 / 1.2); return; }
       if (e.key === 'Escape') { App.cancelPending(); if (App.tool !== 'select') App.setTool('select'); else { App.sel = null; App.emitSelection(); } return; }
@@ -210,6 +214,7 @@
     App.initPanels();
     App.initCanvas();
     bind();
+    App.initGuide();
     applyLanguage();
     App.update({ inputs: true });
   }

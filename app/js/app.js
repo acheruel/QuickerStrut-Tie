@@ -105,13 +105,46 @@
     App.addMember(nid, j, m);
     return nid;
   };
+  // Merges node `from` into node `into`: its bars are re-attached, a bar between
+  // the two nodes or doubling an existing one is dropped, its loads are added.
+  App.canMergeNodes = function (from, into) {
+    var map = App.model.meta && App.model.meta.pileMap;
+    return !map || !map[from] || !map[into];
+  };
+  App.mergeNodes = function (from, into) {
+    var a = App.node(from), b = App.node(into);
+    if (!a || !b || a === b || !App.canMergeNodes(from, into)) return false;
+    b.fx = round((Number(b.fx) || 0) + (Number(a.fx) || 0)); b.fy = round((Number(b.fy) || 0) + (Number(a.fy) || 0));
+    b.support = a.support && b.support && a.support !== b.support ? 'pin' : b.support || a.support;
+    b.bearing = Math.max(Number(b.bearing) || 0, Number(a.bearing) || 0);
+    var neighbours = new Set();
+    App.model.members.forEach(function (m) {
+      if (m.i === into) neighbours.add(m.j);
+      if (m.j === into) neighbours.add(m.i);
+    });
+    App.model.members = App.model.members.filter(function (m) {
+      if (m.i !== from && m.j !== from) return true;
+      var other = m.i === from ? m.j : m.i;
+      if (other === into || neighbours.has(other)) return false;
+      if (m.i === from) m.i = into;
+      if (m.j === from) m.j = into;
+      return true;
+    });
+    var pileMap = App.model.meta && App.model.meta.pileMap;
+    if (pileMap && pileMap[from]) {
+      pileMap[into] = pileMap[from];
+      delete pileMap[from];
+    }
+    App.model.nodes = App.model.nodes.filter(function (n) { return n.id !== from; });
+    return true;
+  };
   function round(v) { return Math.round(v * 1e6) / 1e6; }
   App.round = round;
 
   // ---------- History ----------
   App.snapshot = function () { return JSON.stringify(App.model); };
-  App.commit = function () {
-    App.history.push(App.snapshot());
+  App.commit = function (before) {
+    App.history.push(before === undefined ? App.snapshot() : before);
     if (App.history.length > 300) App.history.shift();
     App.future = [];
     App.dirty = true;
@@ -148,7 +181,7 @@
   App.update = function (opts) {
     App.compute();
     App.listeners.forEach(function (fn) { fn(opts || {}); });
-    App.autosave();
+    if (!opts || !opts.drag) App.autosave();
   };
 
   // ---------- Storage ----------
@@ -173,6 +206,11 @@
     } catch (e) { return false; }
   };
   App.saveUi = function () { store(function (ls) { ls.setItem(STORE_UI, JSON.stringify({ display: App.display, panel: App.panel, view: App.view })); }); };
+  App.setMode = function (mode) {
+    App.display.mode = mode;
+    App.saveUi();
+    App.listeners.forEach(function (fn) { fn({ display: true }); });
+  };
   App.restoreUi = function () {
     var raw = store(function (ls) { return ls.getItem(STORE_UI); });
     try { var o = JSON.parse(raw); if (o && o.display) { for (var k in o.display) App.display[k] = o.display[k]; App.panel = o.panel || App.panel; App.view = o.view || App.view; } } catch (e) {}
@@ -240,19 +278,25 @@
     return n || 'quickerstrut';
   };
   App.utilColor = function (u) {
-    if (!isFinite(u)) return '#ff5d5d';
-    var stops = [[0, [86, 224, 187]], [0.4, [166, 227, 107]], [0.7, [255, 209, 102]], [0.9, [255, 159, 67]], [1.0, [255, 93, 93]]];
-    if (u > 1.0005) return 'rgb(255,93,93)';
-    if (u >= 1) return 'rgb(255,127,80)';
+    // Green to red, dark enough to read on the white canvas.
+    if (!isFinite(u)) return 'rgb(200,30,30)';
+    var stops = [[0, [47, 158, 110]], [0.4, [122, 176, 52]], [0.7, [226, 163, 0]], [0.9, [232, 115, 12]], [1.0, [217, 45, 32]]];
+    if (u > 1.0005) return 'rgb(200,30,30)';
+    if (u >= 1) return 'rgb(226,80,20)';
     for (var i = 1; i < stops.length; i++) {
       if (u <= stops[i][0]) {
         var a = stops[i - 1], b = stops[i], f = (u - a[0]) / (b[0] - a[0]);
         return 'rgb(' + a[1].map(function (c, k) { return Math.round(c + f * (b[1][k] - c)); }).join(',') + ')';
       }
     }
-    return 'rgb(255,93,93)';
+    return 'rgb(200,30,30)';
   };
   // Ink colour for utilisation on a light background (bars, tables).
   App.utilInk = function (u) { return !isFinite(u) || u > 1 ? '#b23a2a' : u > 0.9 ? '#b0641a' : u > 0.7 ? '#8a6d12' : '#1f7a5a'; };
+  // Statics of a solved model, as text.
+  App.statText = function (r) {
+    if (r.unbraced) return App.t('unbracedStat');
+    return r.indeterminacy > 0 ? App.t('indeterminate') + ' (r = ' + r.indeterminacy + ')' : App.t('determinate');
+  };
   App.statusOf = function (u) { return !isFinite(u) || u > 1.0005 ? 'bad' : u > 0.95 ? 'warn' : 'ok'; };
 })();

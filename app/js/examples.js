@@ -37,7 +37,7 @@
     {
       key: 'deep-beam-2',
       title: { fr: 'Poutre-cloison · deux charges', en: 'Deep beam · two point loads' },
-      sub: { fr: 'Bielle supérieure, montants à effort nul', en: 'Top strut, zero-force web members' },
+      sub: { fr: 'Modèle en trapèze : bielle supérieure entre les charges', en: 'Trapezoid model: top strut between the loads' },
       model: {
         code: 'S6',
         material: material({ fc: 35, b: 450 }),
@@ -46,14 +46,11 @@
           N('N1', 0.35, 0.15, { support: 'pin', bearing: 350 }),
           N('N2', 4.25, 0.15, { support: 'ry', bearing: 350 }),
           N('N3', 1.65, 2.0, { fy: -1800, bearing: 350 }),
-          N('N4', 2.95, 2.0, { fy: -1800, bearing: 350 }),
-          N('N5', 1.65, 0.15),
-          N('N6', 2.95, 0.15)
+          N('N4', 2.95, 2.0, { fy: -1800, bearing: 350 })
         ],
         members: [
           S('M1', 'N1', 'N3', 350), S('M2', 'N3', 'N4', 250), S('M3', 'N4', 'N2', 350),
-          T('M4', 'N1', 'N5', 6, '30M', 300), T('M5', 'N5', 'N6', 6, '30M', 300), T('M6', 'N6', 'N2', 6, '30M', 300),
-          S('M7', 'N3', 'N5', 200), S('M8', 'N4', 'N6', 200), S('M9', 'N3', 'N6', 200)
+          T('M4', 'N1', 'N2', 6, '30M', 300)
         ]
       }
     },
@@ -76,8 +73,7 @@
         members: [
           T('M1', 'N1', 'N2', 4, '20M', 120, 'plate'),
           S('M2', 'N1', 'N3', 150), S('M3', 'N2', 'N4', 150),
-          S('M4', 'N3', 'N4', 120), S('M5', 'N3', 'N5', 200), S('M6', 'N4', 'N6', 200),
-          S('M7', 'N3', 'N2', 100), S('M8', 'N3', 'N6', 100)
+          S('M4', 'N3', 'N4', 120), S('M5', 'N3', 'N5', 200), S('M6', 'N4', 'N6', 200)
         ]
       }
     },
@@ -100,7 +96,37 @@
         members: [
           T('M1', 'N1', 'N2', 16, '35M', 200), T('M2', 'N2', 'N3', 20, '35M', 200), T('M3', 'N3', 'N4', 16, '35M', 200),
           S('M4', 'N1', 'N5', 450), S('M5', 'N2', 'N5', 350), S('M6', 'N3', 'N6', 350), S('M7', 'N4', 'N6', 450),
-          S('M8', 'N5', 'N6', 300), S('M9', 'N2', 'N6', 200)
+          S('M8', 'N5', 'N6', 300)
+        ]
+      }
+    },
+    {
+      key: 'bent-cap-20m',
+      title: { fr: 'Chevêtre de 20 m sur 4 colonnes', en: '20 m bent cap on 4 columns' },
+      sub: { fr: '7 poutres, bielles directes vers les colonnes', en: '7 girders, direct struts to the columns' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 35, b: 1500 }),
+        // Cap 20 m × 2.0 m, columns 1.2 m wide at x = ±2.6 and ±7.8 m, girders
+        // every 2.8 m. Each load goes straight to the nearest column(s): top
+        // ties over the outer columns, bottom ties in the three spans, no bar
+        // without force.
+        outline: [[-10, 0], [-8.4, 0], [-8.4, -1.5], [-7.2, -1.5], [-7.2, 0], [-3.2, 0], [-3.2, -1.5], [-2.0, -1.5], [-2.0, 0],
+          [2.0, 0], [2.0, -1.5], [3.2, -1.5], [3.2, 0], [7.2, 0], [7.2, -1.5], [8.4, -1.5], [8.4, 0], [10, 0], [10, 2.0], [-10, 2.0]],
+        nodes: [
+          N('T1', -8.4, 1.85, { fy: -2000, bearing: 600 }), N('T2', -5.6, 1.85, { fy: -2000, bearing: 600 }),
+          N('T3', -2.8, 1.85, { fy: -2000, bearing: 600 }), N('T4', 0, 1.85, { fy: -2000, bearing: 600 }),
+          N('T5', 2.8, 1.85, { fy: -2000, bearing: 600 }), N('T6', 5.6, 1.85, { fy: -2000, bearing: 600 }),
+          N('T7', 8.4, 1.85, { fy: -2000, bearing: 600 }),
+          N('B1', -7.8, 0.15, { support: 'pin', bearing: 1200 }), N('B2', -2.6, 0.15, { support: 'ry', bearing: 1200 }),
+          N('B3', 2.6, 0.15, { support: 'ry', bearing: 1200 }), N('B4', 7.8, 0.15, { support: 'ry', bearing: 1200 })
+        ],
+        members: [
+          S('M1', 'T1', 'B1', 400), S('M2', 'T2', 'B1', 400), S('M3', 'T2', 'B2', 300), S('M4', 'T3', 'B2', 400),
+          S('M5', 'T4', 'B2', 350), S('M6', 'T4', 'B3', 350), S('M7', 'T5', 'B3', 400), S('M8', 'T6', 'B3', 300),
+          S('M9', 'T6', 'B4', 400), S('M10', 'T7', 'B4', 400),
+          T('M11', 'T1', 'T2', 6, '25M', 200), S('M12', 'T2', 'T3', 200), S('M13', 'T5', 'T6', 200), T('M14', 'T6', 'T7', 6, '25M', 200),
+          T('M15', 'B1', 'B2', 8, '25M', 250), T('M16', 'B2', 'B3', 10, '25M', 250), T('M17', 'B3', 'B4', 8, '25M', 250)
         ]
       }
     },
@@ -129,35 +155,33 @@
           S('M4', 'N2', 'N5', 150), S('M5', 'N3', 'N4', 250), S('M6', 'N3', 'N5', 300), T('M7', 'N3', 'N6', 6, '25M', 150, 'plate'),
           S('M8', 'N5', 'N4', 150), T('M9', 'N4', 'N6', 5, '15M', 150, 'stirrup'), S('M10', 'N5', 'N7', 150), T('M11', 'N6', 'N8', 6, '25M', 150),
           S('M12', 'N6', 'N7', 250), T('M13', 'N7', 'N8', 4, '15M', 150, 'stirrup'), S('M14', 'N7', 'N9', 150), T('M15', 'N8', 'N10', 6, '25M', 150),
-          S('M16', 'N8', 'N9', 250), T('M17', 'N9', 'N10', 4, '15M', 150, 'stirrup')
+          S('M16', 'N8', 'N9', 250)
         ]
       }
     },
     {
       key: 'bridge-corbel',
-      title: { fr: 'Corbeau de pile de pont', en: 'Bridge pier corbel' },
-      sub: { fr: 'Corbeau simple sous appareil d’appui, H = 0,2 V', en: 'Single corbel under a girder bearing, H = 0.2 V' },
+      title: { fr: 'Corbeau de pont avec garde-grève', en: 'Bridge corbel with backwall' },
+      sub: { fr: 'Corbeau sous appareil d’appui, garde-grève complet, H = 0,2 V', en: 'Corbel under a girder bearing, full backwall, H = 0.2 V' },
       model: {
         code: 'S6',
         material: material({ fc: 35, b: 900 }),
-        // Column 1.0 m deep (far face at x = 0), corbel projecting 0.6 m; the
-        // column is cut 1.4 m below the corbel, where the supports stand for it.
-        outline: [[0, -2.4], [1.0, -2.4], [1.0, -0.9], [1.6, -0.5], [1.6, 0], [0, 0]],
+        // Column 1.0 m deep (far face at x = 0), corbel projecting 0.6 m. The
+        // backwall shares the column faces and rises 0.85 m above the seat (unloaded here).
+        // The bottom supports represent the cut through the column.
+        outline: [[0, -2.4], [1.0, -2.4], [1.0, -0.9], [1.6, -0.5], [1.6, 0], [1.0, 0], [1.0, 0.85], [0, 0.85]],
         nodes: [
           N('N1', 1.3, -0.08, { fy: -1400, fx: 280, bearing: 400 }),
           N('N2', 0.08, -0.08),
           N('N3', 0.92, -0.95),
           N('N4', 0.08, -0.95),
           N('N5', 0.92, -2.3, { support: 'pin', bearing: 200 }),
-          N('N6', 0.08, -2.3, { support: 'ry' }),
-          N('N7', 0.92, -0.08)
+          N('N6', 0.08, -2.3, { support: 'ry' })
         ],
         members: [
-          T('M1', 'N1', 'N7', 8, '25M', 160, 'plate'), T('M2', 'N7', 'N2', 8, '25M', 160, 'continuous'),
-          S('M3', 'N1', 'N3', 350), S('M4', 'N2', 'N3', 300), S('M5', 'N7', 'N3', 150),
-          T('M6', 'N2', 'N4', 10, '25M', 160, 'continuous'), T('M7', 'N3', 'N4', 6, '15M', 0, 'stirrup'),
-          S('M8', 'N3', 'N5', 250), T('M9', 'N4', 'N6', 10, '25M', 160, 'continuous'), S('M10', 'N4', 'N5', 250),
-          S('M11', 'N5', 'N6', 200)
+          T('M1', 'N1', 'N2', 8, '25M', 160, 'plate'), S('M2', 'N1', 'N3', 350), S('M3', 'N2', 'N3', 300),
+          T('M4', 'N2', 'N4', 10, '25M', 160, 'continuous'), T('M5', 'N3', 'N4', 6, '15M', 0, 'stirrup'),
+          S('M6', 'N3', 'N5', 250), T('M7', 'N4', 'N6', 10, '25M', 160, 'continuous'), S('M8', 'N4', 'N5', 250)
         ]
       }
     },
@@ -185,9 +209,9 @@
         ],
         members: [
           T('M1', 'D1', 'K1', 8, '20M', 200, 'continuous'), S('M2', 'D2', 'K2', 240), S('M3', 'D1', 'K2', 300),
-          S('M4', 'D1', 'D2', 200), S('M5', 'K1', 'K2', 300),
-          T('M6', 'K1', 'B3', 8, '25M', 200, 'continuous'), T('M7', 'B3', 'B1', 8, '25M', 200, 'continuous'),
-          S('M8', 'K2', 'B2', 240), S('M9', 'B1', 'B2', 200), S('M10', 'K1', 'B2', 250), S('M11', 'B3', 'B2', 250)
+          S('M4', 'K1', 'K2', 300),
+          T('M5', 'K1', 'B3', 8, '25M', 200, 'continuous'), T('M6', 'B3', 'B1', 8, '25M', 200, 'continuous'),
+          S('M7', 'K2', 'B2', 240), S('M8', 'K1', 'B2', 250), S('M9', 'B3', 'B2', 250)
         ]
       }
     },
@@ -211,9 +235,7 @@
           N('C2', 0.0875, 0.0155, { support: 'ry', bearing: 175 })
         ],
         members: [
-          T('AB', 'A', 'A2', 5, '15M', 56, 'plate'), S('AC', 'A', 'C', 76), S('A2C2', 'A2', 'C2', 76), S('CC2', 'C', 'C2', 31),
-          // Bracing diagonal (zero force under the symmetric loads).
-          S('AC2', 'A', 'C2', 100)
+          T('AB', 'A', 'A2', 5, '15M', 56, 'plate'), S('AC', 'A', 'C', 76), S('A2C2', 'A2', 'C2', 76), S('CC2', 'C', 'C2', 31)
         ]
       }
     },
@@ -246,9 +268,7 @@
           T('GH', 'G', 'H', 6, '10M', 0, 'stirrup'), S('GI', 'G', 'I', 125), S('HI', 'H', 'I', 150),
           T('HJ', 'H', 'J', 5, '30M', 120, 'straight'), T('IJ', 'I', 'J', 4, '10M', 0, 'stirrup'), S('IK', 'I', 'K', 125),
           S('JK', 'J', 'K', 150), T('JL', 'J', 'L', 5, '30M', 120, 'straight'), T('KL', 'K', 'L', 4, '10M', 0, 'stirrup'),
-          S('KM', 'K', 'M', 125), S('LM', 'L', 'M', 150), T('LN', 'L', 'N', 5, '30M', 120, 'straight'),
-          // Zero-force post that holds N vertically (symmetry plane).
-          S('MN', 'M', 'N', 100)
+          S('KM', 'K', 'M', 125), S('LM', 'L', 'M', 150), T('LN', 'L', 'N', 5, '30M', 120, 'straight')
         ]
       }
     },
@@ -272,9 +292,7 @@
         members: [
           TA('AB', 'A', 'B', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000, 1.27 * IN * 1000), TA('BC', 'B', 'C', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000, 1.27 * IN * 1000),
           S('AD', 'A', 'D', 400), T('BD', 'B', 'D', 26, '20M', 0, 'stirrup'), S('BE', 'B', 'E', 400), S('CF', 'C', 'F', 287),
-          S('DE', 'D', 'E', 6 * IN * 1000), S('EF', 'E', 'F', 6 * IN * 1000),
-          // Bracing diagonal (zero force) so that the stiffness matrix is regular.
-          S('BF', 'B', 'F', 150)
+          S('DE', 'D', 'E', 6 * IN * 1000), S('EF', 'E', 'F', 6 * IN * 1000)
         ]
       }
     },
@@ -295,7 +313,7 @@
         ],
         members: [
           T('M1', 'N3', 'N4', 8, '25M', 250), S('M2', 'N1', 'N3', 300), S('M3', 'N2', 'N4', 300),
-          S('M4', 'N1', 'N2', 250), S('M5', 'N1', 'N4', 200)
+          S('M4', 'N1', 'N2', 250)
         ]
       }
     }

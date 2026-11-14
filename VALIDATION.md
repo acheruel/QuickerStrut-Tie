@@ -1,6 +1,6 @@
 # Validation
 
-*QuickerStrut&Tie v0.2.6 · 2026-11-01*
+*QuickerStrut&Tie v0.2.7 · 2026-11-13*
 
 The engine (`app/js/solver.js`, `app/js/csa.js`) is checked against hand calculations by
 the automated tests in `tests/engine.test.js` (`node --test`). The cases below are
@@ -42,7 +42,7 @@ b = 400 mm, f′c = 40 MPa. Loads 600 kN at (±0.45; 1.00), column nodes at (±0
 | Cr | 0.65 × 34.00 × 150 × 400 = 1326 kN | 1326 kN, 0.51 |
 | Node N1 (CCT) | 0.75 × 0.65 × 40 = 19.50 MPa; strut 670.8e3 / (150 × 400) = 11.18 MPa | 0.57 |
 
-The two diagonals that brace the model carry no force under the symmetric loading.
+The model balances the symmetric loads with the six load-carrying members shown.
 
 ## 3. Hammerhead pier cap — statics
 
@@ -64,8 +64,7 @@ Four girder loads of 2500 kN at x = ±1.50 and ±3.30 m (y = 1.85 m), column nod
 Simply supported deep beam, h = 72 in, b = 48 in, span 27 ft, two factored loads of
 600 kips at 9 ft from the bearings, truss height 64 in (tie centroid 5 in above the
 soffit, top nodes 3 in below the top). Built-in example **Deep beam · FHWA manual, ex. 1**
-(converted to SI). The manual's truss is a mechanism for any other load case; a bracing
-diagonal BF is added and carries no force.
+(converted to SI). The solver reproduces the load case using the eight members below.
 
 | Member | Manual, Table 1-1 (kips) | App (kips) |
 | --- | --- | --- |
@@ -182,8 +181,8 @@ problem is visible.
 
 ### 4.6 Bridge examples (statics)
 
-- **Bridge pier corbel** (CSA S6): Vf = 1400 kN, Hf = 0.2 Vf = 280 kN on a 400 mm bearing,
-  column 1.0 m cut 1.4 m below the corbel. Reactions balance the loads (ΣRy = 1400 kN,
+- **Bridge corbel with backwall** (CSA S6): Vf = 1400 kN, Hf = 0.2 Vf = 280 kN on a 400 mm bearing,
+  column 1.0 m and unloaded backwall extending 0.85 m above the seat. Reactions balance the loads (ΣRy = 1400 kN,
   ΣRx = −280 kN); the corbel tie carries the same force from the load to the column face
   and to the far face (891.5 kN), where it is bent down into the far-face column bars
   (continuous anchorage, 923 kN).
@@ -192,6 +191,10 @@ problem is visible.
   face, abutment wall cut 1.5 m below the soffit. Closing frame corner: deck top bars
   (492 kN/m) bent down into the back-face bars (1114 kN/m), corner diagonal strut
   (1110 kN/m); ΣRy = 300 kN/m, ΣRx = −150 kN/m.
+- **20 m bent cap on four columns** (CSA S6): seven 2000 kN girder loads, with a truss
+  height of 1.7 m. The outer top ties carry 2000 × 0.6 / 1.7 = 705.9 kN, and the
+  central bottom tie carries 1000 × 2.6 / 1.7 = 1529.4 kN. The four reactions total
+  14,000 kN and are symmetric.
 
 ## 5. Other automated checks
 
@@ -201,7 +204,7 @@ problem is visible.
   equilibrium, symmetry, thrust taken by the rigid pins.
 - φ overrides, εs = fy / Es option, fcu cap at 0.85 f′c.
 - Node classification (collinear ties count once).
-- Every example: stable, determinate, nodal and global equilibrium residual < 10⁻⁶ kN,
+- Every example: nodal and global equilibrium residual < 10⁻⁶ kN,
   every node and member inside the concrete outline, maximum utilization ≤ 1 (except
   the FHWA example, kept with the manual's initial geometry).
 - S6 α1 limits and the 1500 mm²/m crack control cap; a tie collinear with a strut does
@@ -212,8 +215,10 @@ problem is visible.
 - Development lengths (straight, top bar, hook, 300 mm minimum, √f′c ≤ 8 MPa) and the
   available anchorage length (cover, strut edge `w/2 / sin θ`); no check at a symmetry
   plane or where a tie continues.
-- Templates (nine parameter sets): stable, equilibrium < 10⁻⁶ kN, inside the outline,
-  sized to utilization ≤ 1; bent cap indeterminacy `r = ncol − 2`; dapped end hanger = R and
+- The two-load deep beam balances equal loads on its four-member trapezoid. Unequal
+  loads excite a mechanism. Tests also cover unused nodes and weak but loaded members.
+- Templates (nine parameter sets): equilibrium < 10⁻⁶ kN, inside the outline,
+  sized to utilization ≤ 1; dapped end hanger = R and
   nib tie = R cot α; pile head loads P/2, P/3, P/4 and the 4-pile tie
   `(P/2)(s/2)/z`; 3D tie factors 0.5 and 1/√3.
 - Every interface string exists in French and English.

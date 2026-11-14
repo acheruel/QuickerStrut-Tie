@@ -135,7 +135,8 @@ test('every example solves, is in equilibrium and lies inside its outline', () =
     const { m, r, c } = run(ex.key);
     assert.ok(r.ok, ex.key + ' solves');
     assert.ok(r.residual < 1e-6 && r.globalResidual < 1e-6, ex.key + ' equilibrium');
-    assert.equal(r.indeterminacy, 0, ex.key + ' determinate');
+    assert.ok(r.indeterminacy <= 0 && r.converged, ex.key + ' has no redundant bar');
+    assert.deepEqual(r.forces.filter((f) => f.kind === 'zero'), [], ex.key + ' has no bar without force');
     assert.deepEqual(csa.geometryWarnings(m), [], ex.key + ' inside outline');
     if (!ex.literature) assert.ok(c.maxUtil > 0.2 && c.maxUtil <= 1, ex.key + ' designed: ' + c.maxUtil);
   }
@@ -163,7 +164,8 @@ test('FHWA-NHI-17-071, design example 1: published truss forces are reproduced',
   // AD −785, BE −785, CF −1177, DE −506, EF −1013.
   const published = { AB: 506, BC: 1013, BD: 600, AD: -785, BE: -785, CF: -1177, DE: -506, EF: -1013 };
   for (const [id, v] of Object.entries(published)) close(kips(id), v, 0.6, id);
-  close(byId(r.forces, 'BF').N, 0, 1e-6, 'bracing diagonal');
+  // As published: no bracing diagonal in the panel B–E–F–C (in equilibrium under these loads).
+  assert.ok(r.unbraced && r.residual < 1e-6);
   // The manual's first iteration finds strut CF (node F) and the top strut EF
   // insufficient; the CSA S6 check flags the same two struts.
   assert.ok(byId(c.members, 'CF').util > 1 && byId(c.members, 'EF').util > 1);
@@ -183,10 +185,10 @@ test('NCHRP 20-07/217 deep beam: forces for αs = 37.376° and T1 = 288.9 kips',
   // Same two-load layout; rise / run chosen for αs = 37.376°.
   const a = 1.0, rise = Math.tan(37.376 * Math.PI / 180) * a;
   const P = 220.7 * 4.448222;
-  const nodes = { N1: [0, 0], N2: [3 * a, 0], N3: [a, rise], N4: [2 * a, rise], N5: [a, 0], N6: [2 * a, 0] };
+  const nodes = { N1: [0, 0], N2: [3 * a, 0], N3: [a, rise], N4: [2 * a, rise] };
   m.nodes.forEach((n) => { [n.x, n.y] = nodes[n.id]; n.fy = n.id === 'N3' || n.id === 'N4' ? -P : 0; });
   const r = solver.solve(m);
-  close(byId(r.forces, 'M5').N / 4.448222, 288.9, 0.2, 'T1');
+  close(byId(r.forces, 'M4').N / 4.448222, 288.9, 0.2, 'T1');
   close(-byId(r.forces, 'M1').N / 4.448222, 363.5, 0.2, 'C1');
   close(-byId(r.forces, 'M2').N / 4.448222, 288.9, 0.2, 'C2');
 });
@@ -309,22 +311,22 @@ test('anchorage: available length = critical section + extension − cover', () 
   // No anchorage check at a symmetry plane or where a tie continues.
   const hj = run('half-joint').c;
   assert.ok(!hj.anchors.some((x) => x.node === 'N10'));
-  assert.ok(!run('deep-beam-2').c.anchors.some((x) => x.node === 'N5' || x.node === 'N6'));
+  assert.ok(!hj.anchors.some((x) => x.id === 'M11@N6' || x.id === 'M11@N8'), 'the bottom chord continues through N6 and N8');
 });
 
 test('continuous bars: no anchorage where they bend into another tie or leave the D-region, straight bar elsewhere', () => {
   const ia = run('integral-abutment').c;
-  for (const id of ['M1@D1', 'M1@K1', 'M6@K1']) {
+  for (const id of ['M1@D1', 'M1@K1', 'M5@K1']) {
     const a = ia.anchors.find((x) => x.id === id);
     assert.ok(a && a.mechanical && a.type === 'continuous', id);
   }
-  // Corbel column ties M7: N4 has the far-face bars to continue into, N3 (free,
+  // Corbel column ties M5: N4 has the far-face bars to continue into, N3 (free,
   // unloaded, struts only) has nothing, so the bars are checked as straight bars there.
   const m = csa.normalize(examples.build('bridge-corbel', 'fr'));
-  m.members.find((x) => x.id === 'M7').anchor = 'continuous';
+  m.members.find((x) => x.id === 'M5').anchor = 'continuous';
   const c = csa.check(m, solver.solve(m));
-  assert.ok(c.anchors.find((x) => x.id === 'M7@N4').mechanical, 'bent into the far-face bars');
-  const a = c.anchors.find((x) => x.id === 'M7@N3');
+  assert.ok(c.anchors.find((x) => x.id === 'M5@N4').mechanical, 'bent into the far-face bars');
+  const a = c.anchors.find((x) => x.id === 'M5@N3');
   assert.equal(a.type, 'straight'); assert.ok(!a.mechanical && a.req >= 300);
 });
 
@@ -341,13 +343,13 @@ test('bridge examples: corbel and integral abutment balance their loads', () => 
   const co = run('bridge-corbel');
   close(co.r.reactions.reduce((s, R) => s + R.ry, 0), 1400, 1e-6);
   close(co.r.reactions.reduce((s, R) => s + R.rx, 0), -280, 1e-6);
-  // The corbel tie carries the same force from the load to the column face and on to the far face.
-  close(byId(co.r.forces, 'M1').N, byId(co.r.forces, 'M2').N, 1e-6);
+  // Corbel tie = horizontal load + horizontal component of the strut N1–N3 (dx 0.38, dy 0.87).
+  close(byId(co.r.forces, 'M1').N, 280 + 1400 * 0.38 / 0.87, 1e-6);
   const ia = run('integral-abutment');
   close(ia.r.reactions.reduce((s, R) => s + R.ry, 0), 300, 1e-6);
   close(ia.r.reactions.reduce((s, R) => s + R.rx, 0), -(30 + 120), 1e-6);
   // Closing corner: deck top bars and back-face bars in tension, corner diagonal in compression.
-  assert.ok(byId(ia.r.forces, 'M1').N > 0 && byId(ia.r.forces, 'M6').N > 0 && byId(ia.r.forces, 'M5').N < 0);
+  assert.ok(byId(ia.r.forces, 'M1').N > 0 && byId(ia.r.forces, 'M5').N > 0 && byId(ia.r.forces, 'M4').N < 0);
 });
 
 // ------------------------------------------------------------ templates
@@ -374,12 +376,74 @@ test('templates generate stable, sized models inside their outline', () => {
   }
 });
 
-test('bent cap: indeterminacy r = columns − 2 and reactions balance the girders', () => {
+test('bent cap: reactions balance the girders', () => {
   for (const ncol of [2, 3, 4]) {
     const { r } = solveTpl('bentCap', { ncol, nGirders: 5, spacing: 5, overhang: 1.8, girderSpacing: 3.0, P: 1000 });
-    assert.equal(r.indeterminacy, ncol - 2);
     close(r.reactions.reduce((s, R) => s + R.ry, 0), 5000, 1e-6);
   }
+});
+
+test('templates keep no bar without force and number their nodes and bars without gaps', () => {
+  for (const [k, p] of [['dappedEnd', {}], ['bentCap', {}], ['bentCap', { ncol: 4, nGirders: 6, spacing: 5 }], ['pileCap', { np: 4 }]]) {
+    const g = templates[k](p), r = solver.solve(csa.normalize(g.model));
+    assert.deepEqual(r.forces.filter((f) => f.kind === 'zero'), [], k);
+    assert.deepEqual(g.model.nodes.map((n) => n.id), g.model.nodes.map((n, i) => 'N' + (i + 1)), k);
+    assert.deepEqual(g.model.members.map((m) => m.id), g.model.members.map((m, i) => 'M' + (i + 1)), k);
+  }
+});
+
+// ------------------------------------------------- models without bracing bars
+test('a model in equilibrium under its loads needs no bracing bar; other loads make it a mechanism', () => {
+  // Trapezoid deep beam: 4 nodes, 4 bars, 3 reactions: one mechanism mode (sway of the top strut).
+  const m = csa.normalize(examples.build('deep-beam-2'));
+  let r = solver.solve(m);
+  assert.ok(r.ok && r.unbraced && r.indeterminacy === -1);
+  // a = 1.3 m, z = 1.85 m: T = P a / z, inclined strut = P √(a² + z²) / z, top strut = T.
+  close(byId(r.forces, 'M4').N, 1800 * 1.3 / 1.85, 1e-6, 'tie');
+  close(-byId(r.forces, 'M2').N, 1800 * 1.3 / 1.85, 1e-6, 'top strut');
+  close(-byId(r.forces, 'M1').N, 1800 * Math.hypot(1.3, 1.85) / 1.85, 1e-6, 'inclined strut');
+  assert.ok(r.residual < 1e-6 && r.globalResidual < 1e-6);
+  // Unequal loads set the trapezoid in motion: mechanism.
+  m.nodes.find((n) => n.id === 'N4').fy = -900;
+  r = solver.solve(m);
+  assert.equal(r.ok, false); assert.equal(r.error, 'mechanism');
+  // A node without any bar or load does not make the model invalid.
+  m.nodes.find((n) => n.id === 'N4').fy = -1800;
+  m.nodes.push({ id: 'N9', x: 2, y: 1, support: null, fx: 0, fy: 0, bearing: 0 });
+  assert.ok(solver.solve(m).ok);
+});
+
+test('a stable truss is not reported as unbraced', () => {
+  assert.equal(run('deep-beam-1').r.unbraced, false);
+  assert.equal(run('bent-cap-20m').r.unbraced, false);
+});
+
+test('singular equilibrium preserves a weak loaded direction and identifies incompatible loads', () => {
+  const K = [[0, 0, 0], [0, 1, 0], [0, 0, 1e9]];
+  assert.deepEqual(solver.linearSolve(K, [0, 2, 1000], true), { x: [0, 2, 1e-6], unbraced: true });
+  assert.deepEqual(solver.linearSolve(K, [0.001, 2, 1000], true), { singular: 0 });
+});
+
+test('template pruning keeps members that carry small loads', () => {
+  const { model } = templates.pileCap({ np: 2, P: 0.01 });
+  const r = solver.solve(model, 0);
+  assert.ok(r.ok);
+  assert.equal(model.members.length, 4);
+  assert.ok(r.forces.every((f) => Math.abs(f.N) > 0 && Math.abs(f.N) < solver.ZERO_FORCE_KN));
+  close(r.reactions.reduce((sum, reaction) => sum + reaction.ry, 0), 0.01, 1e-12);
+});
+
+test('20 m bent cap on 4 columns: statics of the direct-strut model', () => {
+  const { r, c } = run('bent-cap-20m');
+  assert.equal(r.indeterminacy, 0);
+  const z = 1.7, P = 2000;
+  close(byId(r.forces, 'M11').N, P * 0.6 / z, 1e-6, 'top tie over the outer column');
+  close(byId(r.forces, 'M16').N, 0.5 * P * 2.6 / z, 1e-6, 'bottom tie of the central span');
+  close(r.reactions.reduce((s, R) => s + R.ry, 0), 7 * P, 1e-6);
+  const R = Object.fromEntries(r.reactions.map((x) => [x.node, x.ry]));
+  close(R.B1, R.B4, 1e-6); close(R.B2, R.B3, 1e-6);
+  assert.ok(Math.abs(R.B1 - R.B2) < 0.05 * R.B1, 'columns share the load almost equally');
+  assert.ok(c.maxUtil <= 1);
 });
 
 test('dapped-end template: hanger = R and nib tie = R cot α', () => {

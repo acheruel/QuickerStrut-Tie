@@ -22,6 +22,7 @@ test('static keys exist in both languages', () => {
 test('dynamic key families are complete', () => {
   const fam = {
     tool_: ['select', 'node', 'member', 'support', 'load', 'outline', 'erase'],
+    tut: ['1', '1T', '2', '2T', '3', '3T', '4', '4T', '5', '5T', '6', '6T', '7', '7T', '8', '8T'],
     hint_: ['select', 'node', 'member', 'support', 'load', 'outline', 'erase'],
     mode_: ['geometry', 'forces', 'util'], kind_: ['strut', 'tie', 'zero'],
     sup_: ['none', 'null', 'pin', 'rx', 'ry'], face_: ['strut', 'tie', 'support', 'load'],

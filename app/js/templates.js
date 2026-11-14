@@ -6,6 +6,7 @@
  *   dappedEnd   about réduit / demi-joint, orthogonal model, half span with symmetry
  *   bentCap     multi-column bent cap, truss with diagonals towards the columns
  *   pileCap     pile cap on 2, 3 or 4 piles, 2D elevation (see pileMap / tie3D)
+ * Bars that carry no force under the template loads are removed (prune).
  */
 (function (root) {
   'use strict';
@@ -22,6 +23,32 @@
   function bar(id, i, j, o) {
     o = o || {};
     return { id: id, i: i, j: j, role: 'auto', w: o.w || 200, bars: o.tie ? { n: 4, size: '20M' } : null, As: 0, anchor: o.anchor || 'hook', db: 0 };
+  }
+
+  // A template is a regular truss; under its loads some bars carry nothing.
+  // They are dropped (with the nodes left without a bar) and the rest is
+  // renumbered, so that the model only shows the load path.
+  function prune(model) {
+    csa.normalize(model);
+    var result = solver.solve(model, 0);
+    while (result.ok && result.converged && result.loadScale > 0) {
+      // Prune at numerical precision. A displayed zero can still balance a small load.
+      var tol = 1e-10 * result.loadScale;
+      var kept = model.members.filter(function (m, i) { return Math.abs(result.forces[i].N) > tol; });
+      if (kept.length === model.members.length) break;
+      var previous = model.members;
+      model.members = kept;
+      result = solver.solve(model, 0);
+      if (!result.ok || !result.converged) { model.members = previous; break; }
+    }
+    var used = {}, map = {};
+    model.members.forEach(function (m) { used[m.i] = used[m.j] = 1; });
+    model.nodes = model.nodes.filter(function (n) { return used[n.id] || n.support || n.fx || n.fy; });
+    model.nodes.forEach(function (n, k) { map[n.id] = 'N' + (k + 1); n.id = map[n.id]; });
+    model.members.forEach(function (m, k) { m.id = 'M' + (k + 1); m.i = map[m.i]; m.j = map[m.j]; });
+    var pm = model.meta && model.meta.pileMap;
+    if (pm) { var out = {}; Object.keys(pm).forEach(function (k) { out[map[k]] = pm[k]; }); model.meta.pileMap = out; }
+    return model;
   }
 
   var DEFAULTS = {
@@ -72,11 +99,11 @@
     }
     return {
       errors: errors,
-      model: {
+      model: prune({
         schema: 1, code: 'S6', material: examples.material({ fc: p.fc, b: p.b }),
         outline: [[0, h - hn], [ln, h - hn], [ln, 0], [p.half, 0], [p.half, h], [0, h]].map(function (q) { return [r6(q[0]), r6(q[1])]; }),
         nodes: nodes, members: mem, meta: { template: 'dappedEnd', params: p }
-      }
+      })
     };
   }
 
@@ -117,11 +144,11 @@
     outline.push([x1, 0], [x1, h], [x0, h]);
     return {
       errors: errors,
-      model: {
+      model: prune({
         schema: 1, code: 'S6', material: examples.material({ fc: p.fc, b: p.b }),
         outline: outline.map(function (q) { return [r6(q[0]), r6(q[1])]; }),
         nodes: nodes, members: mem, meta: { template: 'bentCap', params: p }
-      }
+      })
     };
   }
 
@@ -164,7 +191,7 @@
         node('N4', xb, c, { support: 'ry', bearing: plate1 * (np === 4 ? 2 : 1) })
       ];
       mem = [bar('M1', 'N3', 'N4', { tie: true, w: 250, anchor: 'hook' }), bar('M2', 'N1', 'N3', { w: 400 }), bar('M3', 'N2', 'N4', { w: 400 }),
-        bar('M4', 'N1', 'N2', { w: 250 }), bar('M5', 'N1', 'N4', { w: 150 })];
+        bar('M4', 'N1', 'N2', { w: 250 })];
       pileMap = np === 4
         ? { N3: [{ pile: 'P1', share: 0.5 }, { pile: 'P3', share: 0.5 }], N4: [{ pile: 'P2', share: 0.5 }, { pile: 'P4', share: 0.5 }] }
         : { N3: [{ pile: 'P1', share: 1 }], N4: [{ pile: 'P2', share: 1 }] };
@@ -176,11 +203,11 @@
       [L1, h], [cw / 2, h], [cw / 2, h + stub], [-cw / 2, h + stub], [-cw / 2, h], [L0, h]];
     return {
       errors: errors,
-      model: {
+      model: prune({
         schema: 1, code: 'S6', material: examples.material({ fc: p.fc, b: Math.round(b * 1000) }),
         outline: outline.map(function (q) { return [r6(q[0]), r6(q[1])]; }),
         nodes: nodes, members: mem, meta: { template: 'pileCap', params: Object.assign({}, p, { np: np }), pileMap: pileMap, tie3D: tie3D }
-      }
+      })
     };
   }
 

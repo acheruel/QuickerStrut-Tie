@@ -11,16 +11,17 @@ No installation, no server, no data leaves your computer.
 
 ![QuickerStrut&Tie — hammerhead pier cap, forces view](docs/screenshots/forces.png)
 
-*Version 0.2.6 · 2026-11-01 · Anthony Chéruel · [Version history](CHANGELOG.md) · [Français](#en-français)*
+*Version 0.2.7 · 2026-11-13 · Anthony Chéruel · [Version history](CHANGELOG.md) · [Français](#en-français)*
 
 ## What it does
 
 - **Interactive editor:** select, node, member, support, load, outline and erase tools;
-  drag nodes, members or outline vertices with grid snapping; zoom, pan, undo/redo,
+  drag nodes, members or outline vertices with grid snapping and alignment guides; zoom, pan, undo/redo,
   keyboard shortcuts, touch support.
 - **Live analysis:** pin-jointed truss solved by the direct stiffness method at every
   change (a few milliseconds); struts and ties identified from the force sign; mechanism
-  detection with the free node named; determinate and indeterminate models.
+  detection with the affected node named. Trusses with free mechanism modes can be
+  solved for compatible load cases, without adding zero-force bracing.
 - **CSA checks:** strut crushing with the ε1-based limit (≤ 0.85 f′c to A23.3, ≤ α1 f′c to
   S6), tie yielding, CCC / CCT / CTT nodal zone stresses on strut, bearing and anchorage
   faces, **tie anchorage** (available length to the extended nodal zone vs. straight-bar or
@@ -44,10 +45,13 @@ No installation, no server, no data leaves your computer.
   anchorages and pile loads, SVG drawing, CSV table, `.quickerstrut.json` projects,
   pile head loads for QuickerPile, automatic local save.
 - **Examples:** deep beams, double corbel, hammerhead pier cap, half-joint seat
-  (dapped end), two-pile cap, **bridge pier corbel**, **integral abutment end diaphragm**
+  (dapped end), two-pile cap, **20 m bent cap on four columns**, **bridge corbel with
+  backwall**, **integral abutment end diaphragm**
   (deck–abutment corner), and three published examples whose member forces are
   reproduced: FHWA deep beam, Paultre (2011) double corbel and the CAC Handbook
   dapped-end beam (24 forces).
+- **Guide and tutorial:** nine design steps, an eight-step hands-on deep-beam exercise,
+  and [Awatif's interactive strut-and-tie examples](https://awatif.co/examples/strut/).
 - **French and English** interface; works on desktop, tablets and foldables (including a
   Galaxy Z Fold unfolded in landscape).
 
@@ -137,17 +141,20 @@ jour en direct. Aucune installation, aucun serveur, aucune donnée transmise.
   aimantation à la grille, zoom, déplacement, annuler/rétablir, raccourcis clavier, tactile.
 - **Calcul en direct :** treillis articulé résolu par la méthode des rigidités à chaque
   modification ; bielles et tirants identifiés par le signe de l’effort ; détection des
-  mécanismes ; modèles isostatiques ou hyperstatiques.
+  mécanismes et résolution des treillis avec modes libres lorsque les charges sont compatibles.
 - **Vérifications CSA :** écrasement des bielles (fcu basé sur ε1), plastification des
   tirants, zones nodales CCC / CCT / CTT, armature de contrôle de la fissuration ;
   coefficients S6 (ponts) ou A23.3 (bâtiments), modifiables.
 - **Résultats lisibles :** largeurs réelles des bielles et tirants, couleur **et** type de
   trait, étiquettes de valeurs ; inspecteur détaillant chaque étape de calcul ; tableaux.
 - **Exemples :** poutres-cloisons, corbeau double, chevêtre en porte-à-faux, **appui en
-  chaise (demi-joint)**, semelle sur deux pieux, **corbeau de pile de pont**, **culée
+  chaise (demi-joint)**, semelle sur deux pieux, **chevêtre de 20 m sur quatre colonnes**,
+  **corbeau de pont avec garde-grève**, **culée
   intégrale (diaphragme d’about)**, et trois exemples publiés dont les efforts sont
   reproduits : poutre-cloison FHWA, console courte double de Paultre (2011) et poutre à
   about réduit du manuel CAC (24 efforts).
+- **Guide et tutoriel** : démarche de conception en neuf étapes, exercice en huit étapes
+  dans l’éditeur et [exemples interactifs d’Awatif](https://awatif.co/examples/strut/).
 - **Sorties :** note de calcul imprimable (PDF), dessin SVG, tableau CSV, projets
   `.quickerstrut.json`, sauvegarde locale automatique.
 - **Utilisation hors ligne :** téléchargez `QuickerStrut-Tie-v<version>-<date>.html` et

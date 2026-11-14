@@ -7,6 +7,9 @@
  * Axial stiffness of each bar: struts EA = Ec·w·b, ties EA = Es·As. For a
  * statically determinate model the forces do not depend on EA; for an
  * indeterminate model the bar roles (strut/tie) are iterated until stable.
+ *
+ * A singular truss can still give an equilibrium solution for its given
+ * loads. Its mechanism displacements are arbitrary and have no design use.
  */
 (function (root) {
   'use strict';
@@ -39,35 +42,49 @@
     });
   }
 
-  // Gaussian elimination with partial pivoting on a dense copy. Returns the
-  // solution or {singular: column} for the first column without a usable pivot.
-  function linearSolve(K, F) {
-    var n = F.length, A = K.map(function (r) { return r.slice(); }), x = F.slice();
+  // Gaussian elimination with partial pivoting. For a singular equilibrium
+  // solve, leave nonpivot coordinates at zero and check the original equations.
+  // The arbitrary mechanism displacements do not strain the bars.
+  function linearSolve(K, F, allowSingular) {
+    var n = F.length, A = K.map(function (r) { return r.slice(); }), rhs = F.slice();
     var scale = 0;
     for (var d = 0; d < n; d++) scale = Math.max(scale, Math.abs(A[d][d]));
     var tol = Math.max(scale, 1e-30) * 1e-10;
-    var perm = [];
-    for (var p = 0; p < n; p++) perm.push(p);
+    var pivots = [];
     for (var k = 0; k < n; k++) {
-      var piv = k, best = Math.abs(A[k][k]);
-      for (var r = k + 1; r < n; r++) if (Math.abs(A[r][k]) > best) { best = Math.abs(A[r][k]); piv = r; }
-      if (best < tol) return { singular: k };
-      if (piv !== k) { var t = A[k]; A[k] = A[piv]; A[piv] = t; var tx = x[k]; x[k] = x[piv]; x[piv] = tx; }
-      var akk = A[k][k];
-      for (var i = k + 1; i < n; i++) {
-        var f = A[i][k] / akk;
+      var row = pivots.length, piv = row, best = Math.abs(A[row][k]);
+      for (var r = row + 1; r < n; r++) if (Math.abs(A[r][k]) > best) { best = Math.abs(A[r][k]); piv = r; }
+      if (best < tol) {
+        if (!allowSingular) return { singular: k };
+        continue;
+      }
+      pivots.push(k);
+      if (piv !== row) {
+        var t = A[row]; A[row] = A[piv]; A[piv] = t;
+        var tx = rhs[row]; rhs[row] = rhs[piv]; rhs[piv] = tx;
+      }
+      for (var i = row + 1; i < n; i++) {
+        var f = A[i][k] / A[row][k];
         if (f === 0) continue;
-        var Ai = A[i], Ak = A[k];
-        for (var j = k; j < n; j++) Ai[j] -= f * Ak[j];
-        x[i] -= f * x[k];
+        for (var j = k + 1; j < n; j++) A[i][j] -= f * A[row][j];
+        rhs[i] -= f * rhs[row];
       }
     }
-    for (var i2 = n - 1; i2 >= 0; i2--) {
-      var sum = x[i2];
-      for (var j2 = i2 + 1; j2 < n; j2++) sum -= A[i2][j2] * x[j2];
-      x[i2] = sum / A[i2][i2];
+    var x = new Array(n).fill(0);
+    for (var i2 = pivots.length - 1; i2 >= 0; i2--) {
+      var col = pivots[i2], sum = rhs[i2];
+      for (var j2 = col + 1; j2 < n; j2++) sum -= A[i2][j2] * x[j2];
+      x[col] = sum / A[i2][col];
     }
-    return { x: x };
+    if (pivots.length === n) return { x: x };
+    var worst = 0, dof = 0, fmax = 0;
+    for (var a = 0; a < n; a++) {
+      fmax = Math.max(fmax, Math.abs(F[a]));
+      var residual = F[a];
+      for (var b = 0; b < n; b++) residual -= K[a][b] * x[b];
+      if (Math.abs(residual) > worst) { worst = Math.abs(residual); dof = a; }
+    }
+    return worst <= 1e-8 * fmax ? { x: x, unbraced: true } : { singular: dof };
   }
 
   function axialStiffness(model, m, isTie, Ec) {
@@ -80,7 +97,8 @@
     return Ec * w * b / 1000; // kN
   }
 
-  function solve(model) {
+  function solve(model, zeroForceKN) {
+    if (zeroForceKN === undefined) zeroForceKN = ZERO_FORCE_KN;
     var nodes = model.nodes, members = model.members, nn = nodes.length, nd = nn * 2;
     var out = { ok: false, nodes: nn, members: members.length };
     if (!nn) { out.error = 'empty'; return out; }
@@ -103,7 +121,7 @@
 
     // Initial roles: explicit roles, otherwise strut.
     var tie = members.map(function (m) { return m.role === 'tie'; });
-    var N, u, EA, iter = 0, converged = false, K;
+    var N, u, EA, iter = 0, converged = false, K, unbraced = false;
     while (iter < 12) {
       iter++;
       EA = members.map(function (m, k) { return axialStiffness(model, m, tie[k], Ec); });
@@ -122,7 +140,7 @@
       var Fr = free.map(function (i) { return F[i]; });
       u = new Array(nd).fill(0);
       if (free.length) {
-        var sol = linearSolve(Kr, Fr);
+        var sol = linearSolve(Kr, Fr, true);
         if (sol.singular !== undefined) {
           var dof = free[sol.singular];
           out.error = 'mechanism';
@@ -130,6 +148,7 @@
           out.mechanismDir = dof % 2 ? 'y' : 'x';
           return out;
         }
+        unbraced = !!sol.unbraced;
         free.forEach(function (dd, k2) { u[dd] = sol.x[k2]; });
       }
       N = members.map(function (m, k) {
@@ -163,6 +182,8 @@
     reactions.forEach(function (R) { sumRx += R.rx; sumRy += R.ry; });
 
     out.ok = true;
+    // true: compatible loads on a kinematically unstable truss.
+    out.unbraced = unbraced;
     out.converged = converged;
     out.iterations = iter;
     out.u = u;
@@ -172,7 +193,7 @@
     out.loadScale = loadScale;
     out.sumLoads = { fx: sumFx, fy: sumFy };
     out.forces = members.map(function (m, k) {
-      var n = Math.abs(N[k]) < ZERO_FORCE_KN ? 0 : N[k];
+      var n = Math.abs(N[k]) < zeroForceKN ? 0 : N[k];
       return {
         id: m.id, N: n, L: geo[k].L, c: geo[k].c, s: geo[k].s, EA: EA[k],
         kind: n > 0 ? 'tie' : n < 0 ? 'strut' : 'zero'

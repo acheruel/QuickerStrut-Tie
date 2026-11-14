@@ -1,6 +1,6 @@
 # Method and assumptions · Méthode et hypothèses
 
-*QuickerStrut&Tie v0.2.6 · 2026-11-01*
+*QuickerStrut&Tie v0.2.7 · 2026-11-13*
 
 ## Units and sign convention
 
@@ -25,9 +25,12 @@ is iterated until it no longer changes; the force distribution then depends on t
 and areas entered. A bar can also be forced to act as a strut or a tie.
 
 Supports: pin (`Rx`, `Ry`), roller with a vertical reaction (`Ry`) or a horizontal
-reaction (`Rx`). A singular stiffness matrix is reported as a mechanism and the first
-free node and direction are named. Reactions are `K·u − F` at restrained degrees of
-freedom; the global equilibrium residual is displayed.
+reaction (`Rx`). If the free stiffness matrix is singular, elimination leaves nonpivot
+coordinates at zero and tests the residual against the original equilibrium equations.
+A compatible load case is shown as **In equilibrium under these loads**. Its free modes
+leave the axial forces unchanged, and the displacement solution is arbitrary along those
+modes. When equilibrium fails, **Mechanism** names the node and direction of the largest
+unbalanced force. Reactions are `K·u − F` at restrained degrees of freedom.
 
 Bars whose force is below 0.05 kN are reported as zero-force members.
 
@@ -145,7 +148,8 @@ For S6 the required grid is limited to 1500 mm²/m on each face, i.e.
   rollers at mid-span), reaction `R` spread over the top nodes.
 - **Multi-column bent cap:** top and bottom chords, a vertical at every girder and column,
   one compression diagonal per panel falling towards the nearest column; first column
-  pinned, others on rollers; indeterminate for 3 and 4 columns (`r = ncol − 2`).
+  pinned, others on rollers. The generator removes unloaded members where the retained
+  truss still satisfies equilibrium under the template loads.
 - **Pile cap:** 2D section. Four piles (square): each pile line stands for two piles, the
   2D tie is shared by two parallel ties (factor 0.5). Three piles (equilateral triangle):
   section through one pile and the line of the other two, side ties `T2D / √3`. Bearing
@@ -160,9 +164,11 @@ For S6 the required grid is limited to 1500 mm²/m on each face, i.e.
 m), and per pile `id`, `node`, `x`, `N` (> 0 compression), `H` (along x), `M` (0, pinned
 head). For the pile cap templates the 2D reactions are expanded to the real piles.
 
-## Limits of version 0.2.6
+## Limits of version 0.2.7
 
 - 2D model with a constant thickness `b`; one factored load case.
+- Equilibrium of a singular model applies to the entered case. Changes to geometry or
+  loading can activate a mechanism. This check provides no physical stability assessment.
 - No automatic self-weight, no automatic model generation, no stress fields.
 - Development lengths use the simplified A23.3 expressions for both codes.
 - 3- and 4-pile caps are handled as 2D sections.

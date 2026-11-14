@@ -14,8 +14,8 @@
 :root{
   --navy:#102d41;--navy-2:#0b2436;--navy-3:#061520;--ink:#17374b;--muted:#566e7c;--axis:#5d7684;
   --line:#dce5eb;--paper:#fff;--bg:#f0f4f7;--teal:#007f78;--mint:#56e0bb;--mint-soft:#d9f5eb;
-  --amber:#b66c16;--blue:#3567ad;--coral:#c4513a;--ok:#1f7a5a;--warn:#9a6a12;--bad:#b23a2a;
-  --strut:#7cb4ff;--tie:#ffc978;--load:#ff9b85;--react:#56e0bb;
+  --amber:#b66c16;--ok:#1f7a5a;--warn:#9a6a12;--bad:#b23a2a;
+  --strut:#1f5fbf;--tie:#c8322b;--edge:#cfdbe3;
   --shadow:0 2px 7px #15354a08;--radius:10px;
   font-family:"Segoe UI",Inter,Roboto,Arial,sans-serif;color:var(--ink);font-size:16px;
 }
@@ -57,6 +57,8 @@ kbd{font:600 .6875rem "Segoe UI",Arial,sans-serif;color:var(--axis);border:1px s
 .language button:hover:not(.selected){background:#1b3d52}
 .github-link{color:#dbe9ef;display:flex}
 .github-link svg{width:24px;height:24px}
+.guide-open{display:inline-flex;align-items:center;gap:7px;border-color:#56e0bb;color:#d8fff3}
+.guide-open svg{width:18px;height:18px}
 
 /* ---------- Workspace ---------- */
 .workspace{display:grid;grid-template-columns:360px minmax(0,1fr);gap:20px;max-width:1880px;margin:0 auto;padding:18px 24px 12px}
@@ -89,7 +91,7 @@ h1{font-size:1.05rem;margin:0;font-weight:650}
 .mi-text b{font-weight:650}
 .mi-text small{color:var(--muted);font-weight:400}
 .menu-sep{height:1px;background:var(--line);margin:5px 4px}
-.ex-thumb{width:58px;height:34px;flex:none;border-radius:6px;background:var(--navy);display:block}
+.ex-thumb{width:58px;height:34px;flex:none;border-radius:6px;background:#fff;border:1px solid var(--line);display:block}
 .input-tabs{display:flex;padding:0 16px;border-bottom:1px solid var(--line);gap:16px}
 .input-tabs button,.view-tabs button{border:0;border-radius:0;background:none;padding:11px 1px;color:var(--muted);border-bottom:2px solid transparent}
 .input-tabs button:hover,.view-tabs button:hover{background:none!important;color:var(--ink)}
@@ -129,8 +131,8 @@ h1{font-size:1.05rem;margin:0;font-weight:650}
 .row-card input,.row-card select{min-height:30px;padding:3px 6px;font-size:.8rem}
 .row-card .mini{font-size:.62rem;color:var(--axis);display:block;margin:0 0 2px 2px;letter-spacing:.3px}
 .tag{display:inline-flex;align-items:center;justify-content:center;height:24px;border-radius:6px;font-weight:700;font-size:.78rem;color:var(--navy);background:#eaf1f5;cursor:pointer}
-.tag.strut{background:#e3eefe;color:#244f8e}
-.tag.tie{background:#fdf0db;color:#7a4a0c}
+.tag.strut{background:#e3eefe;color:#17498f}
+.tag.tie{background:#fde8e6;color:#9c231c}
 .tag.zero{background:#eef1f3;color:#71818b}
 .del{border:0;background:none;color:#97a9b4;font-size:1.05rem;padding:0;height:26px}
 .del:hover:not(:disabled){color:var(--bad);background:none}
@@ -139,30 +141,45 @@ h1{font-size:1.05rem;margin:0;font-weight:650}
 .bars-pick b{text-align:center;color:var(--axis);font-weight:400}
 .input-footer{padding:10px 18px;border-top:1px solid var(--line);color:var(--muted);font-size:.72rem;display:flex;justify-content:space-between;gap:8px}
 
+/* ---------- Tutorial strip ---------- */
+.coach{display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:11px 14px;background:#fff;border:1px solid #9fd8cb;border-left:5px solid var(--teal);border-radius:var(--radius);box-shadow:var(--shadow)}
+.coach.done{border-color:#7fcf9f;border-left-color:var(--ok);background:#f4fbf7}
+.coach-n{flex:none;min-width:44px;height:34px;padding:0 8px;border-radius:9px;background:var(--navy);color:#fff;font-weight:700;font-size:.82rem;display:flex;align-items:center;justify-content:center}
+.coach-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:.84rem;line-height:1.45}
+.coach-text b{font-size:.95rem}
+.coach-text span{color:#3d5868}
+.coach-text span b{font-size:inherit;color:var(--ink)}
+.coach-actions{display:flex;align-items:center;gap:8px;flex:none}
+.coach-ok{color:var(--ok);font-weight:700;font-size:.8rem;white-space:nowrap}
+.coach-x{border:0;background:none;font-size:1.25rem;color:var(--axis);padding:2px 6px}
+.coach-target{outline:3px solid var(--teal)!important;outline-offset:2px;animation:coachPulse 1.2s ease-in-out infinite}
+@keyframes coachPulse{50%{outline-offset:5px;outline-color:#56e0bb}}
+
 /* ---------- Stage (canvas) ---------- */
 .results{min-width:0;display:flex;flex-direction:column}
-.stage{background:radial-gradient(120% 90% at 50% 30%,#123a52 0%,var(--navy-2) 55%,var(--navy-3) 100%);border-radius:var(--radius);color:#fff;overflow:hidden;box-shadow:0 6px 18px #0b1e2b22;position:relative;isolation:isolate}
-.stage-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid #1d4458;flex-wrap:wrap}
-.toolbox{display:flex;gap:4px;padding:3px;background:#0a2131;border:1px solid #1f4256;border-radius:10px}
-.tool{display:flex;align-items:center;gap:6px;border:0;background:transparent;color:#bcd3de;padding:6px 9px;border-radius:7px;font-size:.78rem;position:relative}
+.stage{background:#fff;border:1px solid var(--edge);border-radius:var(--radius);color:var(--ink);overflow:hidden;box-shadow:0 4px 14px #0b1e2b14;position:relative;isolation:isolate}
+.stage-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);background:#f5f8fa;flex-wrap:wrap}
+.toolbox{display:flex;gap:3px;padding:3px;background:#fff;border:1px solid var(--edge);border-radius:10px}
+.tool{display:flex;align-items:center;gap:6px;border:0;background:transparent;color:var(--ink);padding:6px 9px;border-radius:7px;font-size:.78rem;position:relative}
 .tool svg{width:18px;height:18px}
-.tool:hover:not(:disabled){background:#163a50;color:#fff}
-.tool.active{background:#56e0bb;color:#062a24}
-.tool .k{font-size:.62rem;opacity:.65;font-weight:700}
+.tool:hover:not(:disabled){background:#e8f0f4}
+.tool.active,.tool.active:hover{background:var(--navy);color:#fff}
+.tool .k{font-size:.62rem;opacity:.6;font-weight:700}
 .tool .tl{display:none}
+.tool.active .tl{display:inline}
 .stage-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.dark-seg{display:inline-flex;padding:3px;background:#0a2131;border:1px solid #1f4256;border-radius:9px;gap:2px}
-.dark-seg button{border:0;background:transparent;color:#bcd3de;padding:6px 11px;font-size:.78rem;border-radius:6px}
-.dark-seg button:hover:not(:disabled){background:#163a50;color:#fff}
-.dark-seg button.active{background:#e8f6f2;color:var(--navy)}
-.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #2a4f64;background:#0d283a;color:#bcd3de;padding:5px 9px;border-radius:999px;font-size:.74rem;font-weight:600}
-.chip:hover:not(:disabled){background:#163a50;color:#fff}
-.chip[aria-pressed=true]{border-color:#56e0bb;color:#d8fff3;background:#0f3a3a}
+.mode-seg{display:inline-flex;padding:3px;background:#e2eaf0;border-radius:9px;gap:2px}
+.mode-seg button{border:0;background:transparent;color:var(--muted);padding:6px 11px;font-size:.78rem;border-radius:6px}
+.mode-seg button:hover:not(:disabled){background:#d3dfe7;color:var(--ink)}
+.mode-seg button.active{background:#fff;color:var(--navy);box-shadow:0 1px 4px #20374726}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--edge);background:#fff;color:var(--muted);padding:5px 9px;border-radius:999px;font-size:.74rem;font-weight:600}
+.chip:hover:not(:disabled){background:#eef5f7;color:var(--ink)}
+.chip[aria-pressed=true]{border-color:var(--teal);color:#00564f;background:#e6f6f1}
 .chip svg{width:14px;height:14px}
-.icon-chip{width:32px;height:30px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid #2a4f64;background:#0d283a;color:#bcd3de;border-radius:8px}
-.icon-chip:hover:not(:disabled){background:#163a50;color:#fff}
+.icon-chip{width:32px;height:30px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--edge);background:#fff;color:var(--ink);border-radius:8px}
+.icon-chip:hover:not(:disabled){background:#eef5f7}
 .icon-chip svg{width:16px;height:16px}
-.canvas-wrap{position:relative;height:clamp(460px,64vh,820px);touch-action:none}
+.canvas-wrap{position:relative;height:clamp(460px,64vh,820px);touch-action:none;background:#fff}
 #canvas{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-select:none}
 #canvas text{font-family:"Segoe UI",Inter,Roboto,Arial,sans-serif}
 #canvas.tool-select{cursor:default}
@@ -172,34 +189,34 @@ h1{font-size:1.05rem;margin:0;font-weight:650}
 #canvas .hit-node,#canvas .hit-member{cursor:pointer}
 #canvas.tool-select .hit-node{cursor:grab}
 #canvas.dragging,#canvas.dragging *{cursor:grabbing!important}
-.hud{position:absolute;left:12px;bottom:10px;display:flex;gap:10px;align-items:center;font-size:.72rem;color:#a9c3cf;pointer-events:none;font-variant-numeric:tabular-nums;flex-wrap:wrap;max-width:calc(100% - 330px)}
-.hud b{color:#e6f3f7;font-weight:600}
-.hud .hint{color:#7fa6b8}
-.hud .sep{width:1px;height:12px;background:#2c5368}
-.legend-hud{position:absolute;right:12px;bottom:10px;display:flex;gap:12px;align-items:center;font-size:.72rem;color:#bcd3de;background:#0a2131cc;border:1px solid #1f4256;padding:6px 10px;border-radius:8px;backdrop-filter:blur(4px)}
+.hud{position:absolute;left:12px;bottom:10px;display:flex;gap:10px;align-items:center;font-size:.74rem;color:var(--muted);pointer-events:none;font-variant-numeric:tabular-nums;flex-wrap:wrap;max-width:calc(100% - 340px);background:#ffffffe6;border:1px solid var(--line);padding:5px 10px;border-radius:8px}
+.hud b{color:var(--ink);font-weight:600}
+.hud .hint{color:var(--ink)}
+.hud .sep{width:1px;height:12px;background:var(--edge)}
+.legend-hud{position:absolute;right:12px;bottom:10px;display:flex;gap:12px;align-items:center;font-size:.72rem;color:var(--ink);background:#ffffffe6;border:1px solid var(--line);padding:6px 10px;border-radius:8px}
 .legend-hud span{display:inline-flex;align-items:center;gap:6px}
 .legend-hud svg{display:block}
-.grad{width:110px;height:8px;border-radius:4px;background:linear-gradient(90deg,#56e0bb 0%,#a6e36b 40%,#ffd166 70%,#ff9f43 90%,#ff5d5d 100%)}
-.banner{position:absolute;left:14px;top:12px;max-width:min(640px,calc(100% - 360px));padding:8px 14px;border-radius:9px;font-size:.8rem;line-height:1.4;display:flex;gap:9px;align-items:flex-start;box-shadow:0 6px 16px #0006;z-index:3}
-.banner.bad{background:#3a1512ee;border:1px solid #a8483a;color:#ffd9d1}
-.banner.warn{background:#3a2a0eee;border:1px solid #a8822f;color:#ffe9b8}
-.banner b{color:#fff}
+.grad{width:110px;height:8px;border-radius:4px;background:linear-gradient(90deg,#2f9e6e 0%,#7ab034 40%,#e2a300 70%,#e8730c 90%,#d92d20 100%)}
+.banner{position:absolute;left:14px;top:12px;max-width:min(640px,calc(100% - 360px));padding:8px 14px;border-radius:9px;font-size:.8rem;line-height:1.4;display:flex;gap:9px;align-items:flex-start;box-shadow:0 6px 16px #0b1e2b26;z-index:3}
+.banner.bad{background:#fdeceaf5;border:1px solid #e0a39a;color:#7a1f14}
+.banner.warn{background:#fff6e0f5;border:1px solid #e2c275;color:#6b4a00}
+.banner b{color:inherit}
 .empty-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
-.empty-hint div{background:#0a2131dd;border:1px dashed #2f5a70;border-radius:12px;padding:18px 22px;color:#bcd3de;font-size:.85rem;line-height:1.6;max-width:420px;text-align:center}
-.empty-hint b{color:#56e0bb}
-.tooltip{position:absolute;pointer-events:none;z-index:5;background:#f7fbfc;color:var(--ink);border-radius:8px;padding:7px 10px;font-size:.75rem;line-height:1.45;box-shadow:0 8px 20px #0007;min-width:150px;font-variant-numeric:tabular-nums}
+.empty-hint div{background:#fffffff0;border:1px dashed #9fb4c0;border-radius:12px;padding:18px 22px;color:var(--muted);font-size:.85rem;line-height:1.6;max-width:420px;text-align:center}
+.empty-hint b{color:var(--teal)}
+.tooltip{position:absolute;pointer-events:none;z-index:5;background:#fff;color:var(--ink);border:1px solid var(--edge);border-radius:8px;padding:7px 10px;font-size:.75rem;line-height:1.45;box-shadow:0 8px 20px #0b1e2b2e;min-width:150px;font-variant-numeric:tabular-nums}
 .tooltip b{font-weight:700}
 .tooltip .tt-head{display:flex;justify-content:space-between;gap:10px;margin-bottom:3px}
 .tooltip .tt-row{display:flex;justify-content:space-between;gap:14px;color:var(--muted)}
 .tooltip .tt-row span:last-child{color:var(--ink);font-weight:600}
 
 /* Inspector */
-.inspector{position:absolute;right:12px;top:12px;width:318px;max-height:calc(100% - 64px);overflow:auto;background:#f9fcfdf5;color:var(--ink);border-radius:12px;box-shadow:0 12px 30px #0009;border:1px solid #ffffff40;z-index:4;scrollbar-width:thin;animation:insIn .16s ease-out}
+.inspector{position:absolute;right:12px;top:12px;width:318px;max-height:calc(100% - 64px);overflow:auto;background:#fcfdfef7;color:var(--ink);border-radius:12px;box-shadow:0 12px 30px #0b1e2b33;border:1px solid var(--edge);z-index:4;scrollbar-width:thin;animation:insIn .16s ease-out}
 @keyframes insIn{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
 .ins-head{display:flex;align-items:center;gap:10px;padding:12px 14px 10px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#f9fcfd;z-index:1}
 .ins-badge{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;color:#fff;background:var(--navy);flex:none}
-.ins-badge.strut{background:#2f64b0}
-.ins-badge.tie{background:#b66c16}
+.ins-badge.strut{background:var(--strut)}
+.ins-badge.tie{background:var(--tie)}
 .ins-badge.zero{background:#7f909a}
 .ins-title{flex:1;min-width:0}
 .ins-title b{display:block;font-size:.95rem}
@@ -272,6 +289,14 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:10px 16px;border-radius:9px;font-size:.84rem;box-shadow:0 10px 26px #0006;opacity:0;transition:all .25s;z-index:200;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* ---------- Guide dialog ---------- */
+.guide-start{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:14px 24px 0;padding:12px 14px;background:#eefaf6;border:1px solid #9fd8cb;border-radius:10px}
+.guide-start b{display:block}
+.guide-start small{color:var(--muted)}
+.guide-body ol,.guide-body ul{padding-left:22px;margin:6px 0}
+.guide-body li{margin:5px 0}
+.guide-body .in-tool{display:block;color:#00564f;font-size:.82rem}
+
 /* ---------- Templates dialog ---------- */
 .tpl-dialog{width:1040px}
 .tpl-body{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;padding:14px 18px;max-height:72vh;overflow:auto}
@@ -298,6 +323,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 @media (max-width:760px){
   .tpl-body{grid-template-columns:1fr}
   .topbar{padding:0 12px;height:56px}.brand{font-size:1.15rem}.release-info,.method-open .lbl{display:none}
+  .coach{flex-wrap:wrap}.tool.active .tl{display:none}
   .header-right{gap:10px}
   .canvas-wrap{height:68vh}
   .inspector{left:8px;right:8px;width:auto;top:auto;bottom:44px;max-height:48%}
@@ -336,10 +362,13 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
   .row-mem-1{grid-template-columns:36px 1fr 1fr 1fr 22px}
   .stage-top{padding:6px 8px;gap:6px;flex-wrap:nowrap}
   .stage-right{gap:5px;flex-wrap:nowrap;margin-left:auto}
-  .toolbox{position:absolute;left:8px;top:54px;z-index:4;flex-direction:column;gap:2px;padding:3px;box-shadow:0 6px 16px #0006}
+  .toolbox{position:absolute;left:8px;top:54px;z-index:4;flex-direction:column;gap:2px;padding:3px;box-shadow:0 6px 16px #0b1e2b33}
   .tool{padding:7px;justify-content:center}
-  .tool .k{display:none}
-  .dark-seg button{padding:5px 8px;font-size:.72rem}
+  .tool .k,.tool.active .tl{display:none}
+  .coach{margin-bottom:8px;padding:7px 10px;gap:10px}
+  .coach-text{font-size:.76rem}
+  .guide-open .lbl{display:none}
+  .mode-seg button{padding:5px 8px;font-size:.72rem}
   .chip{padding:5px 7px}
   .chip .cl{display:none}
   .icon-chip{width:30px;height:28px}
@@ -370,7 +399,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 }
 @media (pointer:coarse){
   .input-tabs button,.view-tabs button{min-height:40px}
-  .dark-seg button,.tool{min-height:36px;min-width:36px}
+  .mode-seg button,.tool{min-height:36px;min-width:36px}
   .chip,.icon-chip{min-height:34px}
   .menu-pop button{min-height:42px}
 }
@@ -412,6 +441,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
   <p class="top-warning" role="note"><span class="warning-symbol" aria-hidden="true">!</span><span data-i18n="warning"></span></p>
   <div class="header-right">
     <div class="release-info"><b id="release-version"></b><small id="release-date"></small></div>
+    <button id="guide-open" class="method-open guide-open" type="button" data-i18n-title="guideOpen"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 7.5L10 4l7.5 3.5L10 11z M5.5 9.2v3.6c1.2 1.3 2.7 1.9 4.5 1.9s3.3-.6 4.5-1.9V9.2 M17.5 7.5v4.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg><span class="lbl" data-i18n="guideOpen"></span></button>
     <button id="method-open" class="method-open" type="button"><span class="lbl" data-i18n="methodOpen"></span><span aria-hidden="true"> ⓘ</span></button>
     <div class="language" role="group" aria-label="Language / Langue"><button id="lang-en" type="button">EN</button><button id="lang-fr" type="button">FR</button></div>
     <a class="github-link" href="https://github.com/acheruel/QuickerStrut-Tie" target="_blank" rel="noopener noreferrer" title="GitHub · acheruel/QuickerStrut-Tie" aria-label="GitHub · acheruel/QuickerStrut-Tie"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
@@ -447,11 +477,12 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
   </aside>
 
   <section class="results" aria-label="Results">
+    <div id="coach" class="coach hidden" aria-live="polite"></div>
     <div class="stage">
       <div class="stage-top">
         <div class="toolbox" role="toolbar" id="toolbox"></div>
         <div class="stage-right">
-          <div class="dark-seg" id="display-mode" role="group"></div>
+          <div class="mode-seg" id="display-mode" role="group"></div>
           <button type="button" class="chip" id="toggle-bands" aria-pressed="true"></button>
           <button type="button" class="chip" id="toggle-zones" aria-pressed="true"></button>
           <button type="button" class="chip" id="toggle-ids" aria-pressed="true"></button>
@@ -474,11 +505,14 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
     <div class="metrics" id="metrics"></div>
     <div class="chart-toolbar"><div class="view-tabs" role="tablist" id="view-tabs"><button type="button" class="active" data-view="checks" data-i18n="viewChecks"></button><button type="button" data-view="forces" data-i18n="viewForces"></button><button type="button" data-view="reactions" data-i18n="viewReactions"></button></div></div>
     <div class="result-view" id="result-view"></div>
-    <div class="result-footer"><span data-i18n="footerNote"></span><span id="footer-version"></span></div>
+    <div class="result-footer"><span data-i18n="footerNote"></span><span><span data-i18n="seeAlso"></span> <a href="https://awatif.co/examples/strut/" target="_blank" rel="noopener noreferrer">Where does the load flow? · Awatif</a></span><span id="footer-version"></span></div>
   </section>
 </main>
 
 <dialog id="method-dialog"><div class="dlg-head"><span class="ins-badge">i</span><div><b data-i18n="methodOpen"></b><small data-i18n="methodSub"></small></div><button type="button" class="ins-close" data-close aria-label="Close">×</button></div><div class="dlg-body" id="method-body"></div></dialog>
+<dialog id="guide-dialog" aria-labelledby="guide-title"><div class="dlg-head"><span class="ins-badge" aria-hidden="true">?</span><div><b id="guide-title" data-i18n="guideOpen"></b><small data-i18n="guideSub"></small></div><button type="button" class="ins-close" data-close data-i18n-title="close">×</button></div>
+  <div class="guide-start"><div><b data-i18n="tutTitle"></b><small data-i18n="tutLead"></small></div><button type="button" class="primary" id="tut-start" data-i18n="tutStart"></button></div>
+  <div class="dlg-body guide-body" id="guide-body"></div></dialog>
 <dialog id="tpl-dialog" class="tpl-dialog"><div class="dlg-head"><span class="ins-badge">⌂</span><div><b data-i18n="templatesMenu"></b><small data-i18n="templatesSub"></small></div><button type="button" class="ins-close" data-close aria-label="Close">×</button></div>
   <div class="tpl-body"><div class="tpl-side"><div class="tpl-kinds" id="tpl-kinds"></div><div id="tpl-form" class="tpl-form"></div></div><div class="tpl-preview"><div id="tpl-svg" class="tpl-svg"></div><div id="tpl-info" class="tpl-info"></div></div></div>
   <div class="dlg-actions"><button type="button" data-close data-i18n="cancel"></button><button type="button" class="primary" id="tpl-create" data-i18n="tplCreate"></button></div></dialog>
@@ -487,7 +521,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 <div id="report"></div>
 <script>/* js/version.js */
 // SPDX-License-Identifier: GPL-3.0-or-later
-window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chéruel', schema: 1 };
+window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chéruel', schema: 1 };
 
 </script>
 <script>/* js/solver.js */
@@ -500,6 +534,9 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
  * Axial stiffness of each bar: struts EA = Ec·w·b, ties EA = Es·As. For a
  * statically determinate model the forces do not depend on EA; for an
  * indeterminate model the bar roles (strut/tie) are iterated until stable.
+ *
+ * A singular truss can still give an equilibrium solution for its given
+ * loads. Its mechanism displacements are arbitrary and have no design use.
  */
 (function (root) {
   'use strict';
@@ -532,35 +569,49 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     });
   }
 
-  // Gaussian elimination with partial pivoting on a dense copy. Returns the
-  // solution or {singular: column} for the first column without a usable pivot.
-  function linearSolve(K, F) {
-    var n = F.length, A = K.map(function (r) { return r.slice(); }), x = F.slice();
+  // Gaussian elimination with partial pivoting. For a singular equilibrium
+  // solve, leave nonpivot coordinates at zero and check the original equations.
+  // The arbitrary mechanism displacements do not strain the bars.
+  function linearSolve(K, F, allowSingular) {
+    var n = F.length, A = K.map(function (r) { return r.slice(); }), rhs = F.slice();
     var scale = 0;
     for (var d = 0; d < n; d++) scale = Math.max(scale, Math.abs(A[d][d]));
     var tol = Math.max(scale, 1e-30) * 1e-10;
-    var perm = [];
-    for (var p = 0; p < n; p++) perm.push(p);
+    var pivots = [];
     for (var k = 0; k < n; k++) {
-      var piv = k, best = Math.abs(A[k][k]);
-      for (var r = k + 1; r < n; r++) if (Math.abs(A[r][k]) > best) { best = Math.abs(A[r][k]); piv = r; }
-      if (best < tol) return { singular: k };
-      if (piv !== k) { var t = A[k]; A[k] = A[piv]; A[piv] = t; var tx = x[k]; x[k] = x[piv]; x[piv] = tx; }
-      var akk = A[k][k];
-      for (var i = k + 1; i < n; i++) {
-        var f = A[i][k] / akk;
+      var row = pivots.length, piv = row, best = Math.abs(A[row][k]);
+      for (var r = row + 1; r < n; r++) if (Math.abs(A[r][k]) > best) { best = Math.abs(A[r][k]); piv = r; }
+      if (best < tol) {
+        if (!allowSingular) return { singular: k };
+        continue;
+      }
+      pivots.push(k);
+      if (piv !== row) {
+        var t = A[row]; A[row] = A[piv]; A[piv] = t;
+        var tx = rhs[row]; rhs[row] = rhs[piv]; rhs[piv] = tx;
+      }
+      for (var i = row + 1; i < n; i++) {
+        var f = A[i][k] / A[row][k];
         if (f === 0) continue;
-        var Ai = A[i], Ak = A[k];
-        for (var j = k; j < n; j++) Ai[j] -= f * Ak[j];
-        x[i] -= f * x[k];
+        for (var j = k + 1; j < n; j++) A[i][j] -= f * A[row][j];
+        rhs[i] -= f * rhs[row];
       }
     }
-    for (var i2 = n - 1; i2 >= 0; i2--) {
-      var sum = x[i2];
-      for (var j2 = i2 + 1; j2 < n; j2++) sum -= A[i2][j2] * x[j2];
-      x[i2] = sum / A[i2][i2];
+    var x = new Array(n).fill(0);
+    for (var i2 = pivots.length - 1; i2 >= 0; i2--) {
+      var col = pivots[i2], sum = rhs[i2];
+      for (var j2 = col + 1; j2 < n; j2++) sum -= A[i2][j2] * x[j2];
+      x[col] = sum / A[i2][col];
     }
-    return { x: x };
+    if (pivots.length === n) return { x: x };
+    var worst = 0, dof = 0, fmax = 0;
+    for (var a = 0; a < n; a++) {
+      fmax = Math.max(fmax, Math.abs(F[a]));
+      var residual = F[a];
+      for (var b = 0; b < n; b++) residual -= K[a][b] * x[b];
+      if (Math.abs(residual) > worst) { worst = Math.abs(residual); dof = a; }
+    }
+    return worst <= 1e-8 * fmax ? { x: x, unbraced: true } : { singular: dof };
   }
 
   function axialStiffness(model, m, isTie, Ec) {
@@ -573,7 +624,8 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     return Ec * w * b / 1000; // kN
   }
 
-  function solve(model) {
+  function solve(model, zeroForceKN) {
+    if (zeroForceKN === undefined) zeroForceKN = ZERO_FORCE_KN;
     var nodes = model.nodes, members = model.members, nn = nodes.length, nd = nn * 2;
     var out = { ok: false, nodes: nn, members: members.length };
     if (!nn) { out.error = 'empty'; return out; }
@@ -596,7 +648,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
 
     // Initial roles: explicit roles, otherwise strut.
     var tie = members.map(function (m) { return m.role === 'tie'; });
-    var N, u, EA, iter = 0, converged = false, K;
+    var N, u, EA, iter = 0, converged = false, K, unbraced = false;
     while (iter < 12) {
       iter++;
       EA = members.map(function (m, k) { return axialStiffness(model, m, tie[k], Ec); });
@@ -615,7 +667,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       var Fr = free.map(function (i) { return F[i]; });
       u = new Array(nd).fill(0);
       if (free.length) {
-        var sol = linearSolve(Kr, Fr);
+        var sol = linearSolve(Kr, Fr, true);
         if (sol.singular !== undefined) {
           var dof = free[sol.singular];
           out.error = 'mechanism';
@@ -623,6 +675,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
           out.mechanismDir = dof % 2 ? 'y' : 'x';
           return out;
         }
+        unbraced = !!sol.unbraced;
         free.forEach(function (dd, k2) { u[dd] = sol.x[k2]; });
       }
       N = members.map(function (m, k) {
@@ -656,6 +709,8 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     reactions.forEach(function (R) { sumRx += R.rx; sumRy += R.ry; });
 
     out.ok = true;
+    // true: compatible loads on a kinematically unstable truss.
+    out.unbraced = unbraced;
     out.converged = converged;
     out.iterations = iter;
     out.u = u;
@@ -665,7 +720,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     out.loadScale = loadScale;
     out.sumLoads = { fx: sumFx, fy: sumFy };
     out.forces = members.map(function (m, k) {
-      var n = Math.abs(N[k]) < ZERO_FORCE_KN ? 0 : N[k];
+      var n = Math.abs(N[k]) < zeroForceKN ? 0 : N[k];
       return {
         id: m.id, N: n, L: geo[k].L, c: geo[k].c, s: geo[k].s, EA: EA[k],
         kind: n > 0 ? 'tie' : n < 0 ? 'strut' : 'zero'
@@ -1153,7 +1208,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     {
       key: 'deep-beam-2',
       title: { fr: 'Poutre-cloison · deux charges', en: 'Deep beam · two point loads' },
-      sub: { fr: 'Bielle supérieure, montants à effort nul', en: 'Top strut, zero-force web members' },
+      sub: { fr: 'Modèle en trapèze : bielle supérieure entre les charges', en: 'Trapezoid model: top strut between the loads' },
       model: {
         code: 'S6',
         material: material({ fc: 35, b: 450 }),
@@ -1162,14 +1217,11 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
           N('N1', 0.35, 0.15, { support: 'pin', bearing: 350 }),
           N('N2', 4.25, 0.15, { support: 'ry', bearing: 350 }),
           N('N3', 1.65, 2.0, { fy: -1800, bearing: 350 }),
-          N('N4', 2.95, 2.0, { fy: -1800, bearing: 350 }),
-          N('N5', 1.65, 0.15),
-          N('N6', 2.95, 0.15)
+          N('N4', 2.95, 2.0, { fy: -1800, bearing: 350 })
         ],
         members: [
           S('M1', 'N1', 'N3', 350), S('M2', 'N3', 'N4', 250), S('M3', 'N4', 'N2', 350),
-          T('M4', 'N1', 'N5', 6, '30M', 300), T('M5', 'N5', 'N6', 6, '30M', 300), T('M6', 'N6', 'N2', 6, '30M', 300),
-          S('M7', 'N3', 'N5', 200), S('M8', 'N4', 'N6', 200), S('M9', 'N3', 'N6', 200)
+          T('M4', 'N1', 'N2', 6, '30M', 300)
         ]
       }
     },
@@ -1192,8 +1244,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
         members: [
           T('M1', 'N1', 'N2', 4, '20M', 120, 'plate'),
           S('M2', 'N1', 'N3', 150), S('M3', 'N2', 'N4', 150),
-          S('M4', 'N3', 'N4', 120), S('M5', 'N3', 'N5', 200), S('M6', 'N4', 'N6', 200),
-          S('M7', 'N3', 'N2', 100), S('M8', 'N3', 'N6', 100)
+          S('M4', 'N3', 'N4', 120), S('M5', 'N3', 'N5', 200), S('M6', 'N4', 'N6', 200)
         ]
       }
     },
@@ -1216,7 +1267,37 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
         members: [
           T('M1', 'N1', 'N2', 16, '35M', 200), T('M2', 'N2', 'N3', 20, '35M', 200), T('M3', 'N3', 'N4', 16, '35M', 200),
           S('M4', 'N1', 'N5', 450), S('M5', 'N2', 'N5', 350), S('M6', 'N3', 'N6', 350), S('M7', 'N4', 'N6', 450),
-          S('M8', 'N5', 'N6', 300), S('M9', 'N2', 'N6', 200)
+          S('M8', 'N5', 'N6', 300)
+        ]
+      }
+    },
+    {
+      key: 'bent-cap-20m',
+      title: { fr: 'Chevêtre de 20 m sur 4 colonnes', en: '20 m bent cap on 4 columns' },
+      sub: { fr: '7 poutres, bielles directes vers les colonnes', en: '7 girders, direct struts to the columns' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 35, b: 1500 }),
+        // Cap 20 m × 2.0 m, columns 1.2 m wide at x = ±2.6 and ±7.8 m, girders
+        // every 2.8 m. Each load goes straight to the nearest column(s): top
+        // ties over the outer columns, bottom ties in the three spans, no bar
+        // without force.
+        outline: [[-10, 0], [-8.4, 0], [-8.4, -1.5], [-7.2, -1.5], [-7.2, 0], [-3.2, 0], [-3.2, -1.5], [-2.0, -1.5], [-2.0, 0],
+          [2.0, 0], [2.0, -1.5], [3.2, -1.5], [3.2, 0], [7.2, 0], [7.2, -1.5], [8.4, -1.5], [8.4, 0], [10, 0], [10, 2.0], [-10, 2.0]],
+        nodes: [
+          N('T1', -8.4, 1.85, { fy: -2000, bearing: 600 }), N('T2', -5.6, 1.85, { fy: -2000, bearing: 600 }),
+          N('T3', -2.8, 1.85, { fy: -2000, bearing: 600 }), N('T4', 0, 1.85, { fy: -2000, bearing: 600 }),
+          N('T5', 2.8, 1.85, { fy: -2000, bearing: 600 }), N('T6', 5.6, 1.85, { fy: -2000, bearing: 600 }),
+          N('T7', 8.4, 1.85, { fy: -2000, bearing: 600 }),
+          N('B1', -7.8, 0.15, { support: 'pin', bearing: 1200 }), N('B2', -2.6, 0.15, { support: 'ry', bearing: 1200 }),
+          N('B3', 2.6, 0.15, { support: 'ry', bearing: 1200 }), N('B4', 7.8, 0.15, { support: 'ry', bearing: 1200 })
+        ],
+        members: [
+          S('M1', 'T1', 'B1', 400), S('M2', 'T2', 'B1', 400), S('M3', 'T2', 'B2', 300), S('M4', 'T3', 'B2', 400),
+          S('M5', 'T4', 'B2', 350), S('M6', 'T4', 'B3', 350), S('M7', 'T5', 'B3', 400), S('M8', 'T6', 'B3', 300),
+          S('M9', 'T6', 'B4', 400), S('M10', 'T7', 'B4', 400),
+          T('M11', 'T1', 'T2', 6, '25M', 200), S('M12', 'T2', 'T3', 200), S('M13', 'T5', 'T6', 200), T('M14', 'T6', 'T7', 6, '25M', 200),
+          T('M15', 'B1', 'B2', 8, '25M', 250), T('M16', 'B2', 'B3', 10, '25M', 250), T('M17', 'B3', 'B4', 8, '25M', 250)
         ]
       }
     },
@@ -1245,35 +1326,33 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
           S('M4', 'N2', 'N5', 150), S('M5', 'N3', 'N4', 250), S('M6', 'N3', 'N5', 300), T('M7', 'N3', 'N6', 6, '25M', 150, 'plate'),
           S('M8', 'N5', 'N4', 150), T('M9', 'N4', 'N6', 5, '15M', 150, 'stirrup'), S('M10', 'N5', 'N7', 150), T('M11', 'N6', 'N8', 6, '25M', 150),
           S('M12', 'N6', 'N7', 250), T('M13', 'N7', 'N8', 4, '15M', 150, 'stirrup'), S('M14', 'N7', 'N9', 150), T('M15', 'N8', 'N10', 6, '25M', 150),
-          S('M16', 'N8', 'N9', 250), T('M17', 'N9', 'N10', 4, '15M', 150, 'stirrup')
+          S('M16', 'N8', 'N9', 250)
         ]
       }
     },
     {
       key: 'bridge-corbel',
-      title: { fr: 'Corbeau de pile de pont', en: 'Bridge pier corbel' },
-      sub: { fr: 'Corbeau simple sous appareil d’appui, H = 0,2 V', en: 'Single corbel under a girder bearing, H = 0.2 V' },
+      title: { fr: 'Corbeau de pont avec garde-grève', en: 'Bridge corbel with backwall' },
+      sub: { fr: 'Corbeau sous appareil d’appui, garde-grève complet, H = 0,2 V', en: 'Corbel under a girder bearing, full backwall, H = 0.2 V' },
       model: {
         code: 'S6',
         material: material({ fc: 35, b: 900 }),
-        // Column 1.0 m deep (far face at x = 0), corbel projecting 0.6 m; the
-        // column is cut 1.4 m below the corbel, where the supports stand for it.
-        outline: [[0, -2.4], [1.0, -2.4], [1.0, -0.9], [1.6, -0.5], [1.6, 0], [0, 0]],
+        // Column 1.0 m deep (far face at x = 0), corbel projecting 0.6 m. The
+        // backwall shares the column faces and rises 0.85 m above the seat (unloaded here).
+        // The bottom supports represent the cut through the column.
+        outline: [[0, -2.4], [1.0, -2.4], [1.0, -0.9], [1.6, -0.5], [1.6, 0], [1.0, 0], [1.0, 0.85], [0, 0.85]],
         nodes: [
           N('N1', 1.3, -0.08, { fy: -1400, fx: 280, bearing: 400 }),
           N('N2', 0.08, -0.08),
           N('N3', 0.92, -0.95),
           N('N4', 0.08, -0.95),
           N('N5', 0.92, -2.3, { support: 'pin', bearing: 200 }),
-          N('N6', 0.08, -2.3, { support: 'ry' }),
-          N('N7', 0.92, -0.08)
+          N('N6', 0.08, -2.3, { support: 'ry' })
         ],
         members: [
-          T('M1', 'N1', 'N7', 8, '25M', 160, 'plate'), T('M2', 'N7', 'N2', 8, '25M', 160, 'continuous'),
-          S('M3', 'N1', 'N3', 350), S('M4', 'N2', 'N3', 300), S('M5', 'N7', 'N3', 150),
-          T('M6', 'N2', 'N4', 10, '25M', 160, 'continuous'), T('M7', 'N3', 'N4', 6, '15M', 0, 'stirrup'),
-          S('M8', 'N3', 'N5', 250), T('M9', 'N4', 'N6', 10, '25M', 160, 'continuous'), S('M10', 'N4', 'N5', 250),
-          S('M11', 'N5', 'N6', 200)
+          T('M1', 'N1', 'N2', 8, '25M', 160, 'plate'), S('M2', 'N1', 'N3', 350), S('M3', 'N2', 'N3', 300),
+          T('M4', 'N2', 'N4', 10, '25M', 160, 'continuous'), T('M5', 'N3', 'N4', 6, '15M', 0, 'stirrup'),
+          S('M6', 'N3', 'N5', 250), T('M7', 'N4', 'N6', 10, '25M', 160, 'continuous'), S('M8', 'N4', 'N5', 250)
         ]
       }
     },
@@ -1301,9 +1380,9 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
         ],
         members: [
           T('M1', 'D1', 'K1', 8, '20M', 200, 'continuous'), S('M2', 'D2', 'K2', 240), S('M3', 'D1', 'K2', 300),
-          S('M4', 'D1', 'D2', 200), S('M5', 'K1', 'K2', 300),
-          T('M6', 'K1', 'B3', 8, '25M', 200, 'continuous'), T('M7', 'B3', 'B1', 8, '25M', 200, 'continuous'),
-          S('M8', 'K2', 'B2', 240), S('M9', 'B1', 'B2', 200), S('M10', 'K1', 'B2', 250), S('M11', 'B3', 'B2', 250)
+          S('M4', 'K1', 'K2', 300),
+          T('M5', 'K1', 'B3', 8, '25M', 200, 'continuous'), T('M6', 'B3', 'B1', 8, '25M', 200, 'continuous'),
+          S('M7', 'K2', 'B2', 240), S('M8', 'K1', 'B2', 250), S('M9', 'B3', 'B2', 250)
         ]
       }
     },
@@ -1327,9 +1406,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
           N('C2', 0.0875, 0.0155, { support: 'ry', bearing: 175 })
         ],
         members: [
-          T('AB', 'A', 'A2', 5, '15M', 56, 'plate'), S('AC', 'A', 'C', 76), S('A2C2', 'A2', 'C2', 76), S('CC2', 'C', 'C2', 31),
-          // Bracing diagonal (zero force under the symmetric loads).
-          S('AC2', 'A', 'C2', 100)
+          T('AB', 'A', 'A2', 5, '15M', 56, 'plate'), S('AC', 'A', 'C', 76), S('A2C2', 'A2', 'C2', 76), S('CC2', 'C', 'C2', 31)
         ]
       }
     },
@@ -1362,9 +1439,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
           T('GH', 'G', 'H', 6, '10M', 0, 'stirrup'), S('GI', 'G', 'I', 125), S('HI', 'H', 'I', 150),
           T('HJ', 'H', 'J', 5, '30M', 120, 'straight'), T('IJ', 'I', 'J', 4, '10M', 0, 'stirrup'), S('IK', 'I', 'K', 125),
           S('JK', 'J', 'K', 150), T('JL', 'J', 'L', 5, '30M', 120, 'straight'), T('KL', 'K', 'L', 4, '10M', 0, 'stirrup'),
-          S('KM', 'K', 'M', 125), S('LM', 'L', 'M', 150), T('LN', 'L', 'N', 5, '30M', 120, 'straight'),
-          // Zero-force post that holds N vertically (symmetry plane).
-          S('MN', 'M', 'N', 100)
+          S('KM', 'K', 'M', 125), S('LM', 'L', 'M', 150), T('LN', 'L', 'N', 5, '30M', 120, 'straight')
         ]
       }
     },
@@ -1388,9 +1463,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
         members: [
           TA('AB', 'A', 'B', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000, 1.27 * IN * 1000), TA('BC', 'B', 'C', 16 * 1.27 * IN * IN * 1e6, 10 * IN * 1000, 1.27 * IN * 1000),
           S('AD', 'A', 'D', 400), T('BD', 'B', 'D', 26, '20M', 0, 'stirrup'), S('BE', 'B', 'E', 400), S('CF', 'C', 'F', 287),
-          S('DE', 'D', 'E', 6 * IN * 1000), S('EF', 'E', 'F', 6 * IN * 1000),
-          // Bracing diagonal (zero force) so that the stiffness matrix is regular.
-          S('BF', 'B', 'F', 150)
+          S('DE', 'D', 'E', 6 * IN * 1000), S('EF', 'E', 'F', 6 * IN * 1000)
         ]
       }
     },
@@ -1411,7 +1484,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
         ],
         members: [
           T('M1', 'N3', 'N4', 8, '25M', 250), S('M2', 'N1', 'N3', 300), S('M3', 'N2', 'N4', 300),
-          S('M4', 'N1', 'N2', 250), S('M5', 'N1', 'N4', 200)
+          S('M4', 'N1', 'N2', 250)
         ]
       }
     }
@@ -1449,6 +1522,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
  *   dappedEnd   about réduit / demi-joint, orthogonal model, half span with symmetry
  *   bentCap     multi-column bent cap, truss with diagonals towards the columns
  *   pileCap     pile cap on 2, 3 or 4 piles, 2D elevation (see pileMap / tie3D)
+ * Bars that carry no force under the template loads are removed (prune).
  */
 (function (root) {
   'use strict';
@@ -1465,6 +1539,32 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
   function bar(id, i, j, o) {
     o = o || {};
     return { id: id, i: i, j: j, role: 'auto', w: o.w || 200, bars: o.tie ? { n: 4, size: '20M' } : null, As: 0, anchor: o.anchor || 'hook', db: 0 };
+  }
+
+  // A template is a regular truss; under its loads some bars carry nothing.
+  // They are dropped (with the nodes left without a bar) and the rest is
+  // renumbered, so that the model only shows the load path.
+  function prune(model) {
+    csa.normalize(model);
+    var result = solver.solve(model, 0);
+    while (result.ok && result.converged && result.loadScale > 0) {
+      // Prune at numerical precision. A displayed zero can still balance a small load.
+      var tol = 1e-10 * result.loadScale;
+      var kept = model.members.filter(function (m, i) { return Math.abs(result.forces[i].N) > tol; });
+      if (kept.length === model.members.length) break;
+      var previous = model.members;
+      model.members = kept;
+      result = solver.solve(model, 0);
+      if (!result.ok || !result.converged) { model.members = previous; break; }
+    }
+    var used = {}, map = {};
+    model.members.forEach(function (m) { used[m.i] = used[m.j] = 1; });
+    model.nodes = model.nodes.filter(function (n) { return used[n.id] || n.support || n.fx || n.fy; });
+    model.nodes.forEach(function (n, k) { map[n.id] = 'N' + (k + 1); n.id = map[n.id]; });
+    model.members.forEach(function (m, k) { m.id = 'M' + (k + 1); m.i = map[m.i]; m.j = map[m.j]; });
+    var pm = model.meta && model.meta.pileMap;
+    if (pm) { var out = {}; Object.keys(pm).forEach(function (k) { out[map[k]] = pm[k]; }); model.meta.pileMap = out; }
+    return model;
   }
 
   var DEFAULTS = {
@@ -1515,11 +1615,11 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     }
     return {
       errors: errors,
-      model: {
+      model: prune({
         schema: 1, code: 'S6', material: examples.material({ fc: p.fc, b: p.b }),
         outline: [[0, h - hn], [ln, h - hn], [ln, 0], [p.half, 0], [p.half, h], [0, h]].map(function (q) { return [r6(q[0]), r6(q[1])]; }),
         nodes: nodes, members: mem, meta: { template: 'dappedEnd', params: p }
-      }
+      })
     };
   }
 
@@ -1560,11 +1660,11 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     outline.push([x1, 0], [x1, h], [x0, h]);
     return {
       errors: errors,
-      model: {
+      model: prune({
         schema: 1, code: 'S6', material: examples.material({ fc: p.fc, b: p.b }),
         outline: outline.map(function (q) { return [r6(q[0]), r6(q[1])]; }),
         nodes: nodes, members: mem, meta: { template: 'bentCap', params: p }
-      }
+      })
     };
   }
 
@@ -1607,7 +1707,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
         node('N4', xb, c, { support: 'ry', bearing: plate1 * (np === 4 ? 2 : 1) })
       ];
       mem = [bar('M1', 'N3', 'N4', { tie: true, w: 250, anchor: 'hook' }), bar('M2', 'N1', 'N3', { w: 400 }), bar('M3', 'N2', 'N4', { w: 400 }),
-        bar('M4', 'N1', 'N2', { w: 250 }), bar('M5', 'N1', 'N4', { w: 150 })];
+        bar('M4', 'N1', 'N2', { w: 250 })];
       pileMap = np === 4
         ? { N3: [{ pile: 'P1', share: 0.5 }, { pile: 'P3', share: 0.5 }], N4: [{ pile: 'P2', share: 0.5 }, { pile: 'P4', share: 0.5 }] }
         : { N3: [{ pile: 'P1', share: 1 }], N4: [{ pile: 'P2', share: 1 }] };
@@ -1619,11 +1719,11 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       [L1, h], [cw / 2, h], [cw / 2, h + stub], [-cw / 2, h + stub], [-cw / 2, h], [L0, h]];
     return {
       errors: errors,
-      model: {
+      model: prune({
         schema: 1, code: 'S6', material: examples.material({ fc: p.fc, b: Math.round(b * 1000) }),
         outline: outline.map(function (q) { return [r6(q[0]), r6(q[1])]; }),
         nodes: nodes, members: mem, meta: { template: 'pileCap', params: Object.assign({}, p, { np: np }), pileMap: pileMap, tie3D: tie3D }
-      }
+      })
     };
   }
 
@@ -1705,37 +1805,100 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
 </script>
 <script>/* js/i18n.js */
 // SPDX-License-Identifier: GPL-3.0-or-later
-/* QuickerStrut&Tie — French / English strings. */
+/* QuickerStrut&Tie — French / English strings, method text and design guide. */
 (function (root) {
   'use strict';
 
   var METHOD_FR = [
     '<h3>Modèle</h3><p>Le modèle bielles-tirants est un treillis plan articulé : les nœuds sont reliés par des barres qui ne transmettent qu’un effort axial. Les charges pondérées (ÉLUL) sont appliquées aux nœuds. Le treillis est résolu par la méthode des rigidités directe ; N &gt; 0 est une traction (tirant), N &lt; 0 une compression (bielle). Le rôle d’une barre est déterminé automatiquement par le signe de l’effort, ou imposé.</p>',
-    '<p>Rigidité axiale : bielles <i>EA = Ec·w·b</i>, tirants <i>EA = Es·As</i>. Pour un modèle isostatique les efforts n’en dépendent pas. Pour un modèle hyperstatique, les rôles sont itérés jusqu’à stabilité ; la répartition dépend alors des largeurs et des aires saisies.</p>',
+    '<p>Rigidité axiale : bielles <i>EA = Ec·w·b</i>, tirants <i>EA = Es·As</i>. Pour un modèle isostatique les efforts n’en dépendent pas. Pour un modèle hyperstatique, les rôles sont itérés jusqu’à stabilité ; la répartition dépend alors des largeurs et des aires saisies. Un modèle n’a pas à être un treillis stable sous n’importe quelle charge : s’il est en équilibre sous ses propres charges, il est résolu tel quel (« Équilibre sous ce chargement ») ; il n’est signalé comme mécanisme que si les charges le mettent en mouvement.</p>',
     '<h3>Bielles</h3><span class="eq">Cr = φc · fcu · Acs,&nbsp;&nbsp; Acs = w · b</span><span class="eq">fcu = f′c / (0,8 + 170 ε1) ≤ 0,85 f′c (A23.3) ou α1 f′c (S6),&nbsp;&nbsp; ε1 = εs + (εs + 0,002) cot²θs</span><p>Pour la S6, α1 = 0,85 − 0,0015 f′c ≥ 0,67. θs est le plus petit angle entre la bielle et un tirant adjacent, évalué aux deux extrémités ; la valeur de fcu la plus faible gouverne. Un tirant dans le prolongement de la bielle (à moins de 5°) ne la traverse pas et n’est pas pris en compte. εs est la déformation du tirant, calculée (Tf / Es·As) ou prise égale à fy / Es. Sans tirant adjacent, fcu atteint la limite supérieure.</p>',
-    '<h3>Tirants</h3><span class="eq">Tr = φs · fy · Ast</span><p>Les armatures sont choisies en nombre × diamètre (barres CSA G30.18). L’ancrage n’est pas vérifié : la pleine résistance doit être développée à la sortie de la zone nodale prolongée.</p>',
+    '<h3>Tirants</h3><span class="eq">Tr = φs · fy · Ast</span><p>Les armatures sont choisies en nombre × diamètre (barres CSA G30.18). L’ancrage est vérifié à part (voir plus bas) : la pleine résistance doit être développée à la sortie de la zone nodale prolongée.</p>',
     '<h3>Zones nodales</h3><p>Contrainte sur chaque face ≤ 0,85 / 0,75 / 0,65 φc f′c selon l’A23.3, ou α1 / 0,88 α1 / 0,76 α1 φc f′c selon la S6, pour les nœuds CCC (bielles et appuis), CCT (un tirant ancré) et CTT (tirants dans plus d’une direction). Faces vérifiées : bielles (C / w·b), plaques d’appui et de charge (R / lb·b) et, en option, face d’ancrage des tirants (T / w·b).</p>',
     '<h3>Zones nodales hydrostatiques</h3><p>Chaque force sur le nœud est une poussée sur une face : bielles de leur côté, tirants sur la face arrière (force nette des tirants alignés), charges et réactions sur leur plaque. Le polygone des forces fermé, tourné de 90° et mis à l’échelle 1 / (σh·b), donne la zone nodale : chaque face est perpendiculaire à sa force et toutes portent la même contrainte σh. σh est la plus forte contrainte des faces de largeur saisie ; la zone est tracée au canevas et un avertissement signale un dépassement du contour.</p>',
     '<h3>Ancrage des tirants</h3><p>À chaque nœud où un tirant se termine (sauf plan de symétrie), l<sub>a</sub> = distance à la section critique (bord de la bielle ou de la zone hydrostatique sur l’axe du tirant) + prolongement des barres jusqu’à la face du béton − enrobage. Exigé : l<sub>d</sub> = k·k1·k4·fy/√f′c·db ≥ 300 mm (barre droite, k = 0,45 ou 0,6, k1 = 1,3 barres supérieures, k4 = 0,8 jusqu’au 20M) ou l<sub>dh</sub> = 100·db/√f′c·fy/400 ≥ 8db, 150 mm (crochet), selon l’A23.3 12.2.3 et 12.5 (méthode simplifiée, aussi utilisée avec la S6 : à confirmer avec la S6 8.15). Plaques, barres soudées et étriers fermés sont considérés ancrés mécaniquement. Une « barre continue ou pliée » n’a pas à être ancrée là où elle se poursuit : pliée dans un autre tirant (coin de portique) ou prolongée au-delà de la région D (nœud chargé ou appuyé) ; ailleurs, elle est vérifiée comme barre droite.</p>',
     '<h3>Armature de contrôle de la fissuration</h3><p>Grille orthogonale près de chaque face : ρ ≥ 0,003 (S6) ou 0,002 (A23.3) dans chaque direction, espacement ≤ 300 mm. Selon la S6, la grille n’a pas à dépasser 1500 mm²/m par face.</p>',
     '<h3>Coefficients</h3><table><tr><th></th><th>φc</th><th>φs</th><th>Articles</th></tr><tr><td>CSA S6</td><td>0,75</td><td>0,90</td><td>8.4.6, 8.10.3.3, 8.10.4.1, 8.10.5.1</td></tr><tr><td>CSA A23.3</td><td>0,65</td><td>0,85</td><td>8.4, 11.4.2.3, 11.4.3.1, 11.4.4.1, 11.4.5</td></tr></table><p>Les coefficients peuvent être remplacés (béton préfabriqué, etc.). Les numéros d’article et facteurs sont à confirmer avec l’édition de la norme applicable au projet.</p>',
-    '<h3>Limites</h3><p>Modèle 2D, un seul cas de charge pondéré, épaisseur b constante. Pas de poids propre automatique, de génération automatique du modèle ni de champs de contraintes. La géométrie du modèle (position des nœuds, largeurs) relève du jugement de l’ingénieur.</p>'
+    '<h3>Limites</h3><p>Modèle 2D, un seul cas de charge pondéré, épaisseur b constante. Pas de poids propre automatique, de génération automatique du modèle ni de champs de contraintes. Un modèle sans barre de stabilité n’est valable que pour le cas de charge saisi. La géométrie du modèle (position des nœuds, largeurs) relève du jugement de l’ingénieur.</p>'
   ].join('');
   var METHOD_EN = [
     '<h3>Model</h3><p>A strut-and-tie model is a plane pin-jointed truss: nodes are linked by bars carrying axial force only. Factored (ULS) loads act at the nodes. The truss is solved with the direct stiffness method; N &gt; 0 is tension (tie), N &lt; 0 compression (strut). A bar’s role follows the sign of its force, or can be imposed.</p>',
-    '<p>Axial stiffness: struts <i>EA = Ec·w·b</i>, ties <i>EA = Es·As</i>. Forces in a statically determinate model do not depend on it. For an indeterminate model the roles are iterated until stable; the force distribution then depends on the widths and areas entered.</p>',
+    '<p>Axial stiffness: struts <i>EA = Ec·w·b</i>, ties <i>EA = Es·As</i>. Forces in a statically determinate model do not depend on it. For an indeterminate model the roles are iterated until stable; the force distribution then depends on the widths and areas entered. A model does not have to be a truss that is stable under any load: if it is in equilibrium under its own loads it is solved as it is (“In equilibrium under these loads”); it is reported as a mechanism only when the loads set it in motion.</p>',
     '<h3>Struts</h3><span class="eq">Cr = φc · fcu · Acs,&nbsp;&nbsp; Acs = w · b</span><span class="eq">fcu = f′c / (0.8 + 170 ε1) ≤ 0.85 f′c (A23.3) or α1 f′c (S6),&nbsp;&nbsp; ε1 = εs + (εs + 0.002) cot²θs</span><p>For S6, α1 = 0.85 − 0.0015 f′c ≥ 0.67. θs is the smallest angle between the strut and an adjoining tie, evaluated at both ends; the lowest fcu governs. A tie in line with the strut (within 5°) does not cross it and is ignored. εs is the tie strain, computed (Tf / Es·As) or taken as fy / Es. With no adjoining tie, fcu reaches the upper limit.</p>',
-    '<h3>Ties</h3><span class="eq">Tr = φs · fy · Ast</span><p>Reinforcement is entered as number × bar size (CSA G30.18 bars). Anchorage is not checked: full strength must be developed where the tie leaves the extended nodal zone.</p>',
+    '<h3>Ties</h3><span class="eq">Tr = φs · fy · Ast</span><p>Reinforcement is entered as number × bar size (CSA G30.18 bars). Anchorage is checked separately (see below): full strength must be developed where the tie leaves the extended nodal zone.</p>',
     '<h3>Nodal zones</h3><p>Stress on each face ≤ 0.85 / 0.75 / 0.65 φc f′c to A23.3, or α1 / 0.88 α1 / 0.76 α1 φc f′c to S6, for CCC (struts and bearings), CCT (one anchored tie) and CTT (ties in more than one direction) nodes. Faces checked: struts (C / w·b), bearing and load plates (R / lb·b) and, optionally, the anchorage face of ties (T / w·b).</p>',
     '<h3>Hydrostatic nodal zones</h3><p>Each force on the node is a push on one face: struts on their own side, ties on the back face (net force of collinear ties), loads and reactions on their plate. The closed force polygon, rotated by 90° and scaled by 1 / (σh·b), is the nodal zone: every face is perpendicular to its force and all carry the same stress σh. σh is the highest stress on a face with an entered width; the zone is drawn on the canvas and a warning flags a zone outside the outline.</p>',
     '<h3>Tie anchorage</h3><p>At every node where a tie ends (except a symmetry plane), l<sub>a</sub> = distance to the critical section (strut or hydrostatic zone edge on the tie axis) + bar extension to the concrete face − cover. Required: l<sub>d</sub> = k·k1·k4·fy/√f′c·db ≥ 300 mm (straight, k = 0.45 or 0.6, k1 = 1.3 top bars, k4 = 0.8 up to 20M) or l<sub>dh</sub> = 100·db/√f′c·fy/400 ≥ 8db, 150 mm (hook), to A23.3 12.2.3 and 12.5 (simplified, also used with S6: to be confirmed with S6 8.15). Plates, welded bars and closed stirrups are taken as mechanically anchored. A “continuous or bent bar” needs no anchorage where it carries on: bent into another tie (frame corner) or extended past the D-region (loaded or supported node); elsewhere it is checked as a straight bar.</p>',
     '<h3>Crack control reinforcement</h3><p>Orthogonal grid near each face: ρ ≥ 0.003 (S6) or 0.002 (A23.3) in each direction, spacing ≤ 300 mm. To S6, the grid need not exceed 1500 mm²/m on each face.</p>',
     '<h3>Factors</h3><table><tr><th></th><th>φc</th><th>φs</th><th>Clauses</th></tr><tr><td>CSA S6</td><td>0.75</td><td>0.90</td><td>8.4.6, 8.10.3.3, 8.10.4.1, 8.10.5.1</td></tr><tr><td>CSA A23.3</td><td>0.65</td><td>0.85</td><td>8.4, 11.4.2.3, 11.4.3.1, 11.4.4.1, 11.4.5</td></tr></table><p>The factors can be overridden (precast concrete, etc.). Clause numbers and factors must be confirmed against the edition of the standard that applies to the project.</p>',
-    '<h3>Limits</h3><p>2D model, a single factored load case, constant thickness b. No automatic self-weight, automatic model generation or stress fields. The model geometry (node positions, widths) is the engineer’s judgement.</p>'
+    '<h3>Limits</h3><p>2D model, a single factored load case, constant thickness b. No automatic self-weight, automatic model generation or stress fields. A model without bracing bars is valid only for the load case entered. The model geometry (node positions, widths) is the engineer’s judgement.</p>'
+  ].join('');
+
+  var GUIDE_FR = [
+    '<h3>1. Quand utiliser un modèle bielles-tirants</h3><p>La théorie des poutres (les sections planes restent planes) vaut dans les <b>régions B</b>. Elle ne vaut plus dans les <b>régions D</b>, où le cheminement des efforts est perturbé : près d’une charge concentrée ou d’un appui, et près d’un changement brusque de géométrie (ouverture, about réduit, corbeau, coin de portique). Selon le principe de Saint-Venant, la perturbation s’étend sur une distance à peu près égale à la hauteur de la pièce.</p>',
+    '<p>En pratique, quand la portée de cisaillement <i>a</i> est inférieure à environ deux fois la hauteur <i>h</i> (A23.3, art. 10.7.1), la charge descend directement vers l’appui par une bielle et l’analyse sectionnelle ne s’applique plus. Cas typiques : poutres-cloisons et poutres de transfert, corbeaux, chevêtres de pile, appuis en chaise, semelles sur pieux, zones d’ancrage de précontrainte, murs avec ouvertures. Une même pièce combine souvent des régions B (analyse sectionnelle) et des régions D (bielles-tirants).</p>',
+    '<h3>2. Le principe</h3><p>Le champ de contraintes réel est remplacé par un treillis : des <b>bielles</b> de béton comprimé, des <b>tirants</b> d’armature tendue et des <b>nœuds</b> où ils se rencontrent. La méthode repose sur le théorème de la borne inférieure de la plasticité : un modèle en équilibre avec les charges, dont aucune résistance n’est dépassée, est du côté de la sécurité, pourvu que la pièce soit assez ductile pour s’y adapter. C’est le rôle de l’armature de contrôle de la fissuration.</p>',
+    '<p>Il n’existe donc pas « le » bon modèle, mais un petit nombre de bons choix et beaucoup de mauvais. Un bon modèle suit le cheminement élastique des efforts : la charge prend le chemin le plus court et le plus raide vers les appuis, avec peu de tirants, courts, placés là où l’on peut réellement disposer des barres (droites, parallèles aux faces).</p>',
+    '<h3>3. La démarche en neuf étapes</h3><ol>',
+    '<li><b>Délimiter les régions B et D.</b> Tout l’élément est-il une région D, ou seulement une partie ?<span class="in-tool">Dans l’outil : tracez le contour de la région D (outil Contour) et coupez la pièce là où commence la région B ; les efforts à la coupe deviennent des charges ou des appuis.</span></li>',
+    '<li><b>Définir les charges pondérées.</b> Ramenez-les à des forces ponctuelles aux nœuds : une charge répartie est remplacée par quelques forces équivalentes, poids propre inclus. Un cas de charge à la fois.</li>',
+    '<li><b>Choisir la géométrie du treillis.</b> Nœuds sur les axes des charges et des appuis. Membrures horizontales décalées des faces : le tirant au centre de gravité de ses lits d’armature, la bielle horizontale à a/2 de la face (a : hauteur du bloc de compression). Visez des angles de 25° à 65° entre les bielles et les tirants et vérifiez les exigences de la norme applicable. En cas de doute, une analyse élastique par éléments finis montre où passent les efforts.</li>',
+    '<li><b>Calculer les efforts</b> du treillis.<span class="in-tool">Dans l’outil : immédiat, à chaque modification.</span></li>',
+    '<li><b>Dimensionner les tirants</b> : A<sub>st</sub> ≥ T<sub>f</sub> / (φ<sub>s</sub> f<sub>y</sub>). Si le nombre de lits déplace le centre de gravité du tirant, déplacez le nœud et recalculez. Vérifiez l’espacement des barres.</li>',
+    '<li><b>Vérifier les zones nodales</b> : contrainte sur chaque face (plaque d’appui, face arrière du tirant, interface avec la bielle) contre la limite du type de nœud.</li>',
+    '<li><b>Vérifier les bielles</b>, d’abord les plus chargées et les plus inclinées à plat, à chacune de leurs extrémités : C<sub>r</sub> = φ<sub>c</sub> f<sub>cu</sub> A<sub>cs</sub>.</li>',
+    '<li><b>Prévoir l’armature de contrôle de la fissuration</b> : grille orthogonale près de chaque face (sauf dalles et semelles).</li>',
+    '<li><b>Ancrer les tirants</b> : la pleine force doit être développée à l’entrée de la zone nodale.</li></ol>',
+    '<h3>4. Bielles</h3><p>La résistance d’une bielle chute quand un tirant la traverse sous un petit angle : f<sub>cu</sub> = f′<sub>c</sub> / (0,8 + 170 ε<sub>1</sub>), avec ε<sub>1</sub> = ε<sub>s</sub> + (ε<sub>s</sub> + 0,002) cot²θ<sub>s</sub>. À 25°, cot²θ<sub>s</sub> ≈ 4,6. La réduction dépend aussi de la déformation du tirant. θ<sub>s</sub> se mesure avec le tirant qui fait le plus petit angle avec la bielle. La largeur d’une bielle est fixée par ses nœuds : plaque d’appui et hauteur de la zone du tirant à une extrémité, bloc de compression à l’autre.</p>',
+    '<h3>5. Zones nodales</h3><p><b>CCC</b> : bielles et plaques seulement. <b>CCT</b> : un tirant ancré, dans une direction. <b>CTT</b> : tirants dans plus d’une direction. Limites : 0,85 / 0,75 / 0,65 φ<sub>c</sub> f′<sub>c</sub> (A23.3) ; α<sub>1</sub> / 0,88 α<sub>1</sub> / 0,76 α<sub>1</sub> φ<sub>c</sub> f′<sub>c</sub> (S6).</p>',
+    '<p>Un nœud <b>hydrostatique</b> porte la même contrainte sur toutes ses faces, chacune perpendiculaire à sa force : il n’y a pas de cisaillement dans le nœud. Ce n’est pas toujours réalisable, car les dimensions réelles des plaques et des lits d’armature s’imposent ; on vérifie alors chaque face du nœud non hydrostatique. Un nœud intérieur sans plaque ni face définie est un nœud « diffus », rarement critique. Un nœud où arrivent plus de trois forces se traite en combinant deux bielles voisines en leur résultante, ou en le subdivisant ; les angles sont à recalculer après chaque modification.</p>',
+    '<h3>6. Tirants et ancrage</h3><p>Répartissez les barres d’un tirant sur une hauteur réaliste : elle fixe la face arrière du nœud et la largeur des bielles qui y aboutissent. La longueur d’ancrage disponible se mesure à partir du point où les barres entrent dans la zone nodale prolongée, là où elles croisent le bord de la bielle. Si elle ne suffit pas : crochets, barres en U, plaques ou barres soudées. Les tirants verticaux sont des étriers fermés, avec une barre longitudinale dans chaque coin.</p>',
+    '<h3>7. Armature de contrôle de la fissuration</h3><p>Grille orthogonale près de chaque face : ρ ≥ 0,002 (A23.3) ou 0,003 (S6) dans chaque direction, espacement ≤ 300 mm. Elle donne la ductilité nécessaire à la redistribution et reprend la traction transversale des bielles qui s’élargissent en bouteille.</p>',
+    '<h3>8. Erreurs fréquentes</h3><ul><li><b>Bielles trop plates et appuis trop petits</b> : fissures inclinées dès le service. Le remède est d’augmenter les dimensions de la pièce, pas l’armature ; un renforcement après coup coûte très cher.</li><li>Tirant placé sur la face du béton au lieu du centre de gravité des barres : bras de levier surestimé.</li><li>Ancrage oublié aux nœuds d’extrémité (nœud CCT sur appui).</li><li>Modèle très éloigné du cheminement élastique : admissible en théorie, mais il exige de grandes redistributions et fissure beaucoup.</li><li>Armature de contrôle de la fissuration omise.</li></ul>',
+    '<h3>9. Pas de barre « de stabilité »</h3><p>Le modèle doit fournir un cheminement des efforts en équilibre sous chaque cas de charge étudié. Deux charges égales sur une poutre-cloison se reprennent par un trapèze (deux bielles inclinées, une bielle horizontale, un tirant), sans diagonale ni montant. QuickerStrut&amp;Tie accepte ces modèles et affiche « Équilibre sous ce chargement ». L’équilibre affiché concerne le chargement saisi. Vérifiez séparément les autres combinaisons. Si « Mécanisme » apparaît, suivez le cheminement des efforts au nœud et dans la direction indiqués pour revoir les appuis ou la géométrie du treillis.</p>',
+    '<h3>Pour aller plus loin</h3><ul><li>CSA A23.3, art. 11.4 ; CSA S6, art. 8.10.</li><li>Schlaich, Schäfer et Jennewein (1987), <i>Toward a consistent design of structural concrete</i>, PCI Journal.</li><li>Muttoni, Schwartz et Thürlimann (1997), <i>Design of concrete structures with stress fields</i>.</li><li>Williams, Deschenes et Bayrak (2012), <i>Strut-and-tie model design examples for bridges</i>, FHWA/TX-12/5-5253-01-1.</li><li>Mitchell et Collins (2013), <i>Revision of strut-and-tie provisions in the AASHTO LRFD</i>, NCHRP 20-07/306.</li><li>Notes du cours CIV6501, Polytechnique Montréal (F. Lagier), et document « Procédure de design B&amp;T ».</li><li>Pour voir des modèles se former tout seuls : <a href="https://awatif.co/examples/strut/" target="_blank" rel="noopener noreferrer">Where does the load flow? (Awatif)</a>.</li></ul>'
+  ].join('');
+  var GUIDE_EN = [
+    '<h3>1. When to use a strut-and-tie model</h3><p>Beam theory (plane sections remain plane) holds in <b>B-regions</b>. It does not in <b>D-regions</b>, where the flow of forces is disturbed: near a concentrated load or a support, and near an abrupt change of geometry (opening, dapped end, corbel, frame corner). By Saint-Venant’s principle the disturbance extends over a distance about equal to the member depth.</p>',
+    '<p>In practice, when the shear span <i>a</i> is less than about twice the depth <i>h</i> (A23.3, cl. 10.7.1), the load goes straight to the support through a strut and sectional analysis no longer applies. Typical cases: deep and transfer beams, corbels, pier caps, dapped ends, pile caps, post-tensioning anchorage zones, walls with openings. One member often combines B-regions (sectional analysis) and D-regions (strut-and-tie).</p>',
+    '<h3>2. The principle</h3><p>The real stress field is replaced by a truss: <b>struts</b> of compressed concrete, <b>ties</b> of tensioned reinforcement and the <b>nodes</b> where they meet. The method rests on the lower-bound theorem of plasticity: a model in equilibrium with the loads, in which no strength is exceeded, is on the safe side, provided the member is ductile enough to adapt to it. That is what the crack control reinforcement is for.</p>',
+    '<p>So there is no single right model, but a small number of good choices and many bad ones. A good model follows the elastic flow of forces: the load takes the shortest and stiffest path to the supports, with few ties, short ones, placed where bars can really be laid (straight, parallel to the faces).</p>',
+    '<h3>3. The procedure in nine steps</h3><ol>',
+    '<li><b>Separate B- and D-regions.</b> Is the whole member a D-region, or only part of it?<span class="in-tool">In the tool: draw the outline of the D-region (Outline tool) and cut the member where the B-region starts; the forces at the cut become loads or supports.</span></li>',
+    '<li><b>Define the factored loads.</b> Turn them into point forces at the nodes: a distributed load is replaced by a few equivalent forces, self-weight included. One load case at a time.</li>',
+    '<li><b>Choose the truss geometry.</b> Nodes on the lines of the loads and supports. Horizontal chords set in from the faces: the tie at the centroid of its bar layers, the horizontal strut at a/2 from the face (a: depth of the compression block). Aim for angles of 25° to 65° between struts and ties and check the applicable code requirements. When in doubt, a linear elastic finite element analysis shows where the forces go.</li>',
+    '<li><b>Compute the truss forces.</b><span class="in-tool">In the tool: immediate, at every change.</span></li>',
+    '<li><b>Size the ties</b>: A<sub>st</sub> ≥ T<sub>f</sub> / (φ<sub>s</sub> f<sub>y</sub>). If the number of layers moves the centroid of the tie, move the node and recompute. Check the bar spacing.</li>',
+    '<li><b>Check the nodal zones</b>: stress on each face (bearing plate, back face of the tie, strut interface) against the limit for the node type.</li>',
+    '<li><b>Check the struts</b>, first the most loaded and the flattest ones, at each of their ends: C<sub>r</sub> = φ<sub>c</sub> f<sub>cu</sub> A<sub>cs</sub>.</li>',
+    '<li><b>Provide crack control reinforcement</b>: orthogonal grid near each face (except slabs and footings).</li>',
+    '<li><b>Anchor the ties</b>: the full force must be developed where the bars enter the nodal zone.</li></ol>',
+    '<h3>4. Struts</h3><p>The strength of a strut drops when a tie crosses it at a small angle: f<sub>cu</sub> = f′<sub>c</sub> / (0.8 + 170 ε<sub>1</sub>), with ε<sub>1</sub> = ε<sub>s</sub> + (ε<sub>s</sub> + 0.002) cot²θ<sub>s</sub>. At 25°, cot²θ<sub>s</sub> ≈ 4.6. The reduction also depends on the tie strain. θ<sub>s</sub> is measured with the tie that makes the smallest angle with the strut. The width of a strut is set by its nodes: bearing plate and depth of the tie zone at one end, compression block at the other.</p>',
+    '<h3>5. Nodal zones</h3><p><b>CCC</b>: struts and plates only. <b>CCT</b>: one anchored tie, in one direction. <b>CTT</b>: ties in more than one direction. Limits: 0.85 / 0.75 / 0.65 φ<sub>c</sub> f′<sub>c</sub> (A23.3); α<sub>1</sub> / 0.88 α<sub>1</sub> / 0.76 α<sub>1</sub> φ<sub>c</sub> f′<sub>c</sub> (S6).</p>',
+    '<p>A <b>hydrostatic</b> node carries the same stress on all its faces, each perpendicular to its force: there is no shear in the node. This is not always feasible, because the real sizes of the plates and bar layers govern; each face of the non-hydrostatic node is then checked. An interior node without a plate or a defined face is a “smeared” node, seldom critical. A node where more than three forces meet is handled by combining two neighbouring struts into their resultant, or by subdividing it; the angles must be recomputed after every change.</p>',
+    '<h3>6. Ties and anchorage</h3><p>Spread the bars of a tie over a realistic depth: it sets the back face of the node and the width of the struts that end there. The available anchorage length is measured from the point where the bars enter the extended nodal zone, where they cross the edge of the strut. If it is too short: hooks, U-bars, plates or welded bars. Vertical ties are closed stirrups, with a longitudinal bar in each corner.</p>',
+    '<h3>7. Crack control reinforcement</h3><p>Orthogonal grid near each face: ρ ≥ 0.002 (A23.3) or 0.003 (S6) in each direction, spacing ≤ 300 mm. It gives the ductility needed for redistribution and carries the transverse tension of bottle-shaped struts.</p>',
+    '<h3>8. Common mistakes</h3><ul><li><b>Struts too flat and bearings too small</b>: inclined cracks under service loads. The cure is a larger member, not more steel; strengthening afterwards is very expensive.</li><li>Tie drawn on the concrete face instead of the centroid of the bars: lever arm overestimated.</li><li>Anchorage forgotten at end nodes (CCT node over a support).</li><li>Model far from the elastic flow of forces: admissible in theory, but it needs large redistributions and cracks a lot.</li><li>Crack control reinforcement left out.</li></ul>',
+    '<h3>9. No “bracing” bar</h3><p>The model must provide a load path in equilibrium for each load case studied. Two equal loads on a deep beam are carried by a trapezoid (two inclined struts, one horizontal strut, one tie), with no diagonal and no post. QuickerStrut&amp;Tie accepts such models and shows “In equilibrium under these loads”. The reported equilibrium applies to the entered load case. Check the other combinations separately. If “Mechanism” appears, follow the load path at the indicated joint and direction to review the supports or truss geometry.</p>',
+    '<h3>Further reading</h3><ul><li>CSA A23.3, cl. 11.4; CSA S6, cl. 8.10.</li><li>Schlaich, Schäfer and Jennewein (1987), <i>Toward a consistent design of structural concrete</i>, PCI Journal.</li><li>Muttoni, Schwartz and Thürlimann (1997), <i>Design of concrete structures with stress fields</i>.</li><li>Williams, Deschenes and Bayrak (2012), <i>Strut-and-tie model design examples for bridges</i>, FHWA/TX-12/5-5253-01-1.</li><li>Mitchell and Collins (2013), <i>Revision of strut-and-tie provisions in the AASHTO LRFD</i>, NCHRP 20-07/306.</li><li>CIV6501 course notes, Polytechnique Montréal (F. Lagier), and the “Procédure de design B&amp;T” handout.</li><li>To watch models form by themselves: <a href="https://awatif.co/examples/strut/" target="_blank" rel="noopener noreferrer">Where does the load flow? (Awatif)</a>.</li></ul>'
   ].join('');
 
   var STR = {
     fr: {
+      guideOpen: 'Guide et tutoriel', guideSub: 'Concevoir un modèle bielles-tirants, pas à pas', guideHtml: GUIDE_FR,
+      tutTitle: 'Tutoriel interactif', tutLead: 'Construisez une poutre-cloison en 8 étapes, environ 3 minutes. Le modèle actuel est remplacé.', tutStart: 'Commencer le tutoriel',
+      tutNext: 'Suivant', tutPrev: 'Précédent', tutQuit: 'Quitter le tutoriel', tutFinish: 'Terminer', tutDone: 'Étape réussie', tutName: 'Tutoriel · poutre-cloison',
+      welcomeTitle: 'Première visite ?', welcomeText: 'Le tutoriel interactif vous fait construire et vérifier un premier modèle en 3 minutes. Le guide explique comment choisir un bon modèle.', welcomeGuide: 'Ouvrir le guide',
+      tut1T: 'Placez trois nœuds', tut1: 'L’outil <b>Nœud (N)</b> est actif. Cliquez dans le béton : deux nœuds près du bas, à gauche et à droite (les futurs appuis), et un nœud en haut au centre (sous la charge).',
+      tut2T: 'Reliez-les par des barres', tut2: 'Avec l’outil <b>Barre (B)</b>, cliquez les nœuds l’un après l’autre pour fermer le triangle : deux barres inclinées et une barre horizontale en bas. <b>Échap</b> termine la chaîne.',
+      tut3T: 'Ajoutez les appuis', tut3: 'Avec l’outil <b>Appui (S)</b>, cliquez un nœud du bas une fois (rotule) et l’autre deux fois (rouleau Ry). Une seule rotule : la pièce doit pouvoir s’allonger librement.',
+      tut4T: 'Appliquez la charge', tut4: 'Avec l’outil <b>Charge (L)</b>, cliquez le nœud du haut : une charge de 100 kN vers le bas apparaît. Tapez −1500 dans la case Fy de l’inspecteur, puis Entrée. Le calcul est immédiat.',
+      tut5T: 'Lisez les efforts', tut5: 'Les <b>bielles</b> (compression) sont en bleu pointillé et le <b>tirant</b> (traction) en rouge plein ; les étiquettes donnent l’effort en kN et les réactions sont en vert. Passez à la vue <b>Utilisation</b> (touche 3) pour voir les vérifications CSA.',
+      tut6T: 'Dimensionnez', tut6: 'Chaque barre et chaque nœud affiche son taux d’utilisation : jusqu’à 1,00, c’est conforme. Cliquez <b>Prédimensionner automatiquement</b> au bas de l’onglet Paramètres, ou cliquez une barre et ajustez sa largeur ou son armature dans l’inspecteur.',
+      tut7T: 'Déplacez un nœud', tut7: 'Avec l’outil <b>Sélection (V)</b>, faites glisser le nœud du haut : efforts et vérifications suivent en direct. Des guides apparaissent quand le nœud s’aligne avec un autre. Plus les bielles sont à plat, plus le tirant travaille.',
+      tut8T: 'À vous de jouer', tut8: 'Vous savez l’essentiel. Explorez les <b>Exemples</b> et les <b>Gabarits</b>, lisez le <b>Guide</b> pour choisir un bon modèle, et imprimez la note de calcul avec Fichier → Rapport PDF.',
+      seeAlso: 'Voir aussi :', hintDrag: 'Alt : sans aimant · Échap : annuler · déposer sur un nœud : fusionner', mergeHere: 'Fusionner avec', nodesMerged: 'Nœuds fusionnés',
+      unbracedStat: 'Équilibre sous ce chargement',
       chipZones: 'Zones nodales', anchorage: 'Ancrage', anchorages: 'Ancrages des tirants', cover: 'Enrobage', ldFactor: 'Coefficient de l<sub>d</sub>', ldFav: 'enrobage et espacement minimaux', ldOther: 'autres cas',
       anchorNote: 'Longueur disponible l<sub>a</sub> = distance du nœud à la section critique (bord de la zone nodale prolongée) + prolongement des barres jusqu’à la face du béton, moins l’enrobage. l<sub>d</sub> barre droite (12.2.3) ou l<sub>dh</sub> crochet normalisé (12.5) selon l’A23.3, méthode simplifiée ; k1 = 1,3 pour les barres ayant plus de 300 mm de béton dessous.',
       autoSizeTitle: 'Prédimensionnement', autoSize: 'Prédimensionner automatiquement', autoSizeNote: 'Choisit les barres des tirants, les largeurs des bielles, les plaques manquantes et le type d’ancrage (droit → crochet → plaque) pour viser une utilisation de 0,85. La géométrie n’est pas modifiée.',
@@ -1752,7 +1915,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       tpl_dappedEnd: 'About réduit (demi-joint)', tpl_bentCap: 'Chevêtre multicolonne', tpl_pileCap: 'Semelle sur pieux',
       tplSub_dappedEnd: 'Suspente, tirant de chaise, demi-portée', tplSub_bentCap: '2 à 4 colonnes, poutres réparties', tplSub_pileCap: '2, 3 ou 4 pieux · coupe 2D',
       tplNote_dappedEnd: 'Modèle orthogonal : bielle de la plaque au sommet de la suspente, tirant de chaise prolongé jusqu’au premier montant, treillis jusqu’à la mi-portée (plan de symétrie). Réaction R répartie sur les nœuds supérieurs.',
-      tplNote_bentCap: 'Treillis à membrures supérieure et inférieure, montants à chaque poutre et colonne, diagonales comprimées dirigées vers la colonne la plus proche. Hyperstatique dès 3 colonnes (r = n − 2).',
+      tplNote_bentCap: 'Treillis à membrures supérieure et inférieure, montants à chaque poutre et colonne, diagonales comprimées dirigées vers la colonne la plus proche. Les barres sans effort sont retirées. Dès 3 colonnes, la répartition entre les colonnes dépend des rigidités.',
       tplNote_pileCap: 'Coupe 2D. 4 pieux : chaque ligne représente deux pieux et le tirant 2D se partage entre deux tirants parallèles. 3 pieux (triangle) : coupe par un pieu et la ligne des deux autres ; tirants de côté = T2D / √3. Plaques équivalentes aux aires réelles.',
       tplAutoNote: 'Barres, largeurs et plaques prédimensionnées automatiquement (utilisation visée 0,85).',
       tf_h: 'Hauteur h', tf_hn: 'Hauteur de la chaise', tf_ln: 'Longueur de la chaise', tf_a: 'Appui depuis l’about', tf_half: 'Demi-portée', tf_R: 'Réaction R', tf_n: 'Panneaux', tf_b: 'Épaisseur b', tf_fc: "f'c",
@@ -1772,7 +1935,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       viewChecks: 'Vérifications', viewForces: 'Efforts', viewReactions: 'Réactions',
       footerNote: 'Calcul local dans le navigateur · aucune donnée transmise · logiciel libre GPL-3.0', cancel: 'Annuler',
       grid: 'Grille', hintChain: 'Échap pour terminer la chaîne',
-      hint_select: 'Glisser un nœud ou une barre · glisser le fond pour déplacer · molette pour zoomer',
+      hint_select: 'Glisser un nœud ou une barre · glisser le fond pour déplacer la vue · molette pour zoomer',
       hint_node: 'Cliquer pour ajouter un nœud · sur une barre pour la diviser',
       hint_member: 'Cliquer deux nœuds (ou le vide) pour tracer une barre',
       hint_support: 'Cliquer un nœud : rotule → rouleau Ry → rouleau Rx → libre',
@@ -1806,11 +1969,11 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       vertex: 'Sommet', deleteVertex: 'Supprimer le sommet', vertexHint: 'Glissez le sommet ou utilisez les flèches.',
       mUtil: 'Utilisation max', mStrut: 'Bielle max', mTie: 'Tirant max', mModel: 'Modèle', mechanism: 'Mécanisme',
       emptyModel: 'Modèle vide', invalidModel: 'Modèle invalide', nodesLc: 'nœuds', membersLc: 'barres', determinate: 'Isostatique', indeterminate: 'Hyperstatique', none: 'aucun',
-      mechanismMsg: 'le nœud {node} est libre en {dir}. Ajoutez une barre ou un appui pour stabiliser le treillis.',
+      mechanismMsg: 'effort non équilibré au nœud {node} (direction {dir}). Vérifiez la géométrie, les appuis et le cheminement des efforts.',
       err_missingNode: 'une barre référence un nœud inexistant', err_zeroLength: 'barre de longueur nulle',
       notConverged: 'Les rôles bielle/tirant oscillent : imposez le rôle de certaines barres.',
       outsideMsg: 'Hors du contour du béton :',
-      emptyHint: 'Commencez avec l’outil <b>Nœud (N)</b>, puis reliez les nœuds avec <b>Barre (B)</b>.<br>Ou ouvrez un modèle dans <b>Exemples</b>.',
+      emptyHint: 'Commencez avec l’outil <b>Nœud (N)</b>, puis reliez les nœuds avec <b>Barre (B)</b>.<br>Ou ouvrez un modèle dans <b>Exemples</b>, ou suivez le tutoriel dans <b>Guide et tutoriel</b>.',
       noResults: 'Aucun résultat : le modèle doit être stable et contenir au moins une barre.',
       element: 'Élément', type: 'Type', demand: 'Sollicitation', resistance: 'Résistance', details: 'Détails',
       struts: 'Bielles', ties: 'Tirants', nodalZones: 'Zones nodales',
@@ -1825,6 +1988,20 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       resetTitle: 'Réinitialiser le modèle ?', resetBody: 'Le modèle actuel sera remplacé par l’exemple de départ.'
     },
     en: {
+      guideOpen: 'Guide and tutorial', guideSub: 'Designing a strut-and-tie model, step by step', guideHtml: GUIDE_EN,
+      tutTitle: 'Interactive tutorial', tutLead: 'Build a deep beam in 8 steps, about 3 minutes. The current model is replaced.', tutStart: 'Start the tutorial',
+      tutNext: 'Next', tutPrev: 'Back', tutQuit: 'Leave the tutorial', tutFinish: 'Finish', tutDone: 'Step completed', tutName: 'Tutorial · deep beam',
+      welcomeTitle: 'First visit?', welcomeText: 'The interactive tutorial has you build and check a first model in 3 minutes. The guide explains how to choose a good model.', welcomeGuide: 'Open the guide',
+      tut1T: 'Place three nodes', tut1: 'The <b>Node tool (N)</b> is active. Click inside the concrete: two nodes near the bottom, left and right (the future supports), and one node at the top centre (under the load).',
+      tut2T: 'Link them with members', tut2: 'With the <b>Member tool (B)</b>, click the nodes one after the other to close the triangle: two inclined members and a horizontal one at the bottom. <b>Esc</b> ends the chain.',
+      tut3T: 'Add the supports', tut3: 'With the <b>Support tool (S)</b>, click one bottom node once (pin) and the other twice (roller Ry). One pin only: the member must be free to lengthen.',
+      tut4T: 'Apply the load', tut4: 'With the <b>Load tool (L)</b>, click the top node: a 100 kN downward load appears. Type −1500 in the Fy box of the inspector, then Enter. The model is solved at once.',
+      tut5T: 'Read the forces', tut5: '<b>Struts</b> (compression) are blue and dashed, the <b>tie</b> (tension) is red and solid; the labels give the force in kN and reactions are green. Switch to the <b>Utilization</b> view (key 3) to see the CSA checks.',
+      tut6T: 'Size the model', tut6: 'Every member and node shows its utilization: up to 1.00 is acceptable. Click <b>Size automatically</b> at the bottom of the Parameters tab, or click a member and adjust its width or reinforcement in the inspector.',
+      tut7T: 'Move a node', tut7: 'With the <b>Select tool (V)</b>, drag the top node: forces and checks follow live. Guides appear when the node lines up with another one. The flatter the struts, the harder the tie works.',
+      tut8T: 'Your turn', tut8: 'You know the essentials. Explore the <b>Examples</b> and <b>Templates</b>, read the <b>Guide</b> to choose a good model, and print the calculation note with File → PDF report.',
+      seeAlso: 'See also:', hintDrag: 'Alt: no snapping · Esc: cancel · drop on a node: merge', mergeHere: 'Merge with', nodesMerged: 'Nodes merged',
+      unbracedStat: 'In equilibrium under these loads',
       chipZones: 'Nodal zones', anchorage: 'Anchorage', anchorages: 'Tie anchorages', cover: 'Cover', ldFactor: 'l<sub>d</sub> factor', ldFav: 'minimum cover and spacing', ldOther: 'other cases',
       anchorNote: 'Available length l<sub>a</sub> = distance from the node to the critical section (edge of the extended nodal zone) + extension of the bars to the concrete face, less the cover. l<sub>d</sub> straight bar (12.2.3) or l<sub>dh</sub> standard hook (12.5) to A23.3, simplified; k1 = 1.3 for bars with more than 300 mm of concrete below.',
       autoSizeTitle: 'Preliminary sizing', autoSize: 'Size automatically', autoSizeNote: 'Picks tie bars, strut widths, missing plates and the anchorage type (straight → hook → plate) for a target utilization of 0.85. The geometry is not changed.',
@@ -1841,7 +2018,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       tpl_dappedEnd: 'Dapped end (half-joint)', tpl_bentCap: 'Multi-column bent cap', tpl_pileCap: 'Pile cap',
       tplSub_dappedEnd: 'Hanger, nib tie, half span', tplSub_bentCap: '2 to 4 columns, distributed girders', tplSub_pileCap: '2, 3 or 4 piles · 2D section',
       tplNote_dappedEnd: 'Orthogonal model: strut from the plate to the top of the hanger, nib tie extended to the first vertical, truss to mid-span (symmetry plane). Reaction R spread over the top nodes.',
-      tplNote_bentCap: 'Truss with top and bottom chords, verticals at every girder and column, compression diagonals towards the nearest column. Indeterminate from 3 columns (r = n − 2).',
+      tplNote_bentCap: 'Truss with top and bottom chords, verticals at every girder and column, compression diagonals towards the nearest column. Bars without force are removed. From 3 columns, the share of each column depends on the stiffnesses.',
       tplNote_pileCap: '2D section. 4 piles: each line stands for two piles and the 2D tie is shared by two parallel ties. 3 piles (triangle): section through one pile and the line of the other two; side ties = T2D / √3. Plates equivalent to the real areas.',
       tplAutoNote: 'Bars, widths and plates sized automatically (target utilization 0.85).',
       tf_h: 'Depth h', tf_hn: 'Nib depth', tf_ln: 'Nib length', tf_a: 'Bearing from the end', tf_half: 'Half span', tf_R: 'Reaction R', tf_n: 'Panels', tf_b: 'Thickness b', tf_fc: "f'c",
@@ -1895,11 +2072,11 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       vertex: 'Vertex', deleteVertex: 'Delete vertex', vertexHint: 'Drag the vertex or use the arrow keys.',
       mUtil: 'Max utilization', mStrut: 'Max strut', mTie: 'Max tie', mModel: 'Model', mechanism: 'Mechanism',
       emptyModel: 'Empty model', invalidModel: 'Invalid model', nodesLc: 'nodes', membersLc: 'members', determinate: 'Statically determinate', indeterminate: 'Indeterminate', none: 'none',
-      mechanismMsg: 'node {node} is free in {dir}. Add a member or a support to stabilize the truss.',
+      mechanismMsg: 'unbalanced force at node {node} (direction {dir}). Check the geometry, supports and load path.',
       err_missingNode: 'a member refers to a missing node', err_zeroLength: 'zero-length member',
       notConverged: 'Strut/tie roles keep switching: impose the role of some members.',
       outsideMsg: 'Outside the concrete outline:',
-      emptyHint: 'Start with the <b>Node tool (N)</b>, then link nodes with <b>Member (B)</b>.<br>Or open a model from <b>Examples</b>.',
+      emptyHint: 'Start with the <b>Node tool (N)</b>, then link nodes with <b>Member (B)</b>.<br>Or open a model from <b>Examples</b>, or follow the tutorial in <b>Guide and tutorial</b>.',
       noResults: 'No results: the model must be stable and have at least one member.',
       element: 'Element', type: 'Type', demand: 'Demand', resistance: 'Resistance', details: 'Details',
       struts: 'Struts', ties: 'Ties', nodalZones: 'Nodal zones',
@@ -2037,13 +2214,46 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     App.addMember(nid, j, m);
     return nid;
   };
+  // Merges node `from` into node `into`: its bars are re-attached, a bar between
+  // the two nodes or doubling an existing one is dropped, its loads are added.
+  App.canMergeNodes = function (from, into) {
+    var map = App.model.meta && App.model.meta.pileMap;
+    return !map || !map[from] || !map[into];
+  };
+  App.mergeNodes = function (from, into) {
+    var a = App.node(from), b = App.node(into);
+    if (!a || !b || a === b || !App.canMergeNodes(from, into)) return false;
+    b.fx = round((Number(b.fx) || 0) + (Number(a.fx) || 0)); b.fy = round((Number(b.fy) || 0) + (Number(a.fy) || 0));
+    b.support = a.support && b.support && a.support !== b.support ? 'pin' : b.support || a.support;
+    b.bearing = Math.max(Number(b.bearing) || 0, Number(a.bearing) || 0);
+    var neighbours = new Set();
+    App.model.members.forEach(function (m) {
+      if (m.i === into) neighbours.add(m.j);
+      if (m.j === into) neighbours.add(m.i);
+    });
+    App.model.members = App.model.members.filter(function (m) {
+      if (m.i !== from && m.j !== from) return true;
+      var other = m.i === from ? m.j : m.i;
+      if (other === into || neighbours.has(other)) return false;
+      if (m.i === from) m.i = into;
+      if (m.j === from) m.j = into;
+      return true;
+    });
+    var pileMap = App.model.meta && App.model.meta.pileMap;
+    if (pileMap && pileMap[from]) {
+      pileMap[into] = pileMap[from];
+      delete pileMap[from];
+    }
+    App.model.nodes = App.model.nodes.filter(function (n) { return n.id !== from; });
+    return true;
+  };
   function round(v) { return Math.round(v * 1e6) / 1e6; }
   App.round = round;
 
   // ---------- History ----------
   App.snapshot = function () { return JSON.stringify(App.model); };
-  App.commit = function () {
-    App.history.push(App.snapshot());
+  App.commit = function (before) {
+    App.history.push(before === undefined ? App.snapshot() : before);
     if (App.history.length > 300) App.history.shift();
     App.future = [];
     App.dirty = true;
@@ -2080,7 +2290,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
   App.update = function (opts) {
     App.compute();
     App.listeners.forEach(function (fn) { fn(opts || {}); });
-    App.autosave();
+    if (!opts || !opts.drag) App.autosave();
   };
 
   // ---------- Storage ----------
@@ -2105,6 +2315,11 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     } catch (e) { return false; }
   };
   App.saveUi = function () { store(function (ls) { ls.setItem(STORE_UI, JSON.stringify({ display: App.display, panel: App.panel, view: App.view })); }); };
+  App.setMode = function (mode) {
+    App.display.mode = mode;
+    App.saveUi();
+    App.listeners.forEach(function (fn) { fn({ display: true }); });
+  };
   App.restoreUi = function () {
     var raw = store(function (ls) { return ls.getItem(STORE_UI); });
     try { var o = JSON.parse(raw); if (o && o.display) { for (var k in o.display) App.display[k] = o.display[k]; App.panel = o.panel || App.panel; App.view = o.view || App.view; } } catch (e) {}
@@ -2172,20 +2387,26 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     return n || 'quickerstrut';
   };
   App.utilColor = function (u) {
-    if (!isFinite(u)) return '#ff5d5d';
-    var stops = [[0, [86, 224, 187]], [0.4, [166, 227, 107]], [0.7, [255, 209, 102]], [0.9, [255, 159, 67]], [1.0, [255, 93, 93]]];
-    if (u > 1.0005) return 'rgb(255,93,93)';
-    if (u >= 1) return 'rgb(255,127,80)';
+    // Green to red, dark enough to read on the white canvas.
+    if (!isFinite(u)) return 'rgb(200,30,30)';
+    var stops = [[0, [47, 158, 110]], [0.4, [122, 176, 52]], [0.7, [226, 163, 0]], [0.9, [232, 115, 12]], [1.0, [217, 45, 32]]];
+    if (u > 1.0005) return 'rgb(200,30,30)';
+    if (u >= 1) return 'rgb(226,80,20)';
     for (var i = 1; i < stops.length; i++) {
       if (u <= stops[i][0]) {
         var a = stops[i - 1], b = stops[i], f = (u - a[0]) / (b[0] - a[0]);
         return 'rgb(' + a[1].map(function (c, k) { return Math.round(c + f * (b[1][k] - c)); }).join(',') + ')';
       }
     }
-    return 'rgb(255,93,93)';
+    return 'rgb(200,30,30)';
   };
   // Ink colour for utilisation on a light background (bars, tables).
   App.utilInk = function (u) { return !isFinite(u) || u > 1 ? '#b23a2a' : u > 0.9 ? '#b0641a' : u > 0.7 ? '#8a6d12' : '#1f7a5a'; };
+  // Statics of a solved model, as text.
+  App.statText = function (r) {
+    if (r.unbraced) return App.t('unbracedStat');
+    return r.indeterminacy > 0 ? App.t('indeterminate') + ' (r = ' + r.indeterminacy + ')' : App.t('determinate');
+  };
   App.statusOf = function (u) { return !isFinite(u) || u > 1.0005 ? 'bad' : u > 0.95 ? 'warn' : 'ok'; };
 })();
 
@@ -2197,22 +2418,17 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
   'use strict';
   var QST = window.QST, App = QST.App;
 
+  // One light palette for the screen, the printed report and the SVG export:
+  // struts blue and dashed, ties red and solid, loads in ink, reactions green.
   var PAL = {
-    dark: {
-      bg: null, gridMinor: '#163a4f', gridMajor: '#215069', axis: '#3d7896', gridText: '#6f98ab',
-      concrete: '#9fc3d2', concreteOp: 0.085, concreteStroke: '#88b3c6',
-      strut: '#7cb4ff', tie: '#ffc978', zero: '#6f8a99', neutral: '#cfe6ef',
-      nodeFill: '#e8fff8', nodeStroke: '#0b2436', load: '#ff9b85', react: '#56e0bb', support: '#cfe6ef', ground: '#6f98ab',
-      pill: '#0a2131', pillOp: 0.86, pillText: '#e6f3f7', idText: '#9fc3d2', sel: '#56e0bb', bandOp: 0.17, tieBandOp: 0.2, warn: '#ff7a6b'
-    },
-    light: {
-      bg: '#ffffff', gridMinor: '#f1f5f7', gridMajor: '#e1e9ee', axis: '#c5d3db', gridText: '#8aa0ad',
-      concrete: '#c9d8e1', concreteOp: 0.45, concreteStroke: '#6f8c9c',
-      strut: '#2f64b0', tie: '#b66c16', zero: '#9aa9b2', neutral: '#5d7684',
-      nodeFill: '#ffffff', nodeStroke: '#17374b', load: '#c4513a', react: '#007f78', support: '#5d7684', ground: '#8aa0ad',
-      pill: '#ffffff', pillOp: 0.92, pillText: '#17374b', idText: '#566e7c', sel: '#007f78', bandOp: 0.16, tieBandOp: 0.22, warn: '#b23a2a'
-    }
+    bg: '#ffffff', gridMinor: '#f0f3f6', gridMajor: '#dfe6eb', axis: '#b3c2cc', gridText: '#7f95a3',
+    concrete: '#e6ecf0', concreteOp: 0.75, concreteStroke: '#3f5868',
+    strut: '#1f5fbf', tie: '#c8322b', zero: '#8c9aa3', neutral: '#4b6474', strutInk: '#17498f', tieInk: '#9c231c',
+    nodeFill: '#ffffff', nodeStroke: '#17374b', load: '#1b2b36', react: '#0a7d5a', support: '#4b6474', ground: '#7f95a3',
+    pill: '#ffffff', pillOp: 0.94, pillText: '#17374b', idText: '#5a7180', sel: '#0a9f8f', bandOp: 0.16, tieBandOp: 0.2, warn: '#e8590c',
+    zoneFill: '#cfdae2', zoneStroke: '#4b6474'
   };
+  App.palette = PAL;
 
   var svg, wrap, W = 0, H = 0;
   var view = { ox: 0, oy: 0, k: 120 };
@@ -2220,6 +2436,8 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
   var cursorRaw = null;
   var pending = null;       // first node of a member being drawn
   var drag = null;          // current drag operation
+  var guides = null;        // alignment guides shown while dragging: {x, y} in world coordinates
+  var clipSeq = 0;          // unique clip-path ids for the static drawings
   var pointers = {};        // active pointers (pinch zoom)
   var spaceDown = false;
   var raf = 0;
@@ -2281,7 +2499,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
 
   // ---------------------------------------------------------------- draw ---
   function draw(model, result, checks, o) {
-    var pal = PAL[o.palette || 'dark'], v = o.view, mode = o.mode || 'forces';
+    var pal = PAL, v = o.view, mode = o.mode || 'forces';
     var nm = nodeMap(model), ok = result && result.ok;
     var forces = {}, mchk = {}, nchk = {}, react = {};
     if (ok) result.forces.forEach(function (f) { forces[f.id] = f; });
@@ -2291,7 +2509,10 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     (o.warnings || []).forEach(function (w) { warnIds[w.id] = 1; });
     var sel = o.sel || null, hov = o.hover || null;
     var out = [];
-    var clipId = 'clip-' + (o.palette || 'dark');
+    var clipId = 'qst-clip-' + (o.interactive ? 'canvas' : ++clipSeq);
+    // Forces view: the line thickness follows the force (thickest = largest force).
+    var nMax = 0;
+    if (ok) result.forces.forEach(function (f) { nMax = Math.max(nMax, Math.abs(f.N)); });
 
     // Outline path
     var poly = (model.outline || []).map(function (p) { var s = toScreen(v, p[0], p[1]); return n2(s[0]) + ',' + n2(s[1]); }).join(' ');
@@ -2357,7 +2578,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
         if (wpx < 1) return;
         var nx = -g.uy * wpx / 2, ny = g.ux * wpx / 2, c = colorOf(m);
         var op = kind === 'tie' ? pal.tieBandOp : pal.bandOp;
-        if (mode === 'util') op = (o.palette === 'light' ? 0.42 : 0.26);
+        if (mode === 'util') op = 0.42;
         bands.push('<path d="M' + n2(g.a[0] + nx) + ' ' + n2(g.a[1] + ny) + 'L' + n2(g.b[0] + nx) + ' ' + n2(g.b[1] + ny) + 'L' + n2(g.b[0] - nx) + ' ' + n2(g.b[1] - ny) + 'L' + n2(g.a[0] - nx) + ' ' + n2(g.a[1] - ny) + 'Z" fill="' + c + '" fill-opacity="' + op + '"/>');
       });
       out.push('<g clip-path="url(#' + clipId + ')">' + bands.join('') + '</g>');
@@ -2373,6 +2594,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       var dash = kind === 'strut' ? ' stroke-dasharray="9 5"' : kind === 'zero' ? ' stroke-dasharray="2 4"' : '';
       if (mode === 'geometry') dash = m.role === 'tie' ? '' : m.role === 'strut' ? ' stroke-dasharray="9 5"' : ' stroke-dasharray="5 3"';
       var sw = kind === 'tie' ? 3.2 : kind === 'strut' ? 2.4 : 1.4;
+      if (mode === 'forces' && kind !== 'zero' && nMax > 0) sw = 2 + 4.5 * Math.abs(forces[m.id].N) / nMax;
       out.push('<line x1="' + n2(g.a[0]) + '" y1="' + n2(g.a[1]) + '" x2="' + n2(g.b[0]) + '" y2="' + n2(g.b[1]) + '" stroke="' + c + '" stroke-width="' + sw + '"' + dash + ' stroke-linecap="round"/>');
     });
 
@@ -2382,8 +2604,8 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       checks.nodes.forEach(function (nc) {
         var z = nc.zone; if (!z) return;
         var pts = z.poly.map(function (q) { var sp = toScreen(v, q[0], q[1]); return n2(sp[0]) + ',' + n2(sp[1]); }).join(' ');
-        var fillZ = mode === 'util' ? App.utilColor(z.util) : (o.palette === 'light' ? '#dfe9ef' : '#e8fff8');
-        zs.push('<polygon points="' + pts + '" fill="' + fillZ + '" fill-opacity="' + (mode === 'util' ? 0.45 : (o.palette === 'light' ? 0.7 : 0.16)) + '" stroke="' + (z.outside ? pal.warn : (o.palette === 'light' ? '#5d7684' : '#cfe6ef')) + '" stroke-width="1.2" stroke-linejoin="round"' + (z.outside ? ' stroke-dasharray="3 2"' : '') + '/>');
+        var fillZ = mode === 'util' ? App.utilColor(z.util) : pal.zoneFill;
+        zs.push('<polygon points="' + pts + '" fill="' + fillZ + '" fill-opacity="' + (mode === 'util' ? 0.45 : 0.75) + '" stroke="' + (z.outside ? pal.warn : pal.zoneStroke) + '" stroke-width="1.2" stroke-linejoin="round"' + (z.outside ? ' stroke-dasharray="3 2"' : '') + '/>');
         z.faces.forEach(function (fa) {
           var A = toScreen(v, fa.a[0], fa.a[1]), Bp = toScreen(v, fa.b[0], fa.b[1]);
           var col = fa.kind === 'strut' ? pal.strut : fa.kind === 'tie' ? pal.tie : fa.kind === 'load' ? pal.load : pal.react;
@@ -2517,12 +2739,12 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
         opt.small = true;
       } else if (mode === 'forces' && f) {
         text = f.kind === 'zero' ? '0' : (f.kind === 'strut' ? 'C ' : 'T ') + App.fmt(Math.abs(f.N), 0);
-        opt.color = f.kind === 'strut' ? (o.palette === 'light' ? '#244f8e' : '#cfe2ff') : f.kind === 'tie' ? (o.palette === 'light' ? '#7a4a0c' : '#ffe2ae') : pal.idText;
+        opt.color = f.kind === 'strut' ? pal.strutInk : f.kind === 'tie' ? pal.tieInk : pal.idText;
         opt.stroke = f.kind === 'zero' ? null : colorOf(m);
         opt.small = f.kind === 'zero';
       } else if (mode === 'util' && c && f && f.kind !== 'zero') {
         text = App.fmt(c.util, 2);
-        opt.color = o.palette === 'light' ? App.utilInk(c.util) : App.utilColor(c.util);
+        opt.color = App.utilInk(c.util);
         opt.stroke = App.utilColor(c.util);
       }
       if (text) out.push(label(mx, my, g.ang, text, pal, opt));
@@ -2538,7 +2760,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       if (o.ids !== false) parts.push(n.id);
       if (mode === 'util' && nc) parts.push(nc.type + ' ' + App.fmt(nc.util, 2));
       if (!parts.length) return;
-      out.push('<text x="' + n2(s[0] - 10) + '" y="' + n2(s[1] - 10) + '" text-anchor="end" font-size="10.5" font-weight="650" fill="' + (mode === 'util' && nc ? (o.palette === 'light' ? App.utilInk(nc.util) : App.utilColor(nc.util)) : pal.idText) + '">' + parts.join(' · ') + '</text>');
+      out.push('<text x="' + n2(s[0] - 10) + '" y="' + n2(s[1] - 10) + '" text-anchor="end" font-size="10.5" font-weight="650" fill="' + (mode === 'util' && nc ? App.utilInk(nc.util) : pal.idText) + '">' + parts.join(' · ') + '</text>');
     });
 
     // Interactive overlays: outline handles, preview, hit areas
@@ -2548,11 +2770,11 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
         pts.forEach(function (p, k) {
           var s = toScreen(v, p[0], p[1]), q = pts[(k + 1) % pts.length], t = toScreen(v, q[0], q[1]);
           var mx = (s[0] + t[0]) / 2, my = (s[1] + t[1]) / 2;
-          out.push('<g class="hit-edge" data-edge="' + k + '" style="cursor:copy"><circle cx="' + n2(mx) + '" cy="' + n2(my) + '" r="9" fill="transparent"/><circle cx="' + n2(mx) + '" cy="' + n2(my) + '" r="4.5" fill="#0a2131" stroke="' + pal.sel + '" stroke-width="1.3"/><path d="M' + n2(mx - 2.5) + ' ' + n2(my) + 'h5M' + n2(mx) + ' ' + n2(my - 2.5) + 'v5" stroke="' + pal.sel + '" stroke-width="1.2"/></g>');
+          out.push('<g class="hit-edge" data-edge="' + k + '" style="cursor:copy"><circle cx="' + n2(mx) + '" cy="' + n2(my) + '" r="9" fill="transparent"/><circle cx="' + n2(mx) + '" cy="' + n2(my) + '" r="4.5" fill="#ffffff" stroke="' + pal.sel + '" stroke-width="1.3"/><path d="M' + n2(mx - 2.5) + ' ' + n2(my) + 'h5M' + n2(mx) + ' ' + n2(my - 2.5) + 'v5" stroke="' + pal.sel + '" stroke-width="1.2"/></g>');
         });
         pts.forEach(function (p, k) {
           var s = toScreen(v, p[0], p[1]), isS = sel && sel.type === 'vertex' && sel.index === k;
-          out.push('<g class="hit-vertex" data-vertex="' + k + '" style="cursor:move"><rect x="' + n2(s[0] - 10) + '" y="' + n2(s[1] - 10) + '" width="20" height="20" fill="transparent"/><rect x="' + n2(s[0] - 5) + '" y="' + n2(s[1] - 5) + '" width="10" height="10" rx="2" fill="' + (isS ? pal.sel : '#e8fff8') + '" stroke="#0b2436" stroke-width="1.5"/></g>');
+          out.push('<g class="hit-vertex" data-vertex="' + k + '" style="cursor:move"><rect x="' + n2(s[0] - 10) + '" y="' + n2(s[1] - 10) + '" width="20" height="20" fill="transparent"/><rect x="' + n2(s[0] - 5) + '" y="' + n2(s[1] - 5) + '" width="10" height="10" rx="2" fill="' + (isS ? pal.sel : '#ffffff') + '" stroke="' + pal.nodeStroke + '" stroke-width="1.5"/></g>');
         });
       }
       if (App.tool === 'member' && pending && cursor) {
@@ -2568,6 +2790,21 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       if ((App.tool === 'node' || App.tool === 'member') && cursor && !(hov && hov.type === 'node')) {
         var c2 = toScreen(v, cursor[0], cursor[1]);
         out.push('<g pointer-events="none"><circle cx="' + n2(c2[0]) + '" cy="' + n2(c2[1]) + '" r="5" fill="none" stroke="' + pal.sel + '" stroke-width="1.5"/><path d="M' + n2(c2[0] - 11) + ' ' + n2(c2[1]) + 'h7M' + n2(c2[0] + 4) + ' ' + n2(c2[1]) + 'h7M' + n2(c2[0]) + ' ' + n2(c2[1] - 11) + 'v7M' + n2(c2[0]) + ' ' + n2(c2[1] + 4) + 'v7" stroke="' + pal.sel + '" stroke-width="1.2"/></g>');
+      }
+      if (guides) {
+        var gs = toScreen(v, guides.x === null ? 0 : guides.x, guides.y === null ? 0 : guides.y);
+        out.push('<path d="' + (guides.x === null ? '' : 'M' + n2(gs[0]) + ' 0V' + o.h) + (guides.y === null ? '' : 'M0 ' + n2(gs[1]) + 'H' + o.w) + '" stroke="' + pal.sel + '" stroke-width="1" stroke-dasharray="5 4" fill="none" pointer-events="none"/>');
+      }
+      if (drag && drag.moved && drag.kind === 'node') {
+        var dn = nm[drag.id], mt = drag.merge ? nm[drag.merge] : null;
+        if (mt) {
+          var ms = toScreen(v, mt.x, mt.y);
+          out.push('<circle cx="' + n2(ms[0]) + '" cy="' + n2(ms[1]) + '" r="15" fill="' + pal.sel + '" fill-opacity=".18" stroke="' + pal.sel + '" stroke-width="2" stroke-dasharray="4 3" pointer-events="none"/>');
+          out.push(label(ms[0], ms[1] - 26, 0, App.t('mergeHere') + ' ' + mt.id, pal, { small: true, color: pal.sel, stroke: pal.sel }));
+        } else if (dn) {
+          var ds = toScreen(v, dn.x, dn.y);
+          out.push(label(ds[0], ds[1] - 24, 0, App.fmt(dn.x, 3) + ' ; ' + App.fmt(dn.y, 3) + ' m', pal, { small: true, stroke: pal.sel }));
+        }
       }
       if (App.tool !== 'outline') {
         model.members.forEach(function (m) {
@@ -2592,7 +2829,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
       svg.setAttribute('class', 'tool-' + App.tool + (drag && drag.kind === 'pan' ? ' panning' : '') + (drag && drag.moved && drag.kind !== 'pan' ? ' dragging' : ''));
       svg.innerHTML = draw(App.model, App.result, App.checks, {
-        view: view, w: W, h: H, palette: 'dark', mode: App.display.mode, bands: App.display.bands, ids: App.display.ids, zones: App.display.zones,
+        view: view, w: W, h: H, mode: App.display.mode, bands: App.display.bands, ids: App.display.ids, zones: App.display.zones,
         interactive: true, sel: App.sel, hover: App.hover, warnings: App.warnings
       });
       hud();
@@ -2604,7 +2841,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     var parts = [];
     if (cursorRaw) parts.push('<span>x <b>' + App.fmt(cursorRaw[0], 3) + '</b> · y <b>' + App.fmt(cursorRaw[1], 3) + '</b> m</span>');
     parts.push('<span class="sep"></span><span>' + App.t('grid') + ' <b>' + App.fmt(niceStep(view.k) * 1000, 0) + '</b> mm</span>');
-    parts.push('<span class="sep"></span><span class="hint">' + App.t('hint_' + App.tool) + (pending ? ' · ' + App.t('hintChain') : '') + '</span>');
+    parts.push('<span class="sep"></span><span class="hint">' + (drag && drag.moved && drag.kind !== 'pan' ? App.t('hintDrag') : App.t('hint_' + App.tool) + (pending ? ' · ' + App.t('hintChain') : '')) + '</span>');
     el.innerHTML = parts.join('');
   }
 
@@ -2615,6 +2852,17 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     if (!App.display.snap || (e && e.altKey)) return [App.round(w[0]), App.round(w[1])];
     var s = niceStep(view.k);
     return [App.round(Math.round(w[0] / s) * s), App.round(Math.round(w[1] / s) * s)];
+  }
+  // Snap one coordinate while dragging. Alignment with one of `others` (within
+  // 7 px) wins over the grid, so a point stays on its own line until it is
+  // really moved away and lines up with its neighbours; Alt disables both.
+  function snapAxis(val, others, e) {
+    if (!App.display.snap || e.altKey) return { v: App.round(val), guide: false };
+    var tol = 7 / view.k, best = null;
+    others.forEach(function (o) { if (Math.abs(o - val) <= tol && (best === null || Math.abs(o - val) < Math.abs(best - val))) best = o; });
+    if (best !== null) return { v: best, guide: true };
+    var s = niceStep(view.k);
+    return { v: App.round(Math.round(val / s) * s), guide: false };
   }
   function hitOf(e) {
     var t = e.target && e.target.closest ? e.target.closest('[data-node],[data-member],[data-vertex],[data-edge]') : null;
@@ -2629,6 +2877,18 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
   App.emitSelection = function () { App.listeners.forEach(function (fn) { fn({ selection: true }); }); };
   function changed(opts) { App.update(opts || {}); }
   App.cancelPending = function () { if (pending) { pending = null; render(); } };
+  // Esc while dragging: puts everything back where it was. Returns true when a drag was cancelled.
+  App.cancelDrag = function () {
+    if (!drag || drag.kind === 'pan') return false;
+    var before = drag.before;
+    drag = null; guides = null;
+    if (before !== undefined) {
+      App.model = JSON.parse(before);
+      App.validateSel();
+      changed({ inputs: true });
+    } else render();
+    return true;
+  };
 
   function projectOnMember(m, w) {
     var A = App.node(m.i), B = App.node(m.j);
@@ -2644,7 +2904,8 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     var p = localPoint(e);
     pointers[e.pointerId] = p;
     hideTooltip();
-    if (Object.keys(pointers).length === 2) { startPinch(); return; }
+    var count = Object.keys(pointers).length;
+    if (count >= 2) { if (count === 2) startPinch(); return; }
     var hit = hitOf(e), w = snapWorld(p, e);
     if (e.button === 1 || spaceDown) { drag = { kind: 'pan', start: p, view: { ox: view.ox, oy: view.oy }, moved: false }; render(); return; }
     var tool = App.tool;
@@ -2661,8 +2922,8 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
         drag = { kind: 'pan', start: p, view: { ox: view.ox, oy: view.oy }, moved: false, clear: true };
       }
     } else if (tool === 'node') {
+      if (hit && hit.type === 'node') { select({ type: 'node', id: hit.id }); return; }
       App.commit();
-      if (hit && hit.type === 'node') { select({ type: 'node', id: hit.id }); App.history.pop(); return; }
       var id;
       if (hit && hit.type === 'member') { var pr = projectOnMember(App.member(hit.id), w); id = App.splitMember(hit.id, pr[0], pr[1]); }
       else id = App.addNode(w[0], w[1]);
@@ -2690,6 +2951,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       }
     } else if (tool === 'load') {
       if (hit && hit.type === 'node') {
+        e.preventDefault();
         var nl = App.node(hit.id);
         if (!nl.fx && !nl.fy) { App.commit(); nl.fy = -100; }
         App.sel = { type: 'node', id: hit.id };
@@ -2701,11 +2963,11 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
         select({ type: 'vertex', index: hit.index });
         drag = { kind: 'vertex', index: hit.index, start: p, orig: [pt[0], pt[1]], moved: false };
       } else if (hit && hit.type === 'edge') {
-        App.commit();
+        var before = App.snapshot();
         App.model.outline.splice(hit.index + 1, 0, [w[0], w[1]]);
         select({ type: 'vertex', index: hit.index + 1 });
-        drag = { kind: 'vertex', index: hit.index + 1, start: p, orig: [w[0], w[1]], moved: true, committed: true };
-        changed({ inputs: true });
+        drag = { kind: 'vertex', index: hit.index + 1, start: p, orig: [w[0], w[1]], moved: true, before: before };
+        changed({ drag: true });
       } else {
         drag = { kind: 'pan', start: p, view: { ox: view.ox, oy: view.oy }, moved: false, clear: true };
       }
@@ -2726,32 +2988,51 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
   function onMove(e) {
     var p = localPoint(e);
     if (pointers[e.pointerId]) pointers[e.pointerId] = p;
-    if (pinch && Object.keys(pointers).length === 2) { movePinch(); return; }
+    if (pinch) { if (Object.keys(pointers).length === 2) movePinch(); return; }
     cursorRaw = toWorld(p[0], p[1]);
     cursor = snapWorld(p, e);
     var hit = hitOf(e);
     if (drag) {
       var dx = p[0] - drag.start[0], dy = p[1] - drag.start[1];
-      if (!drag.moved && Math.hypot(dx, dy) < 3) return;
+      // A click is not a drag: fingers and bars (easily caught by accident) need a longer move.
+      var slop = e.pointerType === 'touch' ? 8 : drag.kind === 'member' ? 6 : 3;
+      if (!drag.moved && Math.hypot(dx, dy) < slop) return;
       if (drag.kind === 'pan') {
         drag.moved = true;
         view.ox = drag.view.ox + dx; view.oy = drag.view.oy + dy; render(); return;
       }
-      if (!drag.committed) { App.commit(); drag.committed = true; }
+      if (drag.before === undefined) drag.before = App.snapshot();
       drag.moved = true;
-      var s = App.display.snap && !e.altKey ? niceStep(view.k) : 0;
-      var snap = function (v) { return s ? App.round(Math.round(v / s) * s) : App.round(v); };
       var dwx = dx / view.k, dwy = -dy / view.k;
       if (drag.kind === 'node') {
-        var n = App.node(drag.id);
-        n.x = snap(drag.orig[0] + dwx); n.y = snap(drag.orig[1] + dwy);
+        var n = App.node(drag.id), tx = drag.orig[0] + dwx, ty = drag.orig[1] + dwy;
+        var xs = [drag.orig[0]], ys = [drag.orig[1]], near = null, reach = (e.pointerType === 'touch' ? 16 : 10) / view.k;
+        App.model.nodes.forEach(function (o) {
+          if (o.id === n.id) return;
+          xs.push(o.x); ys.push(o.y);
+          var d = Math.hypot(o.x - tx, o.y - ty);
+          if (App.display.snap && !e.altKey && d < reach && App.canMergeNodes(n.id, o.id)) { reach = d; near = o; }
+        });
+        drag.merge = near ? near.id : null;
+        if (near) {
+          // Dropping here merges the two nodes: preview only, the model is solved on release.
+          guides = null;
+          render(); return;
+        }
+        var sx = snapAxis(tx, xs, e), sy = snapAxis(ty, ys, e);
+        n.x = sx.v; n.y = sy.v;
+        guides = sx.guide || sy.guide ? { x: sx.guide ? sx.v : null, y: sy.guide ? sy.v : null } : null;
       } else if (drag.kind === 'member') {
         var m = App.member(drag.id), A = App.node(m.i), B = App.node(m.j);
-        var ddx = snap(drag.origA[0] + dwx) - drag.origA[0], ddy = snap(drag.origA[1] + dwy) - drag.origA[1];
+        var ddx = snapAxis(drag.origA[0] + dwx, [drag.origA[0]], e).v - drag.origA[0], ddy = snapAxis(drag.origA[1] + dwy, [drag.origA[1]], e).v - drag.origA[1];
         A.x = App.round(drag.origA[0] + ddx); A.y = App.round(drag.origA[1] + ddy);
         B.x = App.round(drag.origB[0] + ddx); B.y = App.round(drag.origB[1] + ddy);
       } else if (drag.kind === 'vertex') {
-        App.model.outline[drag.index] = [snap(drag.orig[0] + dwx), snap(drag.orig[1] + dwy)];
+        var vx = [drag.orig[0]], vy = [drag.orig[1]];
+        App.model.outline.forEach(function (q, k) { if (k !== drag.index) { vx.push(q[0]); vy.push(q[1]); } });
+        var px = snapAxis(drag.orig[0] + dwx, vx, e), py = snapAxis(drag.orig[1] + dwy, vy, e);
+        App.model.outline[drag.index] = [px.v, py.v];
+        guides = px.guide || py.guide ? { x: px.guide ? px.v : null, y: py.guide ? py.v : null } : null;
       }
       changed({ drag: true });
       return;
@@ -2765,13 +3046,33 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
   }
 
   function onUp(e) {
+    if (!pointers[e.pointerId]) return;
     delete pointers[e.pointerId];
-    if (pinch) { if (Object.keys(pointers).length < 2) pinch = null; return; }
+    if (pinch) { if (Object.keys(pointers).length === 2) startPinch(); else if (Object.keys(pointers).length < 2) pinch = null; return; }
     if (!drag) return;
-    var d = drag; drag = null;
+    var d = drag; drag = null; guides = null;
     if (d.kind === 'pan' && !d.moved && d.clear) { pending = null; select(null); }
-    if (d.kind !== 'pan' && d.moved) changed({ inputs: true });
+    if (d.kind === 'node' && d.merge && App.mergeNodes(d.id, d.merge)) {
+      App.sel = { type: 'node', id: d.merge };
+      App.toast(App.t('nodesMerged'));
+    }
+    if (d.before !== undefined && d.before !== App.snapshot()) {
+      App.commit(d.before);
+      changed({ inputs: true });
+    }
     render();
+  }
+
+  function onCancel(e) {
+    if (!pointers[e.pointerId]) return;
+    if (!pinch && !App.cancelDrag()) drag = null;
+    onUp(e);
+    render();
+  }
+
+  function onWindowMove(e) {
+    if (pointers[e.pointerId] && !e.buttons && e.pointerType === 'mouse') onCancel(e);
+    if (pointers[e.pointerId] || svg.contains(e.target)) onMove(e);
   }
 
   function onWheel(e) {
@@ -2790,6 +3091,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
   var pinch = null;
   function startPinch() {
     var ids = Object.keys(pointers), a = pointers[ids[0]], b = pointers[ids[1]];
+    App.cancelDrag();
     drag = null;
     pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), m: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2] };
   }
@@ -2841,6 +3143,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     render();
   };
   App.setTool = function (t) {
+    App.cancelDrag();
     App.tool = t; pending = null;
     if (t !== 'outline' && App.sel && App.sel.type === 'vertex') App.sel = null;
     App.listeners.forEach(function (fn) { fn({ tool: true }); });
@@ -2865,13 +3168,14 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     var h = opts.height || Math.round(Math.max(340, Math.min(720, (w - 140) * bh / bw + 150)));
     var pad = opts.pad || { l: 90, r: 90, t: 85, b: 110 };
     var v = fitView(model, w, h, pad);
-    var body = draw(model, result, checks, { view: v, w: w, h: h, palette: opts.palette || 'light', mode: opts.mode || 'forces', bands: true, ids: opts.ids !== false, zones: opts.zones !== false, grid: opts.grid !== false, interactive: false });
+    var body = draw(model, result, checks, { view: v, w: w, h: h, mode: opts.mode || 'forces', bands: true, ids: opts.ids !== false, zones: opts.zones !== false, grid: opts.grid !== false, interactive: false });
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" font-family="Segoe UI, Inter, Roboto, Arial, sans-serif">' + body + '</svg>';
   };
 
   App.initCanvas = function () {
     svg = document.getElementById('canvas');
     wrap = document.getElementById('canvas-wrap');
+    App.coarse = !!(window.matchMedia && window.matchMedia('(pointer:coarse)').matches);
     var first = true;
     var ro = new ResizeObserver(function () {
       var r = wrap.getBoundingClientRect();
@@ -2883,9 +3187,14 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     });
     ro.observe(wrap);
     svg.addEventListener('pointerdown', onDown);
-    svg.addEventListener('pointermove', onMove);
-    svg.addEventListener('pointerup', onUp);
-    svg.addEventListener('pointercancel', onUp);
+    // The SVG is redrawn during selection and dragging. Chrome can release
+    // pointer capture when the original hit element is replaced.
+    window.addEventListener('pointermove', onWindowMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onCancel);
+    window.addEventListener('blur', function () {
+      App.cancelDrag(); drag = null; pinch = null; pointers = {}; spaceDown = false; render();
+    });
     svg.addEventListener('pointerleave', function () { cursor = null; cursorRaw = null; if (App.hover) { App.hover = null; render(); } hideTooltip(); hud(); });
     svg.addEventListener('wheel', onWheel, { passive: false });
     svg.addEventListener('dblclick', function (e) { if (!hitOf(e) && App.tool === 'select') App.fit(); });
@@ -2899,7 +3208,10 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     });
     window.addEventListener('keydown', function (e) { if (e.code === 'Space' && !/INPUT|SELECT|TEXTAREA|BUTTON/.test(document.activeElement.tagName)) { spaceDown = true; e.preventDefault(); } });
     window.addEventListener('keyup', function (e) { if (e.code === 'Space') spaceDown = false; });
-    App.on(function (o) { if (o.fit) App.fit(); else render(); });
+    App.on(function (o) {
+      if (o.fit) { drag = null; guides = null; pending = null; App.fit(); }
+      else render();
+    });
   };
   App.renderCanvas = render;
   App.canvasView = function () { return view; };
@@ -2958,11 +3270,12 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       el.innerHTML = '<span>0</span><span class="grad"></span><span>≥ 1,0</span>'.replace('1,0', fmt(1, 1));
       return;
     }
+    var pal = App.palette;
     el.innerHTML =
-      '<span><svg width="26" height="8"><line x1="1" y1="4" x2="25" y2="4" stroke="#7cb4ff" stroke-width="2.4" stroke-dasharray="7 4"/></svg>' + t('legendStrut') + '</span>' +
-      '<span><svg width="26" height="8"><line x1="1" y1="4" x2="25" y2="4" stroke="#ffc978" stroke-width="3.2"/></svg>' + t('legendTie') + '</span>' +
-      '<span><svg width="26" height="8"><line x1="1" y1="4" x2="25" y2="4" stroke="#6f8a99" stroke-width="1.4" stroke-dasharray="2 4"/></svg>' + t('legendZero') + '</span>' +
-      (App.display.mode === 'forces' ? '<span><svg width="18" height="10"><path d="M1 5h11" stroke="#56e0bb" stroke-width="2"/><path d="M17 5l-6-4v8z" fill="#56e0bb"/></svg>' + t('legendReaction') + '</span>' : '');
+      '<span><svg width="26" height="8"><line x1="1" y1="4" x2="25" y2="4" stroke="' + pal.strut + '" stroke-width="2.4" stroke-dasharray="7 4"/></svg>' + t('legendStrut') + '</span>' +
+      '<span><svg width="26" height="8"><line x1="1" y1="4" x2="25" y2="4" stroke="' + pal.tie + '" stroke-width="3.2"/></svg>' + t('legendTie') + '</span>' +
+      '<span><svg width="26" height="8"><line x1="1" y1="4" x2="25" y2="4" stroke="' + pal.zero + '" stroke-width="1.4" stroke-dasharray="2 4"/></svg>' + t('legendZero') + '</span>' +
+      (App.display.mode === 'forces' ? '<span><svg width="18" height="10"><path d="M1 5h11" stroke="' + pal.react + '" stroke-width="2"/><path d="M17 5l-6-4v8z" fill="' + pal.react + '"/></svg>' + t('legendReaction') + '</span>' : '');
   }
 
   // --------------------------------------------------------- inputs ---
@@ -3238,12 +3551,11 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     }
     var gov = c.governing, maxS = null, maxT = null;
     r.forces.forEach(function (f) { if (f.kind === 'strut' && (!maxS || -f.N > -maxS.N)) maxS = f; if (f.kind === 'tie' && (!maxT || f.N > maxT.N)) maxT = f; });
-    var r0 = r.indeterminacy;
-    var stat = r0 === 0 ? t('determinate') : r0 > 0 ? t('indeterminate') + ' (r = ' + r0 + ')' : t('mechanism');
+    var stat = App.statText(r);
     el.innerHTML =
       metric(t('mUtil'), gov ? '<span style="color:' + App.utilInk(c.maxUtil) + '">' + fmt(c.maxUtil, 2) + '</span>' : '—', '', gov ? (gov.kind === 'node' ? t('node') + ' ' + gov.id + ' · ' + gov.type : gov.kind === 'anchor' ? t('anchorage') + ' ' + gov.member + ' · ' + gov.node : t('kind_' + gov.kind) + ' ' + gov.id) + ' · ' + statusText(c.maxUtil) : '', gov ? (gov.kind === 'node' ? 'node:' + gov.id : gov.kind === 'anchor' ? 'member:' + gov.member : 'member:' + gov.id) : null) +
-      metric(t('mStrut'), maxS ? '<span style="color:var(--blue)">' + fmt(-maxS.N, 0) + '</span>' : '—', 'kN', maxS ? maxS.id : t('none'), maxS ? 'member:' + maxS.id : null) +
-      metric(t('mTie'), maxT ? '<span style="color:var(--amber)">' + fmt(maxT.N, 0) + '</span>' : '—', 'kN', maxT ? maxT.id : t('none'), maxT ? 'member:' + maxT.id : null) +
+      metric(t('mStrut'), maxS ? '<span style="color:var(--strut)">' + fmt(-maxS.N, 0) + '</span>' : '—', 'kN', maxS ? maxS.id : t('none'), maxS ? 'member:' + maxS.id : null) +
+      metric(t('mTie'), maxT ? '<span style="color:var(--tie)">' + fmt(maxT.N, 0) + '</span>' : '—', 'kN', maxT ? maxT.id : t('none'), maxT ? 'member:' + maxT.id : null) +
       metric(t('mModel'), '<span style="font-size:1.1rem">' + stat + '</span>', '', App.model.nodes.length + ' ' + t('nodesLc') + ' · ' + App.model.members.length + ' ' + t('membersLc') + ' · ΣF ' + fmt(r.globalResidual, 3) + ' kN · ' + fmt(App.computeMs, 1) + ' ms', null);
   }
   function statusText(u) { var s = App.statusOf(u); return s === 'bad' ? t('statusBad') : s === 'warn' ? t('statusWarn') : t('statusOk'); }
@@ -3311,7 +3623,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       h += '<div class="table-scroll"><table><thead><tr><th>' + t('member') + '</th><th class="l">' + t('nodesCol') + '</th><th>L (m)</th><th>' + t('angle') + ' (°)</th><th>N (kN)</th><th class="l">' + t('type') + '</th><th>w (mm)</th><th>As (mm²)</th></tr></thead><tbody>';
       r.forces.forEach(function (f) {
         var m = App.member(f.id);
-        h += '<tr data-target="member:' + f.id + '"' + isSel('member', f.id) + '><td>' + f.id + '</td><td class="l">' + m.i + ' – ' + m.j + '</td><td>' + fmt(f.L, 3) + '</td><td>' + fmt(deg(Math.atan2(f.s, f.c)), 1) + '</td><td><b style="color:' + (f.kind === 'tie' ? 'var(--amber)' : f.kind === 'strut' ? 'var(--blue)' : 'var(--muted)') + '">' + fmt(f.N, 1) + '</b></td><td class="l">' + t('kind_' + f.kind) + '</td><td>' + fmt(m.w, 0) + '</td><td>' + fmt(QST.csa.memberArea(m), 0) + '</td></tr>';
+        h += '<tr data-target="member:' + f.id + '"' + isSel('member', f.id) + '><td>' + f.id + '</td><td class="l">' + m.i + ' – ' + m.j + '</td><td>' + fmt(f.L, 3) + '</td><td>' + fmt(deg(Math.atan2(f.s, f.c)), 1) + '</td><td><b style="color:' + (f.kind === 'tie' ? 'var(--tie)' : f.kind === 'strut' ? 'var(--strut)' : 'var(--muted)') + '">' + fmt(f.N, 1) + '</b></td><td class="l">' + t('kind_' + f.kind) + '</td><td>' + fmt(m.w, 0) + '</td><td>' + fmt(QST.csa.memberArea(m), 0) + '</td></tr>';
       });
       h += '</tbody></table></div><p class="table-note">' + t('forcesNote') + '</p>';
     } else {
@@ -3349,11 +3661,12 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
     var k = Math.min(50 / (x1 - x0), 26 / (y1 - y0)), ox = 29 - (x0 + x1) / 2 * k, oy = 17 + (y0 + y1) / 2 * k;
     var P = function (x, y) { return (ox + x * k).toFixed(1) + ',' + (oy - y * k).toFixed(1); };
-    var s = '<polygon points="' + m.outline.map(function (p) { return P(p[0], p[1]); }).join(' ') + '" fill="#9fc3d2" fill-opacity=".15" stroke="#88b3c6" stroke-width=".7"/>';
+    var pal = App.palette;
+    var s = '<polygon points="' + m.outline.map(function (p) { return P(p[0], p[1]); }).join(' ') + '" fill="' + pal.concrete + '" stroke="' + pal.concreteStroke + '" stroke-width=".6"/>';
     var nm = {}; m.nodes.forEach(function (n) { nm[n.id] = n; });
     m.members.forEach(function (b) {
       var A = nm[b.i], B = nm[b.j], tie = !!b.bars || b.As > 0;
-      s += '<polyline points="' + P(A.x, A.y) + ' ' + P(B.x, B.y) + '" stroke="' + (tie ? '#ffc978' : '#7cb4ff') + '" stroke-width="' + (tie ? 1.4 : 1) + '"' + (tie ? '' : ' stroke-dasharray="2 1.3"') + '/>';
+      s += '<polyline points="' + P(A.x, A.y) + ' ' + P(B.x, B.y) + '" stroke="' + (tie ? pal.tie : pal.strut) + '" stroke-width="' + (tie ? 1.4 : 1) + '"' + (tie ? '' : ' stroke-dasharray="2 1.3"') + '/>';
     });
     return s;
   }
@@ -3361,7 +3674,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
   // ---------------------------------------------------------- binding ---
   function bind() {
     $('#toolbox').addEventListener('click', function (e) { var b = e.target.closest('[data-tool]'); if (b) App.setTool(b.dataset.tool); });
-    $('#display-mode').addEventListener('click', function (e) { var b = e.target.closest('[data-mode]'); if (!b) return; App.display.mode = b.dataset.mode; App.saveUi(); renderToolbox(); renderLegend(); App.renderCanvas(); });
+    $('#display-mode').addEventListener('click', function (e) { var b = e.target.closest('[data-mode]'); if (b) App.setMode(b.dataset.mode); });
     ['bands', 'zones', 'ids', 'snap'].forEach(function (k) { $('#toggle-' + k).addEventListener('click', function () { App.display[k] = !App.display[k]; App.saveUi(); renderToolbox(); App.renderCanvas(); }); });
     $('#undo').addEventListener('click', App.undo);
     $('#redo').addEventListener('click', App.redo);
@@ -3444,6 +3757,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     bind();
     App.on(function (o) {
       if (o.tool) { renderToolbox(); return; }
+      if (o.display) { renderToolbox(); renderLegend(); return; }
       if (o.selection) {
         renderInspector(); renderResults();
         if (App.panel !== 'params') $$('.row-card').forEach(function (r) { var id = r.dataset.rowNode || r.dataset.rowMember; r.classList.toggle('selected', !!App.sel && App.sel.id === id); });
@@ -3505,7 +3819,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       h += '<table style="margin-top:8px"><thead><tr><th>' + t('node') + '</th><th>Rx (kN)</th><th>Ry (kN)</th></tr></thead><tbody>';
       r.reactions.forEach(function (R) { sx += R.rx; sy += R.ry; h += '<tr><td>' + R.node + '</td><td>' + fmt(R.rx, 1) + '</td><td>' + fmt(R.ry, 1) + '</td></tr>'; });
       h += '<tr><td>Σ ' + t('reactions') + ' / Σ ' + t('loads') + '</td><td>' + fmt(sx, 1) + ' / ' + fmt(r.sumLoads.fx, 1) + '</td><td>' + fmt(sy, 1) + ' / ' + fmt(r.sumLoads.fy, 1) + '</td></tr></tbody></table>';
-      h += '<p>' + (r.indeterminacy === 0 ? t('determinate') : t('indeterminate') + ' (r = ' + r.indeterminacy + ')') + ' · ' + t('residual') + ' ' + r.globalResidual.toExponential(1) + ' kN</p>';
+      h += '<p>' + App.statText(r) + ' · ' + t('residual') + ' ' + r.globalResidual.toExponential(1) + ' kN</p>';
 
       h += '<h2>4. ' + t('rpChecks') + '</h2><div class="rp-figure">' + App.staticSVG({ mode: 'util', width: 1000, grid: false }) + '</div>';
       h += '<table class="rp-calc"><thead><tr><th>' + t('element') + '</th><th>' + t('calc') + '</th><th>' + t('utilShort') + '</th></tr></thead><tbody>';
@@ -3581,6 +3895,149 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
 })();
 
 </script>
+<script>/* js/guide.js */
+// SPDX-License-Identifier: GPL-3.0-or-later
+/* QuickerStrut&Tie — design guide window and interactive tutorial.
+ *
+ * The tutorial is a strip above the canvas (#coach). Each step names the tool
+ * to use and a condition on the model that completes it; the user builds a
+ * small deep beam from an empty outline.
+ */
+(function () {
+  'use strict';
+  var QST = window.QST, App = QST.App;
+  var $ = function (s) { return document.querySelector(s); };
+  var STORE_WELCOME = 'qst-welcome-v1';
+  var tut = null;       // { step, base, timer } while the tutorial runs
+  var welcome = false;  // first-visit invitation shown
+
+  function store(fn) { try { return fn(window.localStorage); } catch (e) { return null; } }
+  function geometry(m) { return m.nodes.map(function (n) { return n.x + ',' + n.y; }).join(';'); }
+
+  // tool: tool selected when the step starts; target: control to point at;
+  // done: condition that completes the step.
+  var STEPS = [
+    { tool: 'node', target: '[data-tool="node"]', done: function (m) { return m.nodes.length >= 3; } },
+    { tool: 'member', target: '[data-tool="member"]', done: function (m) {
+      return m.nodes.filter(function (n) {
+        return m.members.filter(function (b) { return b.i === n.id || b.j === n.id; }).length >= 2;
+      }).length >= 3;
+    } },
+    { tool: 'support', target: '[data-tool="support"]', done: function (m) {
+      return m.nodes.some(function (n) { return n.support === 'pin'; }) && m.nodes.some(function (n) { return n.support === 'ry'; });
+    } },
+    { tool: 'load', target: '[data-tool="load"]', done: function (m) {
+      return m.nodes.some(function (n) { return n.fy === -1500; }) && App.result.ok && App.result.forces.some(function (f) { return f.kind === 'tie'; });
+    } },
+    { tool: 'select', target: '[data-mode="util"]', done: function () { return App.display.mode === 'util'; } },
+    { tool: 'select', target: '#auto-size', panel: 'params', done: function () { return App.checks.ok && App.checks.maxUtil <= 1; } },
+    { tool: 'select', target: '[data-tool="select"]', done: function (m) { return geometry(m) !== tut.base; } },
+    { tool: 'select', target: null, done: function () { return false; } }
+  ];
+
+  function render() {
+    var el = $('#coach'), t = App.t;
+    document.querySelectorAll('.coach-target').forEach(function (x) { x.classList.remove('coach-target'); });
+    if (!tut) {
+      if (!welcome) { el.classList.add('hidden'); el.innerHTML = ''; return; }
+      el.className = 'coach';
+      el.innerHTML = '<span class="coach-n">?</span><div class="coach-text"><b>' + t('welcomeTitle') + '</b><span>' + t('welcomeText') + '</span></div>' +
+        '<div class="coach-actions"><button type="button" class="primary" data-coach="start">' + t('tutStart') + '</button><button type="button" data-coach="guide">' + t('welcomeGuide') + '</button><button type="button" class="coach-x" data-coach="dismiss" aria-label="' + t('close') + '">×</button></div>';
+      return;
+    }
+    var n = tut.step, last = n === STEPS.length - 1, done = STEPS[n].done(App.model);
+    el.className = 'coach' + (done ? ' done' : '');
+    el.innerHTML = '<span class="coach-n">' + (n + 1) + '/' + STEPS.length + '</span>' +
+      '<div class="coach-text"><b>' + t('tut' + (n + 1) + 'T') + '</b><span>' + t('tut' + (n + 1)) + '</span></div>' +
+      '<div class="coach-actions">' + (done ? '<span class="coach-ok">✓ ' + t('tutDone') + '</span>' : '') +
+      (n > 0 ? '<button type="button" data-coach="prev">' + t('tutPrev') + '</button>' : '') +
+      '<button type="button" class="' + (done || last ? 'primary' : '') + '" data-coach="' + (last ? 'quit' : 'next') + '">' + t(last ? 'tutFinish' : 'tutNext') + '</button>' +
+      (last ? '' : '<button type="button" class="coach-x" data-coach="quit" aria-label="' + t('tutQuit') + '" title="' + t('tutQuit') + '">×</button>') + '</div>';
+    var target = STEPS[n].target && !done ? $(STEPS[n].target) : null;
+    if (target) target.classList.add('coach-target');
+  }
+
+  function enter(step) {
+    clearTimeout(tut.timer); tut.timer = null;
+    tut.step = step;
+    tut.base = geometry(App.model);
+    App.sel = null;
+    App.emitSelection();
+    var s = STEPS[step];
+    if (s.panel && App.panel !== s.panel) { App.panel = s.panel; App.update({ inputs: true }); }
+    if (s.tool && App.tool !== s.tool) App.setTool(s.tool);
+    render();
+  }
+
+  // Called after every change: a step completed by the user moves on by itself.
+  function watch(o) {
+    // Another model was opened (example, file, template): the tutorial ends.
+    if (tut && o && o.fit) { quit(); return; }
+    if (!tut || (o && o.drag)) return;
+    if (tut.step < 3 && App.sel) { App.sel = null; App.emitSelection(); }
+    if (!STEPS[tut.step].done(App.model)) { clearTimeout(tut.timer); tut.timer = null; }
+    else if (!tut.timer && tut.step < STEPS.length - 1) {
+      var at = tut.step;
+      tut.timer = setTimeout(function () {
+        tut.timer = null;
+        if (STEPS[at].done(App.model)) enter(at + 1);
+      }, 1300);
+    }
+    render();
+  }
+
+  function quit() {
+    if (tut) clearTimeout(tut.timer);
+    tut = null;
+    render();
+  }
+
+  function start() {
+    App.guard().then(function (go) {
+      if (!go) return;
+      dismissWelcome();
+      var d = $('#guide-dialog');
+      if (d.open) d.close();
+      var m = QST.examples.blank();
+      m.outline = [[0, 0], [4, 0], [4, 2], [0, 2]];
+      m.name = App.t('tutName');
+      App.display.mode = 'forces';
+      App.load(m);
+      tut = { step: 0, timer: null };
+      enter(0);
+    });
+  }
+
+  function dismissWelcome() {
+    welcome = false;
+    store(function (ls) { ls.setItem(STORE_WELCOME, '1'); });
+  }
+
+  App.initGuide = function () {
+    $('#guide-open').addEventListener('click', function () { $('#guide-dialog').showModal(); });
+    $('#guide-dialog').addEventListener('click', function (e) { if (e.target === e.currentTarget) e.currentTarget.close(); });
+    $('#tut-start').addEventListener('click', start);
+    $('#coach').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-coach]'); if (!b) return;
+      var a = b.dataset.coach;
+      if (a === 'start') start();
+      else if (a === 'guide') { dismissWelcome(); render(); $('#guide-dialog').showModal(); }
+      else if (a === 'dismiss') { dismissWelcome(); render(); }
+      else if (a === 'next') enter(tut.step + 1);
+      else if (a === 'prev') enter(tut.step - 1);
+      else if (a === 'quit') quit();
+    });
+    welcome = !store(function (ls) { return ls.getItem(STORE_WELCOME); });
+    App.on(watch);
+    render();
+  };
+  App.renderGuide = function () {
+    $('#guide-body').innerHTML = App.t('guideHtml');
+    render();
+  };
+})();
+
+</script>
 <script>/* js/main.js */
 // SPDX-License-Identifier: GPL-3.0-or-later
 /* QuickerStrut&Tie — start-up, language, menus, files and keyboard shortcuts. */
@@ -3601,6 +4058,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     $('#release-date').textContent = App.t('released') + ' ' + meta.date;
     $('#footer-version').textContent = 'QuickerStrut&Tie v' + meta.version + ' · ' + meta.date;
     $('#method-body').innerHTML = App.t('methodHtml');
+    App.renderGuide();
     $('#project-name').placeholder = App.t('untitled');
     $('#autosave-state').textContent = App.t('autosaved');
     App.renderAllText();
@@ -3620,10 +4078,12 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       d.showModal();
     });
   }
-  function guard(action) {
+  function guard() {
     if (!App.dirty) return Promise.resolve(true);
     return confirmDialog(App.t('unsavedTitle'), App.t('unsavedBody'), App.t('discard'));
   }
+
+  App.guard = guard;
 
   function saveProject() {
     var data = { app: 'QuickerStrut&Tie', version: (window.QST_META || {}).version, schema: 1, savedAt: new Date().toISOString(), model: App.model };
@@ -3682,7 +4142,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     var h = '';
     if (g.errors.length) h += '<div class="bad">⚠ ' + g.errors.map(function (e) { return t('tplErr_' + e); }).join(' · ') + '</div>';
     if (!g.result.ok) h += '<div class="bad">' + t('mechanism') + '</div>';
-    else h += '<div><b>' + t('mUtil') + ' ' + fmt(g.checks.maxUtil, 2) + '</b> · ' + (g.result.indeterminacy === 0 ? t('determinate') : t('indeterminate') + ' (r = ' + g.result.indeterminacy + ')') + ' · ' + g.model.nodes.length + ' ' + t('nodesLc') + ' · ' + g.model.members.length + ' ' + t('membersLc') + '</div>';
+    else h += '<div><b>' + t('mUtil') + ' ' + fmt(g.checks.maxUtil, 2) + '</b> · ' + App.statText(g.result) + ' · ' + g.model.nodes.length + ' ' + t('nodesLc') + ' · ' + g.model.members.length + ' ' + t('membersLc') + '</div>';
     h += '<div>' + t('tplNote_' + tplState.kind) + '</div><div>' + t('tplAutoNote') + '</div>';
     $('#tpl-info').innerHTML = h;
   }
@@ -3757,6 +4217,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       var tag = document.activeElement && document.activeElement.tagName;
       var typing = /INPUT|SELECT|TEXTAREA/.test(tag) || document.querySelector('dialog[open]');
       var mod = e.ctrlKey || e.metaKey;
+      if (e.key === 'Escape' && App.cancelDrag()) return;
       if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); saveProject(); return; }
       if (mod && e.key.toLowerCase() === 'o') { e.preventDefault(); $('#open-project').click(); return; }
       if (mod && e.key.toLowerCase() === 'p') { e.preventDefault(); App.printReport(); return; }
@@ -3768,9 +4229,9 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
       var k = e.key.toLowerCase();
       if (tools[k]) { App.setTool(tools[k]); return; }
       if (k === 'f') { App.fit(); return; }
-      if (k === '1') { App.display.mode = 'geometry'; App.saveUi(); App.update(); return; }
-      if (k === '2') { App.display.mode = 'forces'; App.saveUi(); App.update(); return; }
-      if (k === '3') { App.display.mode = 'util'; App.saveUi(); App.update(); return; }
+      if (k === '1') { App.setMode('geometry'); return; }
+      if (k === '2') { App.setMode('forces'); return; }
+      if (k === '3') { App.setMode('util'); return; }
       if (k === '+' || k === '=') { App.zoom(1.2); return; }
       if (k === '-') { App.zoom(1 / 1.2); return; }
       if (e.key === 'Escape') { App.cancelPending(); if (App.tool !== 'select') App.setTool('select'); else { App.sel = null; App.emitSelection(); } return; }
@@ -3794,6 +4255,7 @@ window.QST_META = { version: '0.2.6', date: '2026-11-01', author: 'Anthony Chér
     App.initPanels();
     App.initCanvas();
     bind();
+    App.initGuide();
     applyLanguage();
     App.update({ inputs: true });
   }

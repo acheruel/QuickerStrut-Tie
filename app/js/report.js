@@ -42,7 +42,7 @@
       h += '<table style="margin-top:8px"><thead><tr><th>' + t('node') + '</th><th>Rx (kN)</th><th>Ry (kN)</th></tr></thead><tbody>';
       r.reactions.forEach(function (R) { sx += R.rx; sy += R.ry; h += '<tr><td>' + R.node + '</td><td>' + fmt(R.rx, 1) + '</td><td>' + fmt(R.ry, 1) + '</td></tr>'; });
       h += '<tr><td>Σ ' + t('reactions') + ' / Σ ' + t('loads') + '</td><td>' + fmt(sx, 1) + ' / ' + fmt(r.sumLoads.fx, 1) + '</td><td>' + fmt(sy, 1) + ' / ' + fmt(r.sumLoads.fy, 1) + '</td></tr></tbody></table>';
-      h += '<p>' + (r.indeterminacy === 0 ? t('determinate') : t('indeterminate') + ' (r = ' + r.indeterminacy + ')') + ' · ' + t('residual') + ' ' + r.globalResidual.toExponential(1) + ' kN</p>';
+      h += '<p>' + App.statText(r) + ' · ' + t('residual') + ' ' + r.globalResidual.toExponential(1) + ' kN</p>';
 
       h += '<h2>4. ' + t('rpChecks') + '</h2><div class="rp-figure">' + App.staticSVG({ mode: 'util', width: 1000, grid: false }) + '</div>';
       h += '<table class="rp-calc"><thead><tr><th>' + t('element') + '</th><th>' + t('calc') + '</th><th>' + t('utilShort') + '</th></tr></thead><tbody>';

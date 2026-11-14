@@ -1,5 +1,18 @@
 # Version history
 
+## 0.2.7 — 2026-11-13
+
+- White drawing canvas and clearer strut, tie, load and reaction colours. Node drags
+  show alignment guides and a merge preview. Escape or an interrupted drag restores the
+  previous geometry and preserves undo and redo history.
+- Bilingual design guide, eight-step tutorial in the editor and an external link to Awatif.
+- Added a 20 m bent cap on four columns and extended the bridge corbel outline to show
+  the full backwall. Published examples use their load-carrying members.
+- The solver checks equilibrium under the entered loads even when the truss has free
+  mechanism modes. It flags the affected joint and direction when a load cannot be
+  balanced. Templates discard members carrying numerically zero force where equilibrium
+  is preserved.
+
 ## 0.2.6 — 2026-11-01
 
 - **Loads and reactions drawn straight**: each component is its own vertical or horizontal

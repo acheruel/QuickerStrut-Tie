@@ -49,11 +49,12 @@
       el.innerHTML = '<span>0</span><span class="grad"></span><span>≥ 1,0</span>'.replace('1,0', fmt(1, 1));
       return;
     }
+    var pal = App.palette;
     el.innerHTML =
-      '<span><svg width="26" height="8"><line x1="1" y1="4" x2="25" y2="4" stroke="#7cb4ff" stroke-width="2.4" stroke-dasharray="7 4"/></svg>' + t('legendStrut') + '</span>' +
-      '<span><svg width="26" height="8"><line x1="1" y1="4" x2="25" y2="4" stroke="#ffc978" stroke-width="3.2"/></svg>' + t('legendTie') + '</span>' +
-      '<span><svg width="26" height="8"><line x1="1" y1="4" x2="25" y2="4" stroke="#6f8a99" stroke-width="1.4" stroke-dasharray="2 4"/></svg>' + t('legendZero') + '</span>' +
-      (App.display.mode === 'forces' ? '<span><svg width="18" height="10"><path d="M1 5h11" stroke="#56e0bb" stroke-width="2"/><path d="M17 5l-6-4v8z" fill="#56e0bb"/></svg>' + t('legendReaction') + '</span>' : '');
+      '<span><svg width="26" height="8"><line x1="1" y1="4" x2="25" y2="4" stroke="' + pal.strut + '" stroke-width="2.4" stroke-dasharray="7 4"/></svg>' + t('legendStrut') + '</span>' +
+      '<span><svg width="26" height="8"><line x1="1" y1="4" x2="25" y2="4" stroke="' + pal.tie + '" stroke-width="3.2"/></svg>' + t('legendTie') + '</span>' +
+      '<span><svg width="26" height="8"><line x1="1" y1="4" x2="25" y2="4" stroke="' + pal.zero + '" stroke-width="1.4" stroke-dasharray="2 4"/></svg>' + t('legendZero') + '</span>' +
+      (App.display.mode === 'forces' ? '<span><svg width="18" height="10"><path d="M1 5h11" stroke="' + pal.react + '" stroke-width="2"/><path d="M17 5l-6-4v8z" fill="' + pal.react + '"/></svg>' + t('legendReaction') + '</span>' : '');
   }
 
   // --------------------------------------------------------- inputs ---
@@ -329,12 +330,11 @@
     }
     var gov = c.governing, maxS = null, maxT = null;
     r.forces.forEach(function (f) { if (f.kind === 'strut' && (!maxS || -f.N > -maxS.N)) maxS = f; if (f.kind === 'tie' && (!maxT || f.N > maxT.N)) maxT = f; });
-    var r0 = r.indeterminacy;
-    var stat = r0 === 0 ? t('determinate') : r0 > 0 ? t('indeterminate') + ' (r = ' + r0 + ')' : t('mechanism');
+    var stat = App.statText(r);
     el.innerHTML =
       metric(t('mUtil'), gov ? '<span style="color:' + App.utilInk(c.maxUtil) + '">' + fmt(c.maxUtil, 2) + '</span>' : '—', '', gov ? (gov.kind === 'node' ? t('node') + ' ' + gov.id + ' · ' + gov.type : gov.kind === 'anchor' ? t('anchorage') + ' ' + gov.member + ' · ' + gov.node : t('kind_' + gov.kind) + ' ' + gov.id) + ' · ' + statusText(c.maxUtil) : '', gov ? (gov.kind === 'node' ? 'node:' + gov.id : gov.kind === 'anchor' ? 'member:' + gov.member : 'member:' + gov.id) : null) +
-      metric(t('mStrut'), maxS ? '<span style="color:var(--blue)">' + fmt(-maxS.N, 0) + '</span>' : '—', 'kN', maxS ? maxS.id : t('none'), maxS ? 'member:' + maxS.id : null) +
-      metric(t('mTie'), maxT ? '<span style="color:var(--amber)">' + fmt(maxT.N, 0) + '</span>' : '—', 'kN', maxT ? maxT.id : t('none'), maxT ? 'member:' + maxT.id : null) +
+      metric(t('mStrut'), maxS ? '<span style="color:var(--strut)">' + fmt(-maxS.N, 0) + '</span>' : '—', 'kN', maxS ? maxS.id : t('none'), maxS ? 'member:' + maxS.id : null) +
+      metric(t('mTie'), maxT ? '<span style="color:var(--tie)">' + fmt(maxT.N, 0) + '</span>' : '—', 'kN', maxT ? maxT.id : t('none'), maxT ? 'member:' + maxT.id : null) +
       metric(t('mModel'), '<span style="font-size:1.1rem">' + stat + '</span>', '', App.model.nodes.length + ' ' + t('nodesLc') + ' · ' + App.model.members.length + ' ' + t('membersLc') + ' · ΣF ' + fmt(r.globalResidual, 3) + ' kN · ' + fmt(App.computeMs, 1) + ' ms', null);
   }
   function statusText(u) { var s = App.statusOf(u); return s === 'bad' ? t('statusBad') : s === 'warn' ? t('statusWarn') : t('statusOk'); }
@@ -402,7 +402,7 @@
       h += '<div class="table-scroll"><table><thead><tr><th>' + t('member') + '</th><th class="l">' + t('nodesCol') + '</th><th>L (m)</th><th>' + t('angle') + ' (°)</th><th>N (kN)</th><th class="l">' + t('type') + '</th><th>w (mm)</th><th>As (mm²)</th></tr></thead><tbody>';
       r.forces.forEach(function (f) {
         var m = App.member(f.id);
-        h += '<tr data-target="member:' + f.id + '"' + isSel('member', f.id) + '><td>' + f.id + '</td><td class="l">' + m.i + ' – ' + m.j + '</td><td>' + fmt(f.L, 3) + '</td><td>' + fmt(deg(Math.atan2(f.s, f.c)), 1) + '</td><td><b style="color:' + (f.kind === 'tie' ? 'var(--amber)' : f.kind === 'strut' ? 'var(--blue)' : 'var(--muted)') + '">' + fmt(f.N, 1) + '</b></td><td class="l">' + t('kind_' + f.kind) + '</td><td>' + fmt(m.w, 0) + '</td><td>' + fmt(QST.csa.memberArea(m), 0) + '</td></tr>';
+        h += '<tr data-target="member:' + f.id + '"' + isSel('member', f.id) + '><td>' + f.id + '</td><td class="l">' + m.i + ' – ' + m.j + '</td><td>' + fmt(f.L, 3) + '</td><td>' + fmt(deg(Math.atan2(f.s, f.c)), 1) + '</td><td><b style="color:' + (f.kind === 'tie' ? 'var(--tie)' : f.kind === 'strut' ? 'var(--strut)' : 'var(--muted)') + '">' + fmt(f.N, 1) + '</b></td><td class="l">' + t('kind_' + f.kind) + '</td><td>' + fmt(m.w, 0) + '</td><td>' + fmt(QST.csa.memberArea(m), 0) + '</td></tr>';
       });
       h += '</tbody></table></div><p class="table-note">' + t('forcesNote') + '</p>';
     } else {
@@ -440,11 +440,12 @@
     var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
     var k = Math.min(50 / (x1 - x0), 26 / (y1 - y0)), ox = 29 - (x0 + x1) / 2 * k, oy = 17 + (y0 + y1) / 2 * k;
     var P = function (x, y) { return (ox + x * k).toFixed(1) + ',' + (oy - y * k).toFixed(1); };
-    var s = '<polygon points="' + m.outline.map(function (p) { return P(p[0], p[1]); }).join(' ') + '" fill="#9fc3d2" fill-opacity=".15" stroke="#88b3c6" stroke-width=".7"/>';
+    var pal = App.palette;
+    var s = '<polygon points="' + m.outline.map(function (p) { return P(p[0], p[1]); }).join(' ') + '" fill="' + pal.concrete + '" stroke="' + pal.concreteStroke + '" stroke-width=".6"/>';
     var nm = {}; m.nodes.forEach(function (n) { nm[n.id] = n; });
     m.members.forEach(function (b) {
       var A = nm[b.i], B = nm[b.j], tie = !!b.bars || b.As > 0;
-      s += '<polyline points="' + P(A.x, A.y) + ' ' + P(B.x, B.y) + '" stroke="' + (tie ? '#ffc978' : '#7cb4ff') + '" stroke-width="' + (tie ? 1.4 : 1) + '"' + (tie ? '' : ' stroke-dasharray="2 1.3"') + '/>';
+      s += '<polyline points="' + P(A.x, A.y) + ' ' + P(B.x, B.y) + '" stroke="' + (tie ? pal.tie : pal.strut) + '" stroke-width="' + (tie ? 1.4 : 1) + '"' + (tie ? '' : ' stroke-dasharray="2 1.3"') + '/>';
     });
     return s;
   }
@@ -452,7 +453,7 @@
   // ---------------------------------------------------------- binding ---
   function bind() {
     $('#toolbox').addEventListener('click', function (e) { var b = e.target.closest('[data-tool]'); if (b) App.setTool(b.dataset.tool); });
-    $('#display-mode').addEventListener('click', function (e) { var b = e.target.closest('[data-mode]'); if (!b) return; App.display.mode = b.dataset.mode; App.saveUi(); renderToolbox(); renderLegend(); App.renderCanvas(); });
+    $('#display-mode').addEventListener('click', function (e) { var b = e.target.closest('[data-mode]'); if (b) App.setMode(b.dataset.mode); });
     ['bands', 'zones', 'ids', 'snap'].forEach(function (k) { $('#toggle-' + k).addEventListener('click', function () { App.display[k] = !App.display[k]; App.saveUi(); renderToolbox(); App.renderCanvas(); }); });
     $('#undo').addEventListener('click', App.undo);
     $('#redo').addEventListener('click', App.redo);
@@ -535,6 +536,7 @@
     bind();
     App.on(function (o) {
       if (o.tool) { renderToolbox(); return; }
+      if (o.display) { renderToolbox(); renderLegend(); return; }
       if (o.selection) {
         renderInspector(); renderResults();
         if (App.panel !== 'params') $$('.row-card').forEach(function (r) { var id = r.dataset.rowNode || r.dataset.rowMember; r.classList.toggle('selected', !!App.sel && App.sel.id === id); });
