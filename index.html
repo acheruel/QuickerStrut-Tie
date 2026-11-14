@@ -322,9 +322,10 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 }
 @media (max-width:760px){
   .tpl-body{grid-template-columns:1fr}
-  .topbar{padding:0 12px;height:56px}.brand{font-size:1.15rem}.release-info,.method-open .lbl{display:none}
-  .coach{flex-wrap:wrap}.tool.active .tl{display:none}
-  .header-right{gap:10px}
+  .topbar{padding:0 10px;gap:8px;height:56px}.brand{gap:8px;font-size:1rem}.brand-logo{width:30px;height:30px}
+  .release-info,.method-open .lbl{display:none}
+  .coach,.coach-actions{flex-wrap:wrap}.coach-actions{max-width:100%}.tool.active .tl{display:none}
+  .header-right{gap:6px}.method-open{padding:5px 7px}.language button{padding:4px 6px}.github-link svg{width:20px;height:20px}
   .canvas-wrap{height:68vh}
   .inspector{left:8px;right:8px;width:auto;top:auto;bottom:44px;max-height:48%}
   .hud{max-width:100%}.legend-hud{display:none}
@@ -332,6 +333,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
   .tool .k{display:none}
   .metrics{grid-template-columns:1fr 1fr}
 }
+@media (max-width:360px){.topbar .brand-logo{display:none}}
 /* ---------- Galaxy Z Fold 8 unfolded in landscape (~816 × 536 CSS px) and other
    wide, short screens: slim header, narrow side panel that scrolls on its own,
    vertical tool column inside the canvas, canvas sized from the screen height. */
