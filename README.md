@@ -11,7 +11,7 @@ No installation, no server, no data leaves your computer.
 
 ![QuickerStrut&Tie — hammerhead pier cap, forces view](docs/screenshots/forces.png)
 
-*Version 0.2.7 · 2026-11-13 · Anthony Chéruel · [Version history](CHANGELOG.md) · [Français](#en-français)*
+*Version 0.2.8 · 2026-11-16 · Anthony Chéruel · [Version history](CHANGELOG.md) · [Français](#en-français)*
 
 ## What it does
 
@@ -42,14 +42,19 @@ No installation, no server, no data leaves your computer.
   widths, colour **and** line style (dashed struts, solid ties) with value labels; an
   inspector showing every step of each calculation; checks, forces and reactions tables.
 - **Outputs:** printable calculation note (PDF through the browser) with nodal zones,
-  anchorages and pile loads, SVG drawing, CSV table, `.quickerstrut.json` projects,
-  pile head loads for QuickerPile, automatic local save.
+  anchorages and pile loads, SVG drawing, **DXF drawing for CAD** (layers for outline,
+  struts, ties, nodes, loads and reactions, forces as text), CSV table,
+  `.quickerstrut.json` projects, pile head loads for QuickerPile, automatic local save.
+- **Tracing and what-if tools:** a drawing (PNG, JPG, SVG) can be shown under the model,
+  scaled by its real width, to trace the outline and nodes over it; all loads can be
+  multiplied by a factor; `Σ T·L` of the ties compares alternative models.
 - **Examples:** deep beams, double corbel, hammerhead pier cap, half-joint seat
   (dapped end), two-pile cap, **20 m bent cap on four columns**, **bridge corbel with
   backwall**, **integral abutment end diaphragm**
-  (deck–abutment corner), and three published examples whose member forces are
-  reproduced: FHWA deep beam, Paultre (2011) double corbel and the CAC Handbook
-  dapped-end beam (24 forces).
+  (deck–abutment corner), and seven published examples whose member forces are
+  reproduced: FHWA deep beam, Paultre (2011) double corbel, the CAC Handbook
+  dapped-end beam (24 forces) and four bridge D-regions from ***fib* Bulletin 61**
+  (box girder pier diaphragm, two pylon diaphragms of a cable-stayed bridge, pile cap).
 - **Guide and tutorial:** nine design steps, an eight-step hands-on deep-beam exercise,
   and [Awatif's interactive strut-and-tie examples](https://awatif.co/examples/strut/).
 - **French and English** interface; works on desktop, tablets and foldables (including a
@@ -150,13 +155,20 @@ jour en direct. Aucune installation, aucun serveur, aucune donnée transmise.
 - **Exemples :** poutres-cloisons, corbeau double, chevêtre en porte-à-faux, **appui en
   chaise (demi-joint)**, semelle sur deux pieux, **chevêtre de 20 m sur quatre colonnes**,
   **corbeau de pont avec garde-grève**, **culée
-  intégrale (diaphragme d’about)**, et trois exemples publiés dont les efforts sont
-  reproduits : poutre-cloison FHWA, console courte double de Paultre (2011) et poutre à
-  about réduit du manuel CAC (24 efforts).
+  intégrale (diaphragme d’about)**, et sept exemples publiés dont les efforts sont
+  reproduits : poutre-cloison FHWA, console courte double de Paultre (2011), poutre à
+  about réduit du manuel CAC (24 efforts) et quatre régions D de ponts du **bulletin
+  *fib* 61** (diaphragme de pont-caisson sur pile, deux diaphragmes de pylône haubané,
+  semelle sur deux pieux).
 - **Guide et tutoriel** : démarche de conception en neuf étapes, exercice en huit étapes
   dans l’éditeur et [exemples interactifs d’Awatif](https://awatif.co/examples/strut/).
-- **Sorties :** note de calcul imprimable (PDF), dessin SVG, tableau CSV, projets
-  `.quickerstrut.json`, sauvegarde locale automatique.
+- **Sorties :** note de calcul imprimable (PDF), dessin SVG, **dessin DXF pour la CAO**
+  (calques contour, bielles, tirants, nœuds, charges et réactions, efforts en texte),
+  tableau CSV, projets `.quickerstrut.json`, sauvegarde locale automatique.
+- **Décalque et variantes :** un dessin (PNG, JPG, SVG) peut être affiché sous le modèle,
+  mis à l’échelle par sa largeur réelle, pour tracer le contour et les nœuds par-dessus ;
+  toutes les charges peuvent être multipliées par un facteur ; `Σ T·L` des tirants compare
+  des variantes de modèle.
 - **Utilisation hors ligne :** téléchargez `QuickerStrut-Tie-v<version>-<date>.html` et
   ouvrez-le ; tout est dans ce fichier.
 

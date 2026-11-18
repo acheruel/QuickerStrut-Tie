@@ -464,6 +464,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
             <div class="menu-sep" role="separator"></div>
             <button type="button" id="print-report" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 7.5V3h9v4.5 M5.5 14H3.5V8h13v6h-2 M5.5 11.5h9V17h-9z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="report"></b><small data-i18n="reportSub"></small></span><kbd>Ctrl P</kbd></button>
             <button type="button" id="export-svg" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 15l4.5-9 4 6 2-3 3.5 6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="exportSvg"></b><small data-i18n="exportSvgSub"></small></span></button>
+            <button type="button" id="export-dxf" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 16.5V3.5h13v13z M3.5 16.5l13-13 M3.5 3.5l6.5 6.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="exportDxf"></b><small data-i18n="exportDxfSub"></small></span></button>
             <button type="button" id="export-pile-menu" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h12v4H4z M6.5 8v9 M13.5 8v9 M5 17h3 M12 17h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="mi-text"><b data-i18n="exportPile"></b><small data-i18n="exportPileSub"></small></span></button>
             <button type="button" id="export-csv" role="menuitem"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><rect x="3.5" y="3.5" width="13" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 8h13 M3.5 12.3h13 M8 3.5v13" stroke="currentColor" stroke-width="1.3"/></svg><span class="mi-text"><b data-i18n="exportCsv"></b><small data-i18n="exportCsvSub"></small></span></button>
           </div></div>
@@ -471,6 +472,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
           <div class="menu-pop" role="menu" id="examples-list"></div></div>
         <button type="button" class="menu-button" id="open-templates"><svg class="mi-ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 16.5h14 M4.5 16.5v-9h11v9 M4.5 7.5l5.5-4 5.5 4 M8 16.5v-4.5h4v4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span data-i18n="templatesMenu"></span></button>
         <input id="project-file" type="file" accept=".json,application/json" hidden>
+        <input id="underlay-file" type="file" accept="image/*" hidden>
       </div>
     </div>
     <div class="input-tabs" role="tablist"><button type="button" class="active" data-panel="params" data-i18n="tabParams"></button><button type="button" data-panel="nodes"><span data-i18n="tabNodes"></span><span class="count" id="count-nodes"></span></button><button type="button" data-panel="members"><span data-i18n="tabMembers"></span><span class="count" id="count-members"></span></button></div>
@@ -523,7 +525,7 @@ dialog::backdrop{background:#061520aa;backdrop-filter:blur(2px)}
 <div id="report"></div>
 <script>/* js/version.js */
 // SPDX-License-Identifier: GPL-3.0-or-later
-window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chéruel', schema: 1 };
+window.QST_META = { version: '0.2.8', date: '2026-11-16', author: 'Anthony Chéruel', schema: 1 };
 
 </script>
 <script>/* js/solver.js */
@@ -1189,6 +1191,9 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
   function T(id, i, j, n, size, w, anchor) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: { n: n, size: size }, As: 0, anchor: anchor || 'hook' }; }
   function TA(id, i, j, As, w, db, anchor) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: null, As: As, db: db, anchor: anchor || 'hook' }; }
   var IN = 0.0254, KIP = 4.448222;
+  // Angles published in fib Bulletin 61 (examples 1-3, 1-4 and 13).
+  function tanDeg(a) { return Math.tan(a * Math.PI / 180); }
+  var TAN10 = tanDeg(10), COT46 = 1 / tanDeg(46), TAN483 = tanDeg(48.3), TAN35 = tanDeg(35), TAN55 = tanDeg(55), COT61 = 1 / tanDeg(61);
 
   var EXAMPLES = [
     {
@@ -1487,6 +1492,102 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
         members: [
           T('M1', 'N3', 'N4', 8, '25M', 250), S('M2', 'N1', 'N3', 300), S('M3', 'N2', 'N4', 300),
           S('M4', 'N1', 'N2', 250)
+        ]
+      }
+    },
+    // ---- fib Bulletin 61 (2011), bridge D-regions. The published forces follow
+    // from the published angles and loads; dimensions that are only on the
+    // figures are rebuilt from those angles (see VALIDATION.md).
+    {
+      key: 'fib-box-diaphragm',
+      literature: true,
+      title: { fr: 'Diaphragme de pont-caisson sur pile · fib 61, ex. 1-4', en: 'Box girder pier diaphragm · fib 61, ex. 1-4' },
+      sub: { fr: 'Appui indirect : l’effort des âmes est suspendu puis ramené aux appareils', en: 'Indirect support: web shear hung up, then brought down to the bearings' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 35, fy: 500, b: 1400 }),
+        // Rd = 6750 kN on two bearings, webs inclined 10°, z = 1.45 m, struts at 46°.
+        outline: [[-2.66, 0], [2.66, 0], [2.93, 1.5], [5.2, 1.56], [5.2, 1.78], [-5.2, 1.78], [-5.2, 1.56], [-2.93, 1.5]],
+        nodes: [
+          N('N1', -(2.7 - 1.45 * COT46), 0.2, { support: 'pin', bearing: 400 }),
+          N('N1b', 2.7 - 1.45 * COT46, 0.2, { support: 'ry', bearing: 400 }),
+          N('N2', -2.7, 1.65), N('N2b', 2.7, 1.65),
+          N('N3', -(2.7 - 1.45 * TAN10), 0.2, { fx: 3375 * TAN10, fy: -3375 }),
+          N('N3b', 2.7 - 1.45 * TAN10, 0.2, { fx: -3375 * TAN10, fy: -3375 })
+        ],
+        members: [
+          S('C12', 'N1', 'N2', 400), S('C12b', 'N1b', 'N2b', 400), S('C11', 'N1', 'N1b', 400),
+          TA('T22', 'N2', 'N2b', 6283, 260, 20, 'hook'),
+          TA('T1', 'N3', 'N2', 8042, 300, 16, 'stirrup'), TA('T1b', 'N3b', 'N2b', 8042, 300, 16, 'stirrup')
+        ]
+      }
+    },
+    {
+      key: 'fib-pylon-crossbeam',
+      literature: true,
+      title: { fr: 'Pylône haubané · diaphragme de la traverse · fib 61, ex. 13', en: 'Cable-stayed pylon · cross-beam diaphragm · fib 61, ex. 13' },
+      sub: { fr: 'Appui vertical de 42 MN, diaphragme épaissi à 2,1 m', en: '42 MN vertical bearing, diaphragm thickened to 2.1 m' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 35, fy: 500, b: 2100 }),
+        // V = 42 MN on a 2.1 m plate (two halves), struts at 48.3° to the bottom
+        // of the 0.7 m side walls, hang-up ties back into the walls.
+        outline: [[-1.9, 0], [1.9, 0], [1.9, 2.25], [-1.9, 2.25]],
+        nodes: [
+          N('N1', -0.525, 0.8 + 1.025 * TAN483, { fy: -21000, bearing: 1050 }),
+          N('N1b', 0.525, 0.8 + 1.025 * TAN483, { fy: -21000, bearing: 1050 }),
+          N('N2', -1.55, 0.8), N('N2b', 1.55, 0.8),
+          N('W1', -1.55, 2.15, { support: 'pin' }), N('W2', 1.55, 2.15, { support: 'ry' })
+        ],
+        members: [
+          S('C1', 'N1', 'N2', 1550), S('C1b', 'N1b', 'N2b', 1550), S('C0', 'N1', 'N1b', 500),
+          TA('T1', 'N2', 'N2b', 43800, 1600, 32, 'hook'),
+          TA('T2', 'N2', 'W1', 48000, 700, 25, 'stirrup'), TA('T2b', 'N2b', 'W2', 48000, 700, 25, 'stirrup')
+        ]
+      }
+    },
+    {
+      key: 'fib-pylon-bearing',
+      literature: true,
+      title: { fr: 'Pylône haubané · butée horizontale · fib 61, ex. 13', en: 'Cable-stayed pylon · horizontal bearing · fib 61, ex. 13' },
+      sub: { fr: 'Vue en plan, 10 MN sismique, deux tirants de part et d’autre du trou d’homme', en: 'Plan view, 10 MN seismic, two ties either side of the manhole' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 35, fy: 500, b: 700 }),
+        // The bearing force is the reaction at N; the four side-wall resistances
+        // of 10 MN / 4 (the 50/50 split assumed by the authors) are the loads.
+        outline: [[-2.9, 0], [2.9, 0], [2.9, 4.0], [-2.9, 4.0]],
+        nodes: [
+          N('N', 0, 3.75, { support: 'pin', bearing: 1000 }),
+          N('K2', -2.4, 3.75 - 2.4 * TAN35, { fy: 2500 }), N('K2b', 2.4, 3.75 - 2.4 * TAN35, { fy: 2500 }),
+          N('K1', -2.4, 3.75 - 2.4 * TAN55, { fy: 2500 }), N('K1b', 2.4, 3.75 - 2.4 * TAN55, { fy: 2500 })
+        ],
+        members: [
+          S('C2', 'N', 'K2', 650), S('C2b', 'N', 'K2b', 650), S('C1', 'N', 'K1', 400), S('C1b', 'N', 'K1b', 400),
+          TA('T2', 'K2', 'K2b', 9108, 300, 25.4, 'hook'), TA('T1', 'K1', 'K1b', 5060, 200, 25.4, 'hook')
+        ]
+      }
+    },
+    {
+      key: 'fib-pile-cap',
+      literature: true,
+      title: { fr: 'Semelle sur deux pieux préfabriqués · fib 61, ex. 1-3', en: 'Cap on two precast piles · fib 61, ex. 1-3' },
+      sub: { fr: 'Modèle A : nœuds surchargés, comme le constate le bulletin', en: 'Model A: overstressed nodes, as the bulletin finds' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 30, fy: 500, b: 400 }),
+        // Nd = 4300 kN, column 0.40 m, piles 0.35 m, cap 1.10 m deep, z = 0.90 m,
+        // struts at 61°. b = column side, so the published node stresses appear.
+        outline: [[-0.95, 0], [-0.774, 0], [-0.774, -0.4], [-0.424, -0.4], [-0.424, 0], [0.424, 0], [0.424, -0.4], [0.774, -0.4], [0.774, 0], [0.95, 0],
+          [0.95, 1.1], [0.2, 1.1], [0.2, 1.6], [-0.2, 1.6], [-0.2, 1.1], [-0.95, 1.1]],
+        nodes: [
+          N('N2', -0.1, 0.95, { fy: -2150, bearing: 200 }), N('N2b', 0.1, 0.95, { fy: -2150, bearing: 200 }),
+          N('N1', -(0.1 + 0.9 * COT61), 0.05, { support: 'pin', bearing: 350 }),
+          N('N1b', 0.1 + 0.9 * COT61, 0.05, { support: 'ry', bearing: 350 })
+        ],
+        members: [
+          S('C12', 'N1', 'N2', 320), S('C12b', 'N1b', 'N2b', 320), S('C22', 'N2', 'N2b', 300),
+          TA('T11', 'N1', 'N1b', 3436, 100, 25, 'hook')
         ]
       }
     }
@@ -1815,7 +1916,7 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
     '<h3>Modèle</h3><p>Le modèle bielles-tirants est un treillis plan articulé : les nœuds sont reliés par des barres qui ne transmettent qu’un effort axial. Les charges pondérées (ÉLUL) sont appliquées aux nœuds. Le treillis est résolu par la méthode des rigidités directe ; N &gt; 0 est une traction (tirant), N &lt; 0 une compression (bielle). Le rôle d’une barre est déterminé automatiquement par le signe de l’effort, ou imposé.</p>',
     '<p>Rigidité axiale : bielles <i>EA = Ec·w·b</i>, tirants <i>EA = Es·As</i>. Pour un modèle isostatique les efforts n’en dépendent pas. Pour un modèle hyperstatique, les rôles sont itérés jusqu’à stabilité ; la répartition dépend alors des largeurs et des aires saisies. Un modèle n’a pas à être un treillis stable sous n’importe quelle charge : s’il est en équilibre sous ses propres charges, il est résolu tel quel (« Équilibre sous ce chargement ») ; il n’est signalé comme mécanisme que si les charges le mettent en mouvement.</p>',
     '<h3>Bielles</h3><span class="eq">Cr = φc · fcu · Acs,&nbsp;&nbsp; Acs = w · b</span><span class="eq">fcu = f′c / (0,8 + 170 ε1) ≤ 0,85 f′c (A23.3) ou α1 f′c (S6),&nbsp;&nbsp; ε1 = εs + (εs + 0,002) cot²θs</span><p>Pour la S6, α1 = 0,85 − 0,0015 f′c ≥ 0,67. θs est le plus petit angle entre la bielle et un tirant adjacent, évalué aux deux extrémités ; la valeur de fcu la plus faible gouverne. Un tirant dans le prolongement de la bielle (à moins de 5°) ne la traverse pas et n’est pas pris en compte. εs est la déformation du tirant, calculée (Tf / Es·As) ou prise égale à fy / Es. Sans tirant adjacent, fcu atteint la limite supérieure.</p>',
-    '<h3>Tirants</h3><span class="eq">Tr = φs · fy · Ast</span><p>Les armatures sont choisies en nombre × diamètre (barres CSA G30.18). L’ancrage est vérifié à part (voir plus bas) : la pleine résistance doit être développée à la sortie de la zone nodale prolongée.</p>',
+    '<h3>Tirants</h3><span class="eq">Tr = φs · fy · Ast</span><p>Les armatures sont choisies en nombre × diamètre (barres CSA G30.18). L’ancrage est vérifié à part (voir plus bas) : la pleine résistance doit être développée à la sortie de la zone nodale prolongée.</p><p>Σ T·L, affichée sous « Tirant max », est la somme effort × longueur des tirants. Entre deux modèles possibles pour la même région, celui qui la minimise est le plus efficace et le plus proche du comportement réel (Schlaich et coll., 1987) : elle sert à comparer des variantes.</p>',
     '<h3>Zones nodales</h3><p>Contrainte sur chaque face ≤ 0,85 / 0,75 / 0,65 φc f′c selon l’A23.3, ou α1 / 0,88 α1 / 0,76 α1 φc f′c selon la S6, pour les nœuds CCC (bielles et appuis), CCT (un tirant ancré) et CTT (tirants dans plus d’une direction). Faces vérifiées : bielles (C / w·b), plaques d’appui et de charge (R / lb·b) et, en option, face d’ancrage des tirants (T / w·b).</p>',
     '<h3>Zones nodales hydrostatiques</h3><p>Chaque force sur le nœud est une poussée sur une face : bielles de leur côté, tirants sur la face arrière (force nette des tirants alignés), charges et réactions sur leur plaque. Le polygone des forces fermé, tourné de 90° et mis à l’échelle 1 / (σh·b), donne la zone nodale : chaque face est perpendiculaire à sa force et toutes portent la même contrainte σh. σh est la plus forte contrainte des faces de largeur saisie ; la zone est tracée au canevas et un avertissement signale un dépassement du contour.</p>',
     '<h3>Ancrage des tirants</h3><p>À chaque nœud où un tirant se termine (sauf plan de symétrie), l<sub>a</sub> = distance à la section critique (bord de la bielle ou de la zone hydrostatique sur l’axe du tirant) + prolongement des barres jusqu’à la face du béton − enrobage. Exigé : l<sub>d</sub> = k·k1·k4·fy/√f′c·db ≥ 300 mm (barre droite, k = 0,45 ou 0,6, k1 = 1,3 barres supérieures, k4 = 0,8 jusqu’au 20M) ou l<sub>dh</sub> = 100·db/√f′c·fy/400 ≥ 8db, 150 mm (crochet), selon l’A23.3 12.2.3 et 12.5 (méthode simplifiée, aussi utilisée avec la S6 : à confirmer avec la S6 8.15). Plaques, barres soudées et étriers fermés sont considérés ancrés mécaniquement. Une « barre continue ou pliée » n’a pas à être ancrée là où elle se poursuit : pliée dans un autre tirant (coin de portique) ou prolongée au-delà de la région D (nœud chargé ou appuyé) ; ailleurs, elle est vérifiée comme barre droite.</p>',
@@ -1827,7 +1928,7 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
     '<h3>Model</h3><p>A strut-and-tie model is a plane pin-jointed truss: nodes are linked by bars carrying axial force only. Factored (ULS) loads act at the nodes. The truss is solved with the direct stiffness method; N &gt; 0 is tension (tie), N &lt; 0 compression (strut). A bar’s role follows the sign of its force, or can be imposed.</p>',
     '<p>Axial stiffness: struts <i>EA = Ec·w·b</i>, ties <i>EA = Es·As</i>. Forces in a statically determinate model do not depend on it. For an indeterminate model the roles are iterated until stable; the force distribution then depends on the widths and areas entered. A model does not have to be a truss that is stable under any load: if it is in equilibrium under its own loads it is solved as it is (“In equilibrium under these loads”); it is reported as a mechanism only when the loads set it in motion.</p>',
     '<h3>Struts</h3><span class="eq">Cr = φc · fcu · Acs,&nbsp;&nbsp; Acs = w · b</span><span class="eq">fcu = f′c / (0.8 + 170 ε1) ≤ 0.85 f′c (A23.3) or α1 f′c (S6),&nbsp;&nbsp; ε1 = εs + (εs + 0.002) cot²θs</span><p>For S6, α1 = 0.85 − 0.0015 f′c ≥ 0.67. θs is the smallest angle between the strut and an adjoining tie, evaluated at both ends; the lowest fcu governs. A tie in line with the strut (within 5°) does not cross it and is ignored. εs is the tie strain, computed (Tf / Es·As) or taken as fy / Es. With no adjoining tie, fcu reaches the upper limit.</p>',
-    '<h3>Ties</h3><span class="eq">Tr = φs · fy · Ast</span><p>Reinforcement is entered as number × bar size (CSA G30.18 bars). Anchorage is checked separately (see below): full strength must be developed where the tie leaves the extended nodal zone.</p>',
+    '<h3>Ties</h3><span class="eq">Tr = φs · fy · Ast</span><p>Reinforcement is entered as number × bar size (CSA G30.18 bars). Anchorage is checked separately (see below): full strength must be developed where the tie leaves the extended nodal zone.</p><p>Σ T·L, shown under “Max tie”, is the sum of tie force × length. Between two possible models of the same region, the one that minimizes it is the most efficient and the closest to the real behaviour (Schlaich et al., 1987): use it to compare variants.</p>',
     '<h3>Nodal zones</h3><p>Stress on each face ≤ 0.85 / 0.75 / 0.65 φc f′c to A23.3, or α1 / 0.88 α1 / 0.76 α1 φc f′c to S6, for CCC (struts and bearings), CCT (one anchored tie) and CTT (ties in more than one direction) nodes. Faces checked: struts (C / w·b), bearing and load plates (R / lb·b) and, optionally, the anchorage face of ties (T / w·b).</p>',
     '<h3>Hydrostatic nodal zones</h3><p>Each force on the node is a push on one face: struts on their own side, ties on the back face (net force of collinear ties), loads and reactions on their plate. The closed force polygon, rotated by 90° and scaled by 1 / (σh·b), is the nodal zone: every face is perpendicular to its force and all carry the same stress σh. σh is the highest stress on a face with an entered width; the zone is drawn on the canvas and a warning flags a zone outside the outline.</p>',
     '<h3>Tie anchorage</h3><p>At every node where a tie ends (except a symmetry plane), l<sub>a</sub> = distance to the critical section (strut or hydrostatic zone edge on the tie axis) + bar extension to the concrete face − cover. Required: l<sub>d</sub> = k·k1·k4·fy/√f′c·db ≥ 300 mm (straight, k = 0.45 or 0.6, k1 = 1.3 top bars, k4 = 0.8 up to 20M) or l<sub>dh</sub> = 100·db/√f′c·fy/400 ≥ 8db, 150 mm (hook), to A23.3 12.2.3 and 12.5 (simplified, also used with S6: to be confirmed with S6 8.15). Plates, welded bars and closed stirrups are taken as mechanically anchored. A “continuous or bent bar” needs no anchorage where it carries on: bent into another tie (frame corner) or extended past the D-region (loaded or supported node); elsewhere it is checked as a straight bar.</p>',
@@ -1931,6 +2032,14 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
       fileMenu: 'Fichier', newProject: 'Nouveau', newProjectSub: 'Contour vide, outil Nœud',
       openProject: 'Ouvrir', openProjectSub: 'Projet QuickerStrut&Tie (.json)', saveProject: 'Enregistrer', saveProjectSub: 'Télécharge le projet (.json)',
       report: 'Rapport PDF', reportSub: 'Note de calcul imprimable', exportSvg: 'Exporter le dessin', exportSvgSub: 'Figure vectorielle (.svg)',
+      exportDxf: 'Exporter en DXF', exportDxfSub: 'Modèle et efforts pour la CAO (.dxf)',
+      underlay: 'Fond de plan à décalquer', underlayPick: 'Importer une image…', underlayReplace: 'Remplacer l’image…', underlayRemove: 'Retirer l’image',
+      underlayWidth: 'Largeur réelle', underlayOpacity: 'Opacité', underlayX: 'Coin bas-gauche x', underlayY: 'Coin bas-gauche y',
+      underlayNote: 'Affiche un dessin (PNG, JPG, SVG) sous le modèle pour tracer le contour et les nœuds par-dessus. Saisir la largeur réelle de l’image pour la mettre à l’échelle. L’image reste dans cette session : elle n’est ni enregistrée ni imprimée.',
+      underlayError: 'Image illisible',
+      loadScaleTitle: 'Mise à l’échelle des charges', loadFactor: 'Facteur', applyLoadFactor: 'Multiplier toutes les charges',
+      loadScaleNote: 'Multiplie Fx et Fy de tous les nœuds (autre combinaison, charge de service → pondérée). Annulable.', loadsScaled: 'Charges multipliées par {f}',
+      tieWorkTip: 'Somme effort × longueur des tirants : plus elle est faible, plus le modèle est efficace',
       exportCsv: 'Exporter les vérifications', exportCsvSub: 'Tableau (.csv)', examplesMenu: 'Exemples',
       tabParams: 'Paramètres', tabNodes: 'Nœuds', tabMembers: 'Barres', unitsNote: 'm · kN · mm · MPa', autosaved: 'Sauvegarde auto ✓',
       undo: 'Annuler (Ctrl Z)', redo: 'Rétablir (Ctrl Y)', fit: 'Recadrer (F)',
@@ -2034,6 +2143,14 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
       fileMenu: 'File', newProject: 'New', newProjectSub: 'Empty outline, Node tool',
       openProject: 'Open', openProjectSub: 'QuickerStrut&Tie project (.json)', saveProject: 'Save', saveProjectSub: 'Downloads the project (.json)',
       report: 'PDF report', reportSub: 'Printable calculation note', exportSvg: 'Export drawing', exportSvgSub: 'Vector figure (.svg)',
+      exportDxf: 'Export DXF', exportDxfSub: 'Model and forces for CAD (.dxf)',
+      underlay: 'Tracing underlay', underlayPick: 'Import an image…', underlayReplace: 'Replace the image…', underlayRemove: 'Remove the image',
+      underlayWidth: 'Real width', underlayOpacity: 'Opacity', underlayX: 'Bottom-left corner x', underlayY: 'Bottom-left corner y',
+      underlayNote: 'Shows a drawing (PNG, JPG, SVG) under the model so the outline and nodes can be traced over it. Enter the real width of the image to scale it. The image stays in this session: it is neither saved nor printed.',
+      underlayError: 'Unreadable image',
+      loadScaleTitle: 'Load scaling', loadFactor: 'Factor', applyLoadFactor: 'Multiply all loads',
+      loadScaleNote: 'Multiplies Fx and Fy at every node (another combination, service → factored load). Can be undone.', loadsScaled: 'Loads multiplied by {f}',
+      tieWorkTip: 'Sum of tie force × length: the lower it is, the more efficient the model',
       exportCsv: 'Export checks', exportCsvSub: 'Table (.csv)', examplesMenu: 'Examples',
       tabParams: 'Parameters', tabNodes: 'Nodes', tabMembers: 'Members', unitsNote: 'm · kN · mm · MPa', autosaved: 'Autosaved ✓',
       undo: 'Undo (Ctrl Z)', redo: 'Redo (Ctrl Y)', fit: 'Fit view (F)',
@@ -2549,6 +2666,12 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
     // Concrete region
     out.push('<polygon points="' + poly + '" fill="' + pal.concrete + '" fill-opacity="' + pal.concreteOp + '" stroke="' + pal.concreteStroke + '" stroke-width="1.5" stroke-linejoin="round"/>');
 
+    // Tracing underlay (screen only): a drawing shown over the concrete, under the model.
+    if (o.underlay) {
+      var ul = o.underlay, up = toScreen(v, ul.x, ul.y + ul.w * ul.ratio);
+      out.push('<image href="' + ul.href + '" x="' + n2(up[0]) + '" y="' + n2(up[1]) + '" width="' + n2(ul.w * v.k) + '" height="' + n2(ul.w * ul.ratio * v.k) + '" opacity="' + ul.op + '" preserveAspectRatio="none" pointer-events="none"/>');
+    }
+
     // Member geometry in screen space
     var geo = {};
     model.members.forEach(function (m) {
@@ -2832,7 +2955,7 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
       svg.setAttribute('class', 'tool-' + App.tool + (drag && drag.kind === 'pan' ? ' panning' : '') + (drag && drag.moved && drag.kind !== 'pan' ? ' dragging' : ''));
       svg.innerHTML = draw(App.model, App.result, App.checks, {
         view: view, w: W, h: H, mode: App.display.mode, bands: App.display.bands, ids: App.display.ids, zones: App.display.zones,
-        interactive: true, sel: App.sel, hover: App.hover, warnings: App.warnings
+        interactive: true, sel: App.sel, hover: App.hover, warnings: App.warnings, underlay: App.underlay
       });
       hud();
     });
@@ -3323,6 +3446,16 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
     h += '<div class="field-row">' + unitField(t('width'), 'rect.w', App.round(b.x1 - b.x0), 'm') + unitField(t('height'), 'rect.h', App.round(b.y1 - b.y0), 'm') + '</div>';
     h += '<button type="button" class="add-button" id="apply-rect">' + t('applyRect') + '</button>';
     h += '<p class="note">' + t('outlineNote') + '</p>';
+    h += '<div class="section-label">' + t('underlay') + '</div>';
+    var ul = App.underlay;
+    if (ul) {
+      h += '<div class="field-row">' + unitField(t('underlayWidth'), 'u.w', ul.w, 'm') + unitField(t('underlayOpacity'), 'u.op', Math.round(ul.op * 100), '%') + '</div>';
+      h += '<div class="field-row">' + unitField(t('underlayX'), 'u.x', ul.x, 'm') + unitField(t('underlayY'), 'u.y', ul.y, 'm') + '</div>';
+    }
+    h += '<button type="button" class="add-button" id="underlay-pick">' + t(ul ? 'underlayReplace' : 'underlayPick') + '</button>' + (ul ? '<button type="button" class="add-button" id="underlay-remove">' + t('underlayRemove') + '</button>' : '') + '<p class="note">' + t('underlayNote') + '</p>';
+    h += '<div class="section-label">' + t('loadScaleTitle') + '</div>';
+    h += '<div class="field-row"><label class="field"><span>' + t('loadFactor') + '</span>' + numInput(1, 'data-k="lf.x"') + '</label></div>';
+    h += '<button type="button" class="add-button" id="apply-load-factor">' + t('applyLoadFactor') + '</button><p class="note">' + t('loadScaleNote') + '</p>';
     h += '<div class="section-label">' + t('anchorage') + '<span style="font-weight:500;letter-spacing:0;text-transform:none">' + t('clause') + ' ' + code.clause.anchor.split(' · ')[0] + '</span></div>';
     h += '<div class="field-row">' + unitField(t('cover'), 'mat.cover', mat.cover, 'mm') +
       '<label class="field"><span>' + t('ldFactor') + '</span><select data-k="mat.ldFactor"><option value="0.45"' + (Number(mat.ldFactor) !== 0.6 ? ' selected' : '') + '>0,45 · ' + t('ldFav') + '</option><option value="0.6"' + (Number(mat.ldFactor) === 0.6 ? ' selected' : '') + '>0,6 · ' + t('ldOther') + '</option></select></label></div>';
@@ -3393,6 +3526,17 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
     if (isNum && (val === null && !/phi/.test(k))) { el.classList.add('num-err'); return; }
     if (isNum && Number.isNaN(val)) { el.classList.add('num-err'); return; }
     el.classList.remove('num-err');
+    if (parts[0] === 'lf') return; // applied with the button
+    if (parts[0] === 'u') {
+      // Session-only tracing image: not part of the model or its history.
+      var ul = App.underlay;
+      if (ul && val !== null) {
+        if (parts[1] === 'w') { if (val > 0) ul.w = val; }
+        else if (parts[1] === 'op') ul.op = Math.max(0.05, Math.min(1, val / 100));
+        else ul[parts[1]] = val;
+      }
+      App.renderCanvas(); renderInputs(); return;
+    }
     App.commit();
     if (parts[0] === 'mat') {
       var key = parts[1];
@@ -3554,10 +3698,13 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
     var gov = c.governing, maxS = null, maxT = null;
     r.forces.forEach(function (f) { if (f.kind === 'strut' && (!maxS || -f.N > -maxS.N)) maxS = f; if (f.kind === 'tie' && (!maxT || f.N > maxT.N)) maxT = f; });
     var stat = App.statText(r);
+    // Σ T·L of the ties: the lower it is, the more efficient the model (comparison of variants).
+    var tieWork = 0;
+    r.forces.forEach(function (f) { if (f.kind === 'tie') tieWork += f.N * f.L; });
     el.innerHTML =
       metric(t('mUtil'), gov ? '<span style="color:' + App.utilInk(c.maxUtil) + '">' + fmt(c.maxUtil, 2) + '</span>' : '—', '', gov ? (gov.kind === 'node' ? t('node') + ' ' + gov.id + ' · ' + gov.type : gov.kind === 'anchor' ? t('anchorage') + ' ' + gov.member + ' · ' + gov.node : t('kind_' + gov.kind) + ' ' + gov.id) + ' · ' + statusText(c.maxUtil) : '', gov ? (gov.kind === 'node' ? 'node:' + gov.id : gov.kind === 'anchor' ? 'member:' + gov.member : 'member:' + gov.id) : null) +
       metric(t('mStrut'), maxS ? '<span style="color:var(--strut)">' + fmt(-maxS.N, 0) + '</span>' : '—', 'kN', maxS ? maxS.id : t('none'), maxS ? 'member:' + maxS.id : null) +
-      metric(t('mTie'), maxT ? '<span style="color:var(--tie)">' + fmt(maxT.N, 0) + '</span>' : '—', 'kN', maxT ? maxT.id : t('none'), maxT ? 'member:' + maxT.id : null) +
+      metric(t('mTie'), maxT ? '<span style="color:var(--tie)">' + fmt(maxT.N, 0) + '</span>' : '—', 'kN', maxT ? maxT.id + ' · <span title="' + t('tieWorkTip') + '">Σ T·L ' + fmt(tieWork, 0) + ' kN·m</span>' : t('none'), maxT ? 'member:' + maxT.id : null) +
       metric(t('mModel'), '<span style="font-size:1.1rem">' + stat + '</span>', '', App.model.nodes.length + ' ' + t('nodesLc') + ' · ' + App.model.members.length + ' ' + t('membersLc') + ' · ΣF ' + fmt(r.globalResidual, 3) + ' kN · ' + fmt(App.computeMs, 1) + ' ms', null);
   }
   function statusText(u) { var s = App.statusOf(u); return s === 'bad' ? t('statusBad') : s === 'warn' ? t('statusWarn') : t('statusOk'); }
@@ -3714,6 +3861,17 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
         App.commit(); App.model.outline = [[bb.x0, bb.y0], [bb.x0 + w, bb.y0], [bb.x0 + w, bb.y0 + hgt], [bb.x0, bb.y0 + hgt]];
         App.update({ inputs: true }); return;
       }
+      if ((b = e.target.closest('#underlay-pick'))) { $('#underlay-file').click(); return; }
+      if ((b = e.target.closest('#underlay-remove'))) { setUnderlay(null); return; }
+      if ((b = e.target.closest('#apply-load-factor'))) {
+        var lf = App.parse($('[data-k="lf.x"]').value);
+        if (!(lf > 0) || lf === 1) return;
+        App.commit();
+        App.model.nodes.forEach(function (n) { n.fx = App.round((Number(n.fx) || 0) * lf); n.fy = App.round((Number(n.fy) || 0) * lf); });
+        App.update({ inputs: true });
+        App.toast(t('loadsScaled').replace('{f}', fmt(lf, 3)));
+        return;
+      }
       if ((b = e.target.closest('#add-node'))) {
         var bb2 = bounds(App.model.outline);
         App.commit(); var id = App.addNode((bb2.x0 + bb2.x1) / 2, (bb2.y0 + bb2.y1) / 2); App.sel = { type: 'node', id: id };
@@ -3742,7 +3900,24 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
       if (e.target.closest('#export-pile')) { App.exportPileLoads(); return; }
       var b = e.target.closest('[data-target]'); if (b) pick(b.dataset.target);
     });
+    $('#underlay-file').addEventListener('change', function (e) {
+      var f = e.target.files[0]; e.target.value = '';
+      if (!f) return;
+      var href = URL.createObjectURL(f), img = new Image();
+      img.onload = function () {
+        // Placed over the outline's bounding box; the user then enters its real width.
+        var bb = bounds(App.model.outline);
+        setUnderlay({ href: href, ratio: img.naturalHeight / img.naturalWidth, w: App.round(bb.x1 - bb.x0), x: bb.x0, y: bb.y0, op: 0.5 });
+      };
+      img.onerror = function () { URL.revokeObjectURL(href); App.toast(t('underlayError')); };
+      img.src = href;
+    });
     $('#project-name').addEventListener('change', function (e) { App.commit(); App.model.name = e.target.value.trim(); App.update({ inputs: true }); });
+  }
+  function setUnderlay(u) {
+    if (App.underlay && (!u || u.href !== App.underlay.href)) URL.revokeObjectURL(App.underlay.href);
+    App.underlay = u;
+    App.renderCanvas(); renderInputs();
   }
   function applyVertex(el) {
     var parts = el.dataset.k.split('.'), v = App.parse(el.value);
@@ -3778,7 +3953,7 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
 </script>
 <script>/* js/report.js */
 // SPDX-License-Identifier: GPL-3.0-or-later
-/* QuickerStrut&Tie — printable calculation report (browser print → PDF) and CSV export. */
+/* QuickerStrut&Tie — printable calculation report (browser print → PDF), CSV and DXF export. */
 (function () {
   'use strict';
   var QST = window.QST, App = QST.App;
@@ -3881,6 +4056,40 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
     if (!data || !data.piles.length) { App.toast(App.t('noPiles')); return; }
     App.download(App.fileBase() + '-quickerpile.json', JSON.stringify(data, null, 2), 'application/json');
     App.toast(App.t('pileExported').replace('{n}', data.piles.length));
+  };
+
+  // ASCII DXF (R12 entities only, metres): outline, bars by kind with their
+  // force, nodes, loads and reactions, one layer each. Opens in any CAD program.
+  App.buildDXF = function () {
+    var m = App.model, r = App.result && App.result.ok ? App.result : null, out = [];
+    var q = function (v) { return String(Math.round(v * 1e4) / 1e4); };
+    var kn = function (v) { return String(Math.round(v * 10) / 10); };
+    function add() { for (var i = 0; i < arguments.length; i += 2) out.push(arguments[i], arguments[i + 1]); }
+    var xs = [], ys = [], nm = {};
+    (m.outline || []).forEach(function (p) { xs.push(p[0]); ys.push(p[1]); });
+    m.nodes.forEach(function (n) { nm[n.id] = n; xs.push(n.x); ys.push(n.y); });
+    var size = xs.length ? Math.max(Math.max.apply(null, xs) - Math.min.apply(null, xs), Math.max.apply(null, ys) - Math.min.apply(null, ys)) : 1;
+    var th = Math.max(size / 90, 0.005);
+    function line(layer, color, a, b) { add(0, 'LINE', 8, layer, 62, color, 10, q(a[0]), 20, q(a[1]), 30, 0, 11, q(b[0]), 21, q(b[1]), 31, 0); }
+    function text(layer, color, x, y, s) { add(0, 'TEXT', 8, layer, 62, color, 10, q(x), 20, q(y), 30, 0, 40, q(th), 1, String(s).replace(/[^\x20-\x7e]/g, '?')); }
+    add(0, 'SECTION', 2, 'ENTITIES');
+    (m.outline || []).forEach(function (p, k) { line('OUTLINE', 8, p, m.outline[(k + 1) % m.outline.length]); });
+    var forces = {};
+    if (r) r.forces.forEach(function (f) { forces[f.id] = f; });
+    m.members.forEach(function (b) {
+      var A = nm[b.i], B = nm[b.j], f = forces[b.id], kind = f ? f.kind : b.role;
+      var layer = kind === 'tie' ? 'TIES' : kind === 'strut' ? 'STRUTS' : 'BARS', color = kind === 'tie' ? 1 : kind === 'strut' ? 5 : 8;
+      line(layer, color, [A.x, A.y], [B.x, B.y]);
+      text(layer, color, (A.x + B.x) / 2 + th * 0.4, (A.y + B.y) / 2 + th * 0.4, b.id + (f ? ' ' + kn(f.N) + ' kN' : ''));
+    });
+    m.nodes.forEach(function (n) {
+      add(0, 'CIRCLE', 8, 'NODES', 62, 7, 10, q(n.x), 20, q(n.y), 30, 0, 40, q(th * 0.5));
+      text('NODES', 7, n.x + th * 0.7, n.y - th * 1.4, n.id);
+      if (Number(n.fx) || Number(n.fy)) text('LOADS', 6, n.x + th * 0.7, n.y + th * 2.2, 'F = (' + kn(n.fx) + '; ' + kn(n.fy) + ') kN');
+    });
+    if (r) r.reactions.forEach(function (R) { var n = nm[R.node]; text('REACTIONS', 3, n.x + th * 0.7, n.y - th * 3, 'R = (' + kn(R.rx) + '; ' + kn(R.ry) + ') kN'); });
+    add(0, 'ENDSEC', 0, 'EOF');
+    return out.join('\r\n') + '\r\n';
   };
 
   App.exportCSV = function () {
@@ -4204,6 +4413,7 @@ window.QST_META = { version: '0.2.7', date: '2026-11-13', author: 'Anthony Chér
     $('#print-report').addEventListener('click', function () { closeMenus(); App.printReport(); });
     $('#export-svg').addEventListener('click', function () { closeMenus(); App.download(App.fileBase() + '-' + App.display.mode + '.svg', App.staticSVG({ mode: App.display.mode === 'geometry' ? 'forces' : App.display.mode }), 'image/svg+xml'); });
     $('#export-csv').addEventListener('click', function () { closeMenus(); App.exportCSV(); });
+    $('#export-dxf').addEventListener('click', function () { closeMenus(); App.download(App.fileBase() + '.dxf', App.buildDXF(), 'application/dxf'); });
     $('#export-pile-menu').addEventListener('click', function () { closeMenus(); App.exportPileLoads(); });
     bindTemplates();
     $('#method-open').addEventListener('click', function () { $('#method-dialog').showModal(); });

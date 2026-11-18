@@ -1,6 +1,6 @@
 # Validation
 
-*QuickerStrut&Tie v0.2.7 · 2026-11-13*
+*QuickerStrut&Tie v0.2.8 · 2026-11-16*
 
 The engine (`app/js/solver.js`, `app/js/csa.js`) is checked against hand calculations by
 the automated tests in `tests/engine.test.js` (`node --test`). The cases below are
@@ -196,6 +196,66 @@ problem is visible.
   central bottom tie carries 1000 × 2.6 / 1.7 = 1529.4 kN. The four reactions total
   14,000 kN and are symmetric.
 
+### 4.7 *fib* Bulletin 61 (2011), *Design examples for strut-and-tie models* — bridge D-regions
+
+Four built-in examples follow the bulletin. The published forces depend only on the
+published loads and angles, so they are reproduced exactly. Dimensions that appear only on
+the bulletin's figures (bearing spacing, cap edges, the plan of the pylon diaphragm) are
+rebuilt from those angles and from the dimensions quoted in the text; they do not change
+the forces. The bulletin checks to the FIP Recommendations (1999) with fyd = 435 MPa; the
+application shows the CSA S6 checks with fy = 500 MPa, so utilizations are not comparable.
+
+**Example 1-4, box girder diaphragm on a pier (indirect support).** Rd = 6750 kN, webs
+inclined 10°, z = 1.45 m, struts at 46°.
+
+| Quantity | Bulletin | App |
+| --- | --- | --- |
+| Web shear hung up, Vd = 6750 / (2 cos 10°) | 3427 kN | 3427.1 kN |
+| Strut 1–2, (6750 / 2) / sin 46° | 4692 kN | 4691.8 kN |
+| Strut 1–1′ between the bearings | 3259 kN | 3259.2 kN |
+| Top tie 2–2′, C12 cos 46° − Vd sin 10° | 2664 kN | 2664.1 kN |
+
+**Example 13, pylon of a cable-stayed bridge, lower cross-beam diaphragm.** V = 42 MN on a
+2.1 m plate, struts at 48.3°, diaphragm thickened to 2.1 m (the bulletin's revised design).
+
+| Quantity | Bulletin | App |
+| --- | --- | --- |
+| Tie T1 = 21 cot 48.3° | 18.71 MN | 18 710 kN |
+| Hang-up tie T2 | 21 MN | 21 000 kN |
+| Strut C1 = 21 / sin 48.3° | 28.13 MN | 28 126 kN |
+| Bearing stress, 42 / (2.1 × 2.1) | 9.52 MPa | 9.52 MPa |
+| Strut C1 at node N2, 28.13 / 3.25 | 8.66 MPa | 8.64 MPa |
+
+**Example 13, pylon diaphragm at the horizontal (seismic) bearing, plan view.** 10 MN,
+half to each of two mechanisms (struts at 55° and 35°) because of the manhole. The split
+is an assumption of the authors, not a result: the model takes the bearing as the support
+and applies the four side-wall resistances of 2.5 MN as loads, which keeps it determinate.
+
+| Quantity | Bulletin | App |
+| --- | --- | --- |
+| T1 = 2.5 cot 55° | 1.75 MN | 1750.5 kN |
+| T2 = 2.5 cot 35° | 3.57 MN | 3570.4 kN |
+| C1 = 2.5 / sin 55° | 3.05 MN | 3051.9 kN |
+| C2 = 2.5 / sin 35° | 4.36 MN | 4358.6 kN |
+| Bearing stress, 10 / (1.0 × 0.7) | 14.3 MPa | 14.29 MPa |
+
+**Example 1-3, pile cap on two precast piles, model A.** Nd = 4300 kN, column 0.40 m,
+z = 0.90 m, struts at 61°; b is set to the column side (400 mm) so that the node stresses
+of the bulletin appear.
+
+| Quantity | Bulletin | App |
+| --- | --- | --- |
+| Strut 1–2 | 2459 kN | 2458.2 kN |
+| Tie 1–1′ | 1192 kN | 1191.8 kN |
+| Strut 2–2′ | 1194 kN | 1191.8 kN |
+| Column stress on node 2 | 26.88 MPa | 26.88 MPa |
+| Strut 1–2 at node 2 | 19.21 MPa | 19.20 MPa |
+| Strut 2–2′ at node 2 | 9.95 MPa | 9.93 MPa |
+
+The bulletin finds node 2 overstressed in model A (26.88 > 20.4 MPa) and goes on to a
+refined model B; the application likewise reports the node above its CSA S6 limit. Model B
+superposes two trusses and is not built in.
+
 ## 5. Other automated checks
 
 - Linear solver against an exact 2 × 2 system; singular matrix detection.
@@ -205,8 +265,8 @@ problem is visible.
 - φ overrides, εs = fy / Es option, fcu cap at 0.85 f′c.
 - Node classification (collinear ties count once).
 - Every example: nodal and global equilibrium residual < 10⁻⁶ kN,
-  every node and member inside the concrete outline, maximum utilization ≤ 1 (except
-  the FHWA example, kept with the manual's initial geometry).
+  every node and member inside the concrete outline, maximum utilization ≤ 1 for the designed examples (published examples keep
+  their source's geometry and may exceed 1, as the FHWA and *fib* pile cap examples do).
 - S6 α1 limits and the 1500 mm²/m crack control cap; a tie collinear with a strut does
   not reduce its strength.
 - Hydrostatic zones: force polygon closure < 10⁻⁹, every face perpendicular to its force,

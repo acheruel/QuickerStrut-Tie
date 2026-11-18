@@ -1,5 +1,20 @@
 # Version history
 
+## 0.2.8 — 2026-11-16
+
+- **Four bridge examples calibrated on *fib* Bulletin 61** (*Design examples for
+  strut-and-tie models*, 2011): box girder diaphragm on a pier (indirect support,
+  ex. 1-4), cross-beam diaphragm of a cable-stayed pylon under a 42 MN bearing and
+  the pylon diaphragm at its 10 MN horizontal bearing (ex. 13), pile cap on two
+  precast piles (ex. 1-3, model A). The published forces and node stresses are
+  reproduced and tested; see `VALIDATION.md` §4.7.
+- **DXF export** of the model for CAD: outline, struts, ties, nodes, loads and
+  reactions on separate layers, forces as text.
+- **Tracing underlay**: an image of a drawing shown under the model, scaled by its
+  real width (session only, neither saved nor printed).
+- **Load scaling**: multiply every load by a factor (undoable).
+- **Σ T·L** of the ties shown with the largest tie force, to compare alternative models.
+
 ## 0.2.7 — 2026-11-13
 
 - White drawing canvas and clearer strut, tie, load and reaction colours. Node drags

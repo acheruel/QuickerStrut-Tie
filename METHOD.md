@@ -1,6 +1,6 @@
 # Method and assumptions · Méthode et hypothèses
 
-*QuickerStrut&Tie v0.2.7 · 2026-11-13*
+*QuickerStrut&Tie v0.2.8 · 2026-11-16*
 
 ## Units and sign convention
 
@@ -74,6 +74,10 @@ Tr = φs · fy · Ast
 The reinforcement is entered as a number of CSA G30.18 bars (10M to 55M). Anchorage is
 not checked: the tie must develop its full strength where it leaves the extended nodal
 zone.
+
+`Σ T·L` (sum of tie force × length, shown under the largest tie force) compares
+alternative models of the same region: the model that minimizes it is the most
+efficient and the closest to the elastic behaviour (Schlaich, Schäfer and Jennewein, 1987).
 
 ### Nodal zones
 
@@ -164,7 +168,7 @@ For S6 the required grid is limited to 1500 mm²/m on each face, i.e.
 m), and per pile `id`, `node`, `x`, `N` (> 0 compression), `H` (along x), `M` (0, pinned
 head). For the pile cap templates the 2D reactions are expanded to the real piles.
 
-## Limits of version 0.2.7
+## Limits of version 0.2.8
 
 - 2D model with a constant thickness `b`; one factored load case.
 - Equilibrium of a singular model applies to the entered case. Changes to geometry or

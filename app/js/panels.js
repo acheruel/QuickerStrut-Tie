@@ -100,6 +100,16 @@
     h += '<div class="field-row">' + unitField(t('width'), 'rect.w', App.round(b.x1 - b.x0), 'm') + unitField(t('height'), 'rect.h', App.round(b.y1 - b.y0), 'm') + '</div>';
     h += '<button type="button" class="add-button" id="apply-rect">' + t('applyRect') + '</button>';
     h += '<p class="note">' + t('outlineNote') + '</p>';
+    h += '<div class="section-label">' + t('underlay') + '</div>';
+    var ul = App.underlay;
+    if (ul) {
+      h += '<div class="field-row">' + unitField(t('underlayWidth'), 'u.w', ul.w, 'm') + unitField(t('underlayOpacity'), 'u.op', Math.round(ul.op * 100), '%') + '</div>';
+      h += '<div class="field-row">' + unitField(t('underlayX'), 'u.x', ul.x, 'm') + unitField(t('underlayY'), 'u.y', ul.y, 'm') + '</div>';
+    }
+    h += '<button type="button" class="add-button" id="underlay-pick">' + t(ul ? 'underlayReplace' : 'underlayPick') + '</button>' + (ul ? '<button type="button" class="add-button" id="underlay-remove">' + t('underlayRemove') + '</button>' : '') + '<p class="note">' + t('underlayNote') + '</p>';
+    h += '<div class="section-label">' + t('loadScaleTitle') + '</div>';
+    h += '<div class="field-row"><label class="field"><span>' + t('loadFactor') + '</span>' + numInput(1, 'data-k="lf.x"') + '</label></div>';
+    h += '<button type="button" class="add-button" id="apply-load-factor">' + t('applyLoadFactor') + '</button><p class="note">' + t('loadScaleNote') + '</p>';
     h += '<div class="section-label">' + t('anchorage') + '<span style="font-weight:500;letter-spacing:0;text-transform:none">' + t('clause') + ' ' + code.clause.anchor.split(' · ')[0] + '</span></div>';
     h += '<div class="field-row">' + unitField(t('cover'), 'mat.cover', mat.cover, 'mm') +
       '<label class="field"><span>' + t('ldFactor') + '</span><select data-k="mat.ldFactor"><option value="0.45"' + (Number(mat.ldFactor) !== 0.6 ? ' selected' : '') + '>0,45 · ' + t('ldFav') + '</option><option value="0.6"' + (Number(mat.ldFactor) === 0.6 ? ' selected' : '') + '>0,6 · ' + t('ldOther') + '</option></select></label></div>';
@@ -170,6 +180,17 @@
     if (isNum && (val === null && !/phi/.test(k))) { el.classList.add('num-err'); return; }
     if (isNum && Number.isNaN(val)) { el.classList.add('num-err'); return; }
     el.classList.remove('num-err');
+    if (parts[0] === 'lf') return; // applied with the button
+    if (parts[0] === 'u') {
+      // Session-only tracing image: not part of the model or its history.
+      var ul = App.underlay;
+      if (ul && val !== null) {
+        if (parts[1] === 'w') { if (val > 0) ul.w = val; }
+        else if (parts[1] === 'op') ul.op = Math.max(0.05, Math.min(1, val / 100));
+        else ul[parts[1]] = val;
+      }
+      App.renderCanvas(); renderInputs(); return;
+    }
     App.commit();
     if (parts[0] === 'mat') {
       var key = parts[1];
@@ -331,10 +352,13 @@
     var gov = c.governing, maxS = null, maxT = null;
     r.forces.forEach(function (f) { if (f.kind === 'strut' && (!maxS || -f.N > -maxS.N)) maxS = f; if (f.kind === 'tie' && (!maxT || f.N > maxT.N)) maxT = f; });
     var stat = App.statText(r);
+    // Σ T·L of the ties: the lower it is, the more efficient the model (comparison of variants).
+    var tieWork = 0;
+    r.forces.forEach(function (f) { if (f.kind === 'tie') tieWork += f.N * f.L; });
     el.innerHTML =
       metric(t('mUtil'), gov ? '<span style="color:' + App.utilInk(c.maxUtil) + '">' + fmt(c.maxUtil, 2) + '</span>' : '—', '', gov ? (gov.kind === 'node' ? t('node') + ' ' + gov.id + ' · ' + gov.type : gov.kind === 'anchor' ? t('anchorage') + ' ' + gov.member + ' · ' + gov.node : t('kind_' + gov.kind) + ' ' + gov.id) + ' · ' + statusText(c.maxUtil) : '', gov ? (gov.kind === 'node' ? 'node:' + gov.id : gov.kind === 'anchor' ? 'member:' + gov.member : 'member:' + gov.id) : null) +
       metric(t('mStrut'), maxS ? '<span style="color:var(--strut)">' + fmt(-maxS.N, 0) + '</span>' : '—', 'kN', maxS ? maxS.id : t('none'), maxS ? 'member:' + maxS.id : null) +
-      metric(t('mTie'), maxT ? '<span style="color:var(--tie)">' + fmt(maxT.N, 0) + '</span>' : '—', 'kN', maxT ? maxT.id : t('none'), maxT ? 'member:' + maxT.id : null) +
+      metric(t('mTie'), maxT ? '<span style="color:var(--tie)">' + fmt(maxT.N, 0) + '</span>' : '—', 'kN', maxT ? maxT.id + ' · <span title="' + t('tieWorkTip') + '">Σ T·L ' + fmt(tieWork, 0) + ' kN·m</span>' : t('none'), maxT ? 'member:' + maxT.id : null) +
       metric(t('mModel'), '<span style="font-size:1.1rem">' + stat + '</span>', '', App.model.nodes.length + ' ' + t('nodesLc') + ' · ' + App.model.members.length + ' ' + t('membersLc') + ' · ΣF ' + fmt(r.globalResidual, 3) + ' kN · ' + fmt(App.computeMs, 1) + ' ms', null);
   }
   function statusText(u) { var s = App.statusOf(u); return s === 'bad' ? t('statusBad') : s === 'warn' ? t('statusWarn') : t('statusOk'); }
@@ -491,6 +515,17 @@
         App.commit(); App.model.outline = [[bb.x0, bb.y0], [bb.x0 + w, bb.y0], [bb.x0 + w, bb.y0 + hgt], [bb.x0, bb.y0 + hgt]];
         App.update({ inputs: true }); return;
       }
+      if ((b = e.target.closest('#underlay-pick'))) { $('#underlay-file').click(); return; }
+      if ((b = e.target.closest('#underlay-remove'))) { setUnderlay(null); return; }
+      if ((b = e.target.closest('#apply-load-factor'))) {
+        var lf = App.parse($('[data-k="lf.x"]').value);
+        if (!(lf > 0) || lf === 1) return;
+        App.commit();
+        App.model.nodes.forEach(function (n) { n.fx = App.round((Number(n.fx) || 0) * lf); n.fy = App.round((Number(n.fy) || 0) * lf); });
+        App.update({ inputs: true });
+        App.toast(t('loadsScaled').replace('{f}', fmt(lf, 3)));
+        return;
+      }
       if ((b = e.target.closest('#add-node'))) {
         var bb2 = bounds(App.model.outline);
         App.commit(); var id = App.addNode((bb2.x0 + bb2.x1) / 2, (bb2.y0 + bb2.y1) / 2); App.sel = { type: 'node', id: id };
@@ -519,7 +554,24 @@
       if (e.target.closest('#export-pile')) { App.exportPileLoads(); return; }
       var b = e.target.closest('[data-target]'); if (b) pick(b.dataset.target);
     });
+    $('#underlay-file').addEventListener('change', function (e) {
+      var f = e.target.files[0]; e.target.value = '';
+      if (!f) return;
+      var href = URL.createObjectURL(f), img = new Image();
+      img.onload = function () {
+        // Placed over the outline's bounding box; the user then enters its real width.
+        var bb = bounds(App.model.outline);
+        setUnderlay({ href: href, ratio: img.naturalHeight / img.naturalWidth, w: App.round(bb.x1 - bb.x0), x: bb.x0, y: bb.y0, op: 0.5 });
+      };
+      img.onerror = function () { URL.revokeObjectURL(href); App.toast(t('underlayError')); };
+      img.src = href;
+    });
     $('#project-name').addEventListener('change', function (e) { App.commit(); App.model.name = e.target.value.trim(); App.update({ inputs: true }); });
+  }
+  function setUnderlay(u) {
+    if (App.underlay && (!u || u.href !== App.underlay.href)) URL.revokeObjectURL(App.underlay.href);
+    App.underlay = u;
+    App.renderCanvas(); renderInputs();
   }
   function applyVertex(el) {
     var parts = el.dataset.k.split('.'), v = App.parse(el.value);

@@ -161,6 +161,7 @@
     $('#print-report').addEventListener('click', function () { closeMenus(); App.printReport(); });
     $('#export-svg').addEventListener('click', function () { closeMenus(); App.download(App.fileBase() + '-' + App.display.mode + '.svg', App.staticSVG({ mode: App.display.mode === 'geometry' ? 'forces' : App.display.mode }), 'image/svg+xml'); });
     $('#export-csv').addEventListener('click', function () { closeMenus(); App.exportCSV(); });
+    $('#export-dxf').addEventListener('click', function () { closeMenus(); App.download(App.fileBase() + '.dxf', App.buildDXF(), 'application/dxf'); });
     $('#export-pile-menu').addEventListener('click', function () { closeMenus(); App.exportPileLoads(); });
     bindTemplates();
     $('#method-open').addEventListener('click', function () { $('#method-dialog').showModal(); });

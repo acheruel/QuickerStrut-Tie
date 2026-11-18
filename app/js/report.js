@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-/* QuickerStrut&Tie — printable calculation report (browser print → PDF) and CSV export. */
+/* QuickerStrut&Tie — printable calculation report (browser print → PDF), CSV and DXF export. */
 (function () {
   'use strict';
   var QST = window.QST, App = QST.App;
@@ -102,6 +102,40 @@
     if (!data || !data.piles.length) { App.toast(App.t('noPiles')); return; }
     App.download(App.fileBase() + '-quickerpile.json', JSON.stringify(data, null, 2), 'application/json');
     App.toast(App.t('pileExported').replace('{n}', data.piles.length));
+  };
+
+  // ASCII DXF (R12 entities only, metres): outline, bars by kind with their
+  // force, nodes, loads and reactions, one layer each. Opens in any CAD program.
+  App.buildDXF = function () {
+    var m = App.model, r = App.result && App.result.ok ? App.result : null, out = [];
+    var q = function (v) { return String(Math.round(v * 1e4) / 1e4); };
+    var kn = function (v) { return String(Math.round(v * 10) / 10); };
+    function add() { for (var i = 0; i < arguments.length; i += 2) out.push(arguments[i], arguments[i + 1]); }
+    var xs = [], ys = [], nm = {};
+    (m.outline || []).forEach(function (p) { xs.push(p[0]); ys.push(p[1]); });
+    m.nodes.forEach(function (n) { nm[n.id] = n; xs.push(n.x); ys.push(n.y); });
+    var size = xs.length ? Math.max(Math.max.apply(null, xs) - Math.min.apply(null, xs), Math.max.apply(null, ys) - Math.min.apply(null, ys)) : 1;
+    var th = Math.max(size / 90, 0.005);
+    function line(layer, color, a, b) { add(0, 'LINE', 8, layer, 62, color, 10, q(a[0]), 20, q(a[1]), 30, 0, 11, q(b[0]), 21, q(b[1]), 31, 0); }
+    function text(layer, color, x, y, s) { add(0, 'TEXT', 8, layer, 62, color, 10, q(x), 20, q(y), 30, 0, 40, q(th), 1, String(s).replace(/[^\x20-\x7e]/g, '?')); }
+    add(0, 'SECTION', 2, 'ENTITIES');
+    (m.outline || []).forEach(function (p, k) { line('OUTLINE', 8, p, m.outline[(k + 1) % m.outline.length]); });
+    var forces = {};
+    if (r) r.forces.forEach(function (f) { forces[f.id] = f; });
+    m.members.forEach(function (b) {
+      var A = nm[b.i], B = nm[b.j], f = forces[b.id], kind = f ? f.kind : b.role;
+      var layer = kind === 'tie' ? 'TIES' : kind === 'strut' ? 'STRUTS' : 'BARS', color = kind === 'tie' ? 1 : kind === 'strut' ? 5 : 8;
+      line(layer, color, [A.x, A.y], [B.x, B.y]);
+      text(layer, color, (A.x + B.x) / 2 + th * 0.4, (A.y + B.y) / 2 + th * 0.4, b.id + (f ? ' ' + kn(f.N) + ' kN' : ''));
+    });
+    m.nodes.forEach(function (n) {
+      add(0, 'CIRCLE', 8, 'NODES', 62, 7, 10, q(n.x), 20, q(n.y), 30, 0, 40, q(th * 0.5));
+      text('NODES', 7, n.x + th * 0.7, n.y - th * 1.4, n.id);
+      if (Number(n.fx) || Number(n.fy)) text('LOADS', 6, n.x + th * 0.7, n.y + th * 2.2, 'F = (' + kn(n.fx) + '; ' + kn(n.fy) + ') kN');
+    });
+    if (r) r.reactions.forEach(function (R) { var n = nm[R.node]; text('REACTIONS', 3, n.x + th * 0.7, n.y - th * 3, 'R = (' + kn(R.rx) + '; ' + kn(R.ry) + ') kN'); });
+    add(0, 'ENDSEC', 0, 'EOF');
+    return out.join('\r\n') + '\r\n';
   };
 
   App.exportCSV = function () {

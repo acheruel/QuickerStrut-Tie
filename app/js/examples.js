@@ -16,6 +16,9 @@
   function T(id, i, j, n, size, w, anchor) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: { n: n, size: size }, As: 0, anchor: anchor || 'hook' }; }
   function TA(id, i, j, As, w, db, anchor) { return { id: id, i: i, j: j, role: 'auto', w: w || 0, bars: null, As: As, db: db, anchor: anchor || 'hook' }; }
   var IN = 0.0254, KIP = 4.448222;
+  // Angles published in fib Bulletin 61 (examples 1-3, 1-4 and 13).
+  function tanDeg(a) { return Math.tan(a * Math.PI / 180); }
+  var TAN10 = tanDeg(10), COT46 = 1 / tanDeg(46), TAN483 = tanDeg(48.3), TAN35 = tanDeg(35), TAN55 = tanDeg(55), COT61 = 1 / tanDeg(61);
 
   var EXAMPLES = [
     {
@@ -314,6 +317,102 @@
         members: [
           T('M1', 'N3', 'N4', 8, '25M', 250), S('M2', 'N1', 'N3', 300), S('M3', 'N2', 'N4', 300),
           S('M4', 'N1', 'N2', 250)
+        ]
+      }
+    },
+    // ---- fib Bulletin 61 (2011), bridge D-regions. The published forces follow
+    // from the published angles and loads; dimensions that are only on the
+    // figures are rebuilt from those angles (see VALIDATION.md).
+    {
+      key: 'fib-box-diaphragm',
+      literature: true,
+      title: { fr: 'Diaphragme de pont-caisson sur pile · fib 61, ex. 1-4', en: 'Box girder pier diaphragm · fib 61, ex. 1-4' },
+      sub: { fr: 'Appui indirect : l’effort des âmes est suspendu puis ramené aux appareils', en: 'Indirect support: web shear hung up, then brought down to the bearings' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 35, fy: 500, b: 1400 }),
+        // Rd = 6750 kN on two bearings, webs inclined 10°, z = 1.45 m, struts at 46°.
+        outline: [[-2.66, 0], [2.66, 0], [2.93, 1.5], [5.2, 1.56], [5.2, 1.78], [-5.2, 1.78], [-5.2, 1.56], [-2.93, 1.5]],
+        nodes: [
+          N('N1', -(2.7 - 1.45 * COT46), 0.2, { support: 'pin', bearing: 400 }),
+          N('N1b', 2.7 - 1.45 * COT46, 0.2, { support: 'ry', bearing: 400 }),
+          N('N2', -2.7, 1.65), N('N2b', 2.7, 1.65),
+          N('N3', -(2.7 - 1.45 * TAN10), 0.2, { fx: 3375 * TAN10, fy: -3375 }),
+          N('N3b', 2.7 - 1.45 * TAN10, 0.2, { fx: -3375 * TAN10, fy: -3375 })
+        ],
+        members: [
+          S('C12', 'N1', 'N2', 400), S('C12b', 'N1b', 'N2b', 400), S('C11', 'N1', 'N1b', 400),
+          TA('T22', 'N2', 'N2b', 6283, 260, 20, 'hook'),
+          TA('T1', 'N3', 'N2', 8042, 300, 16, 'stirrup'), TA('T1b', 'N3b', 'N2b', 8042, 300, 16, 'stirrup')
+        ]
+      }
+    },
+    {
+      key: 'fib-pylon-crossbeam',
+      literature: true,
+      title: { fr: 'Pylône haubané · diaphragme de la traverse · fib 61, ex. 13', en: 'Cable-stayed pylon · cross-beam diaphragm · fib 61, ex. 13' },
+      sub: { fr: 'Appui vertical de 42 MN, diaphragme épaissi à 2,1 m', en: '42 MN vertical bearing, diaphragm thickened to 2.1 m' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 35, fy: 500, b: 2100 }),
+        // V = 42 MN on a 2.1 m plate (two halves), struts at 48.3° to the bottom
+        // of the 0.7 m side walls, hang-up ties back into the walls.
+        outline: [[-1.9, 0], [1.9, 0], [1.9, 2.25], [-1.9, 2.25]],
+        nodes: [
+          N('N1', -0.525, 0.8 + 1.025 * TAN483, { fy: -21000, bearing: 1050 }),
+          N('N1b', 0.525, 0.8 + 1.025 * TAN483, { fy: -21000, bearing: 1050 }),
+          N('N2', -1.55, 0.8), N('N2b', 1.55, 0.8),
+          N('W1', -1.55, 2.15, { support: 'pin' }), N('W2', 1.55, 2.15, { support: 'ry' })
+        ],
+        members: [
+          S('C1', 'N1', 'N2', 1550), S('C1b', 'N1b', 'N2b', 1550), S('C0', 'N1', 'N1b', 500),
+          TA('T1', 'N2', 'N2b', 43800, 1600, 32, 'hook'),
+          TA('T2', 'N2', 'W1', 48000, 700, 25, 'stirrup'), TA('T2b', 'N2b', 'W2', 48000, 700, 25, 'stirrup')
+        ]
+      }
+    },
+    {
+      key: 'fib-pylon-bearing',
+      literature: true,
+      title: { fr: 'Pylône haubané · butée horizontale · fib 61, ex. 13', en: 'Cable-stayed pylon · horizontal bearing · fib 61, ex. 13' },
+      sub: { fr: 'Vue en plan, 10 MN sismique, deux tirants de part et d’autre du trou d’homme', en: 'Plan view, 10 MN seismic, two ties either side of the manhole' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 35, fy: 500, b: 700 }),
+        // The bearing force is the reaction at N; the four side-wall resistances
+        // of 10 MN / 4 (the 50/50 split assumed by the authors) are the loads.
+        outline: [[-2.9, 0], [2.9, 0], [2.9, 4.0], [-2.9, 4.0]],
+        nodes: [
+          N('N', 0, 3.75, { support: 'pin', bearing: 1000 }),
+          N('K2', -2.4, 3.75 - 2.4 * TAN35, { fy: 2500 }), N('K2b', 2.4, 3.75 - 2.4 * TAN35, { fy: 2500 }),
+          N('K1', -2.4, 3.75 - 2.4 * TAN55, { fy: 2500 }), N('K1b', 2.4, 3.75 - 2.4 * TAN55, { fy: 2500 })
+        ],
+        members: [
+          S('C2', 'N', 'K2', 650), S('C2b', 'N', 'K2b', 650), S('C1', 'N', 'K1', 400), S('C1b', 'N', 'K1b', 400),
+          TA('T2', 'K2', 'K2b', 9108, 300, 25.4, 'hook'), TA('T1', 'K1', 'K1b', 5060, 200, 25.4, 'hook')
+        ]
+      }
+    },
+    {
+      key: 'fib-pile-cap',
+      literature: true,
+      title: { fr: 'Semelle sur deux pieux préfabriqués · fib 61, ex. 1-3', en: 'Cap on two precast piles · fib 61, ex. 1-3' },
+      sub: { fr: 'Modèle A : nœuds surchargés, comme le constate le bulletin', en: 'Model A: overstressed nodes, as the bulletin finds' },
+      model: {
+        code: 'S6',
+        material: material({ fc: 30, fy: 500, b: 400 }),
+        // Nd = 4300 kN, column 0.40 m, piles 0.35 m, cap 1.10 m deep, z = 0.90 m,
+        // struts at 61°. b = column side, so the published node stresses appear.
+        outline: [[-0.95, 0], [-0.774, 0], [-0.774, -0.4], [-0.424, -0.4], [-0.424, 0], [0.424, 0], [0.424, -0.4], [0.774, -0.4], [0.774, 0], [0.95, 0],
+          [0.95, 1.1], [0.2, 1.1], [0.2, 1.6], [-0.2, 1.6], [-0.2, 1.1], [-0.95, 1.1]],
+        nodes: [
+          N('N2', -0.1, 0.95, { fy: -2150, bearing: 200 }), N('N2b', 0.1, 0.95, { fy: -2150, bearing: 200 }),
+          N('N1', -(0.1 + 0.9 * COT61), 0.05, { support: 'pin', bearing: 350 }),
+          N('N1b', 0.1 + 0.9 * COT61, 0.05, { support: 'ry', bearing: 350 })
+        ],
+        members: [
+          S('C12', 'N1', 'N2', 320), S('C12b', 'N1b', 'N2b', 320), S('C22', 'N2', 'N2b', 300),
+          TA('T11', 'N1', 'N1b', 3436, 100, 25, 'hook')
         ]
       }
     }

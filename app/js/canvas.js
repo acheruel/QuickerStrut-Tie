@@ -133,6 +133,12 @@
     // Concrete region
     out.push('<polygon points="' + poly + '" fill="' + pal.concrete + '" fill-opacity="' + pal.concreteOp + '" stroke="' + pal.concreteStroke + '" stroke-width="1.5" stroke-linejoin="round"/>');
 
+    // Tracing underlay (screen only): a drawing shown over the concrete, under the model.
+    if (o.underlay) {
+      var ul = o.underlay, up = toScreen(v, ul.x, ul.y + ul.w * ul.ratio);
+      out.push('<image href="' + ul.href + '" x="' + n2(up[0]) + '" y="' + n2(up[1]) + '" width="' + n2(ul.w * v.k) + '" height="' + n2(ul.w * ul.ratio * v.k) + '" opacity="' + ul.op + '" preserveAspectRatio="none" pointer-events="none"/>');
+    }
+
     // Member geometry in screen space
     var geo = {};
     model.members.forEach(function (m) {
@@ -416,7 +422,7 @@
       svg.setAttribute('class', 'tool-' + App.tool + (drag && drag.kind === 'pan' ? ' panning' : '') + (drag && drag.moved && drag.kind !== 'pan' ? ' dragging' : ''));
       svg.innerHTML = draw(App.model, App.result, App.checks, {
         view: view, w: W, h: H, mode: App.display.mode, bands: App.display.bands, ids: App.display.ids, zones: App.display.zones,
-        interactive: true, sel: App.sel, hover: App.hover, warnings: App.warnings
+        interactive: true, sel: App.sel, hover: App.hover, warnings: App.warnings, underlay: App.underlay
       });
       hud();
     });

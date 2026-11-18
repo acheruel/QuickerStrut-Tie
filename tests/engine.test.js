@@ -473,3 +473,45 @@ test('pile caps: pile head loads and 3D tie factors', () => {
   assert.equal(g.model.meta.tie3D.factor, 0.5);
   close(solveTpl('pileCap', { np: 3 }).g.model.meta.tie3D.factor, 1 / Math.sqrt(3), 1e-12);
 });
+
+// ------------------------------------------------- fib Bulletin 61 (bridges)
+test('fib Bulletin 61 ex. 1-4, box girder diaphragm: published forces (Rd = 6750 kN, 46°, webs at 10°)', () => {
+  const { r } = run('fib-box-diaphragm');
+  close(-byId(r.forces, 'C12').N, 4692, 1, 'strut 1-2');
+  close(-byId(r.forces, 'C11').N, 3259, 1, 'strut 1-1\'');
+  close(byId(r.forces, 'T22').N, 2664, 1, 'top tie 2-2\'');
+  close(byId(r.forces, 'T1').N, 3427, 1, 'hanger = Vd');
+  close(r.reactions.find((R) => R.node === 'N1').ry, 3375, 1e-6, 'bearing reaction');
+});
+
+test('fib Bulletin 61 ex. 13, pylon cross-beam diaphragm: published forces and stresses (V = 42 MN, 48.3°)', () => {
+  const { r, c } = run('fib-pylon-crossbeam');
+  close(byId(r.forces, 'T1').N, 18710, 5, 'T1');
+  close(byId(r.forces, 'T2').N, 21000, 1e-6, 'T2');
+  close(-byId(r.forces, 'C1').N, 28130, 5, 'C1');
+  close(byId(c.nodes, 'N1').faces.find((f) => f.kind === 'load').stress, 9.52, 0.01, 'bearing stress on the 2.1 m diaphragm');
+  close(byId(c.nodes, 'N2').faces.find((f) => f.ref === 'C1').stress, 8.66, 0.03, 'strut C1 at node N2');
+  assert.equal(byId(c.nodes, 'N2').type, 'CTT');
+});
+
+test('fib Bulletin 61 ex. 13, pylon horizontal bearing: published forces (10 MN, 55° and 35°)', () => {
+  const { r, c } = run('fib-pylon-bearing');
+  close(byId(r.forces, 'T1').N, 1750, 5, 'T1');
+  close(byId(r.forces, 'T2').N, 3570, 5, 'T2');
+  close(-byId(r.forces, 'C1').N, 3050, 5, 'C1');
+  close(-byId(r.forces, 'C2').N, 4360, 5, 'C2');
+  close(r.reactions.find((R) => R.node === 'N').ry, -10000, 1e-6, 'bearing force');
+  close(byId(c.nodes, 'N').faces.find((f) => f.kind === 'support').stress, 14.3, 0.05, 'bearing stress');
+});
+
+test('fib Bulletin 61 ex. 1-3, pile cap model A: published forces and the overstressed column node', () => {
+  const { r, c } = run('fib-pile-cap');
+  close(-byId(r.forces, 'C12').N, 2459, 2, 'strut 1-2');
+  close(byId(r.forces, 'T11').N, 1192, 1, 'tie 1-1\'');
+  close(-byId(r.forces, 'C22').N, 1194, 3, 'strut 2-2\'');
+  const N2 = byId(c.nodes, 'N2');
+  close(N2.faces.find((f) => f.kind === 'load').stress, 26.88, 0.01, 'column stress');
+  close(N2.faces.find((f) => f.ref === 'C12').stress, 19.21, 0.02, 'strut 1-2 at node 2');
+  close(N2.faces.find((f) => f.ref === 'C22').stress, 9.95, 0.03, 'strut 2-2\' at node 2');
+  assert.ok(N2.util > 1, 'node 2 is overstressed in model A, as the bulletin finds');
+});
